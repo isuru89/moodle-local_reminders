@@ -14,30 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
+
 /**
- * Capability definition(s) for the reminder plugin.
+ * Class to specify the reminder message object for site (global) events.
  *
- * @package    local_reminders
+ * @package    local
+ * @subpackage reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+class group_reminder extends reminder {
+    
+    private $group;
+    
+    public function __construct($group, $event, $notificationstyle = 1) {
+        parent::__construct($event, $notificationstyle);
+        $this->group = $group;
+    }
+    
+    public function get_message_html() {
+        
+    }
+    
+    public function get_message_plaintext() {
+        
+    }
 
-defined('MOODLE_INTERNAL') || die();
-
-$capabilities = array (
-  
-    /*
-    // Ability to recieve reminder notifications
-    'local/reminders:notifications' => array(
-        'captype' => 'read',
-        'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array (
-            'student' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
-            'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW,
-        )
-    )
-     * 
-     */
-);
+    protected function get_message_provider() {
+        return 'reminders_group';
+    }
+    
+}
