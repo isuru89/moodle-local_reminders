@@ -34,7 +34,17 @@ class user_reminder extends reminder {
     }
     
     public function get_message_html() {
+        $htmlmail = $this->get_html_header().'\n';
+        $htmlmail .= '<body id=\"email\">\n<div>\n';
+        $htmlmail .= '<table cellspacing="0" cellpadding="8" border="0" summary="" style="'.$this->bodycssstyle.'">';
+        $htmlmail .= '<tr><td><h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></td></tr>';
+        $htmlmail .= '<tr><td>When</td><td>'.$this->format_event_time_duration().'</td></tr>';
+        $htmlmail .= '<tr><td>User</td><td>'.$this->user->firstname.' '.$this->user->lastname.'</td></tr>';
+        $htmlmail .= '<tr><td>Description</td><td>'.$event->description.'</td></tr>';
+        $htmlmail .= $this->get_html_footer();
+        $htmlmail .= '</table>\n</body>\n</html>';
         
+        return $htmlmail;
     }
     
     public function get_message_plaintext() {
@@ -43,5 +53,9 @@ class user_reminder extends reminder {
 
     protected function get_message_provider() {
         return 'reminders_user';
+    }
+
+    public function get_message_title() {
+        return $this->user->firstname . ' ' . $this->user->lastname . ' : ' . $this->event->name;
     }
 }

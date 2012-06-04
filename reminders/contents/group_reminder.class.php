@@ -45,5 +45,10 @@ class group_reminder extends reminder {
     protected function get_message_provider() {
         return 'reminders_group';
     }
+
+    public function get_message_title() {
+        $course = $DB->get_record('course', array('id' => $group->courseid));
+        return $course->shortname.' - '.$group->name.' - '.$event->name;
+    }
     
 }
