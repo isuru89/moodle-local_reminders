@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2011112900;       
+$plugin->version   = 2011112901;       
 $plugin->requires  = 2011112900;       
 $plugin->component = 'local_reminders';       
 $plugin->cron      = 60;

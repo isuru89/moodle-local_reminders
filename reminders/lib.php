@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+global $CFG;
+
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/global_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/user_reminder.class.php');
@@ -21,11 +23,12 @@ require_once($CFG->dirroot . '/local/reminders/contents/course_reminder.class.ph
 require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php');
 
 require_once($CFG->dirroot . '/calendar/lib.php');
+require_once($CFG->dirroot . '/group/lib.php');
 
 /// CONSTANTS ///////////////////////////////////////////////////////////
 
 //DEFINE('LOCAL_REMINDERS_CUTOFF_DAYS', 2);
-DEFINE('LOCAL_REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE', 1000);
+DEFINE('LOCAL_REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE', 100);
 
 /// FUNCTIONS ///////////////////////////////////////////////////////////
 
@@ -42,13 +45,23 @@ function local_reminders_cron() {
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     
     // gets all upcoming events for next 7 days.
-    $upcomingevents = calendar_get_upcoming(true, true, true, 7, LOCAL_REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE, $now);
+    $upcomingevents = calendar_get_upcoming(0, 0, 0, 7, LOCAL_REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE, $now);
+    
+    // no upcoming events, so let's stop.
+    if (empty($upcomingevents)) {
+        mtrace("======= no upcming events. Aborting...");
+        return;
+    }
+    
+    mtrace("======= retrieved upcoming events...");
     
     // gets all log records for reminder sents
     $params = array();
     $selector = "l.course = 0 AND l.module = 'local_reminders' AND l.action = 'sent reminder' AND l.time >= :cutofftime";
     $params['cutofftime'] = $now - 48 * 3600;
     $logrows = get_logs($selector, $params);
+    
+    mtrace("======= retrieved logs...");
     
     // re-defining structure of log records for faster fetch in next steps
     $logrecs = array();
@@ -58,16 +71,12 @@ function local_reminders_cron() {
         }
     }
     
-    // no upcoming events, so let's stop.
-    if (empty($upcomingevents)) {
-        return;
-    }
-    
     $fromuser = get_admin();
     
     // iterating through each event...
     foreach ($upcomingevents as $event) {
         $event = new calendar_event($event);
+        mtrace("======= processing event".$event->id.  "...");
         
         $timediff = $event->timestart - $now;
         $aheadday = 0;
@@ -85,7 +94,7 @@ function local_reminders_cron() {
         // reminders has been already sent for this event for this ahead of date
         // by a previous cron cycle.
         if (isset($logrecs['event.php?id='.$event->id.'&'.$aheadday])) {
-            continue;
+            //continue;
         }
         
         $options = null;
@@ -112,27 +121,62 @@ function local_reminders_cron() {
         if ($options[$aheaddaysindex[$aheadday]] == '0') continue;
         
         $reminder = null;
+        $eventdata = null;
+        $sendusers = array();
+        
         if ($event->eventtype == 'site') {
             $reminder = new global_reminder($event);
+            $eventdata = $reminder->create_reminder_message_object($fromuser);
         } else if ($event->eventtype == 'user') {
             $user = $DB->get_record('user', array('id' => $event->userid));
-            $reminder = new user_reminder($user, $event);
+            
+            if (!empty($user)) {
+                $reminder = new user_reminder($event, $user);
+                $eventdata = $reminder->create_reminder_message_object($fromuser);
+                $sendusers[] = $user->id;
+            }
         } else if ($event->eventtype == 'due' || $event->eventtype == 'course') {
-            $user = $DB->get_record('course', array('id' => $event->courseid));
-            $reminder = new course_reminder($course, $event);
+            $course = $DB->get_record('course', array('id' => $event->courseid));
+            
+            if (!empty($course)) {
+                $reminder = new course_reminder($event, $course);
+                $eventdata = $reminder->create_reminder_message_object($fromuser);
+            }
         } else if ($event->eventtype == 'group') {
-            $reminder = new group_reminder($event);
+            $group = $DB->get_record('group', array('id' => $event->groupid));
+            
+            if (!empty($group)) {
+                $reminder = new group_reminder($event, $group);
+                $eventdata = $reminder->create_reminder_message_object($fromuser);
+                
+                $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
+                if ($groupmemberroles) {
+                    foreach($groupmemberroles as $roleid=>$roledata) {
+                        foreach($roledata->users as $member) {
+                            $sendusers[] = $member->id;
+                        }
+                    }
+                }
+                
+            }
         }
-        if ($reminder == null) continue;
         
-        $eventdata = $reminder->create_reminder_message_object($fromuser);
+        if ($eventdata == null) {
+            mtrace("  [Local Reminders Cron] event object is null for event ".$event->id. ' type is '.$event->eventtype);
+            continue;
+        }
+        
+        mtrace("  [Local Reminders Cron] found event type ".$event->eventtype);
+        
         if (isset($eventdata->userto)) {
-            $mailresult = message_send($eventdata);
+            //$mailresult = message_send($eventdata);
             
             if (!$mailresult) {
                 mtrace("Error: local/reminders/lib.php local_reminders_cron(): Could not send out message 
                         for eventid $event->id to user $eventdata->userto");
+                mtrace($mailresult);
             } else {
+                mtrace(" SUCCESSFULLY MESSAGE IS SENT!!!!");
                 add_to_log(0, 'local_reminders', 'sent reminder', 'event.php?id='.$event->id, $aheadday);
             }
         }
@@ -141,6 +185,7 @@ function local_reminders_cron() {
         
     }
     
+    /*
     $eventdata = new stdClass();
     $eventdata->component        = 'local_reminders';   // plugin name
     $eventdata->name             = 'reminders_user';     // message interface name
@@ -155,5 +200,5 @@ function local_reminders_cron() {
     $mailresult = message_send($eventdata);
     
     mtrace($mailresult);
-    
+    */
 }

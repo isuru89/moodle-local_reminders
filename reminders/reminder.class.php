@@ -24,18 +24,16 @@
  */
 abstract class reminder {
     
-    protected $msgprovider;
     protected $notification;
     protected $event;
     
-    protected $bodycssstyle = 'width:100%;font-family:Tahoma,Arial,Sans-serif;border-width:1px 2px 2px 1px;border:1px Solid #ccc';
+    protected $tbodycssstyle = 'width:100%;font-family:Tahoma,Arial,Sans-serif;border-width:1px 2px 2px 1px;border:1px Solid #ccc';
     protected $titlestyle = 'padding:0 0 6px 0;margin:0;font-family:Arial,Sans-serif;font-size:16px;font-weight:bold;color:#222';
     protected $footerstyle = 'background-color:#f6f6f6;color:#888;border-top:1px Solid #ccc;font-family:Arial,Sans-serif;font-size:11px';
     
     public function __construct($event, $notificationstyle=1) {
         $this->event = $event;
         $this->notification = $notificationstyle;
-        $this->msgprovider = get_message_provider();
     }
     
     protected function get_html_header() {
@@ -43,18 +41,28 @@ abstract class reminder {
     }
     
     protected function get_html_footer() {
-        $footer .= '<tr><td style="'.$footerstyle.'">';
+        global $CFG;
+        
+        $footer = '<tr><td style="'.$this->footerstyle.'" colspan="2">';
         $footer .= 'Reminder from <a href="'.$CFG->wwwroot.'/calendar/index.php" target="_blank">Moodle Calendar</a></p>';
         $footer .= '</td></tr>';
         return $footer;
     }
     
+    protected function generate_event_link() {
+        global $CFG;
+        
+        return $CFG->wwwroot.'/calendar/view.php?view=day&cal_d='.date('j', $this->event->timestart).
+                '&cal_m='.date('n', $this->event->timestart).
+                '&cal_y='.date('Y', $this->event->timestart).'#event_'.$this->event->id;
+    }
+    
     protected function format_event_time_duration() {
         $followedtimeformat = get_string('strftimetime', 'langconfig');
-        
-        $formattedtime = userdate($event->starttime);
-        if ($event->timeduration > 0) {
-            $formattedtime .= ' - '.userdate($event->starttime + $event->timeduration, $followedtimeformat);
+
+        $formattedtime = userdate($this->event->timestart);
+        if ($this->event->timeduration > 0) {
+            $formattedtime .= ' - '.userdate($this->event->timestart + $this->event->timeduration, $followedtimeformat);
         }
         return $formattedtime;
     }
@@ -93,20 +101,26 @@ abstract class reminder {
     /**
      * @return object a message object which will be sent to the messaging API
      */
-    public function create_reminder_message_object($admin=null) {
+    public function create_reminder_message_object($admin=null) {  
         if ($admin == null) {
             $admin = get_admin();
         }
+        //mtrace("Creating event object for "." {$USER->id} ".$this->get_message_provider());
+        
+        $contenthtml = $this->get_message_html();
+        $titlehtml = $this->get_message_title();
         
         $eventdata = new stdClass();
         $eventdata->component           = 'local_reminders';   // plugin name
         $eventdata->name                = $this->get_message_provider();     // message interface name
-        $eventdata->userfrom            = $admin->id;
-        $eventdata->subject             = 'Reminder: '.$this->get_message_title();    // message title
+        $eventdata->userfrom            = $admin;
+        $eventdata->userto              = 3;
+        $eventdata->subject             = 'Reminder: '.$titlehtml;    // message title
         $eventdata->fullmessage         = $this->get_message_plaintext(); 
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
-        $eventdata->fullmessagehtml     = $this->get_message_html();
-        $eventdata->notification        = $this->notification;
+        $eventdata->fullmessagehtml     = $contenthtml;
+        $eventdata->smallmessage        = $titlehtml . ' - ' . $contenthtml;
+        $eventdata->notification        = 1;
         
         return $eventdata;
     }

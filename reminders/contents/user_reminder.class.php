@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+global $CFG;
+
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 
 /**
@@ -28,27 +30,28 @@ class user_reminder extends reminder {
     
     private $user;
     
-    public function __construct($user, $event, $notificationstyle = 1) {
+    public function __construct($event, $user, $notificationstyle = 1) {
         parent::__construct($event, $notificationstyle);
         $this->user = $user;
     }
     
     public function get_message_html() {
-        $htmlmail = $this->get_html_header().'\n';
-        $htmlmail .= '<body id=\"email\">\n<div>\n';
-        $htmlmail .= '<table cellspacing="0" cellpadding="8" border="0" summary="" style="'.$this->bodycssstyle.'">';
-        $htmlmail .= '<tr><td><h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></td></tr>';
-        $htmlmail .= '<tr><td>When</td><td>'.$this->format_event_time_duration().'</td></tr>';
-        $htmlmail .= '<tr><td>User</td><td>'.$this->user->firstname.' '.$this->user->lastname.'</td></tr>';
-        $htmlmail .= '<tr><td>Description</td><td>'.$event->description.'</td></tr>';
+        $htmlmail = $this->get_html_header().'';
+        $htmlmail .= '<body id=\"email\"><div>';
+        $htmlmail .= '<table cellspacing="0" cellpadding="8" border="0" summary="" style="'.$this->tbodycssstyle.'">';
+        $htmlmail .= '<tr><td colspan="2"><a href="'.$this->generate_event_link().'" style="text-decoration: none">'.
+            '<h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></a></td></tr>';
+        $htmlmail .= '<tr><td width="25%">When</td><td>'.$this->format_event_time_duration().'</td></tr>';
+        $htmlmail .= '<tr><td>User</td><td>'.fullname($this->user).'</td></tr>';
+        $htmlmail .= '<tr><td>Description</td><td>'.$this->event->description.'</td></tr>';
         $htmlmail .= $this->get_html_footer();
-        $htmlmail .= '</table>\n</body>\n</html>';
+        $htmlmail .= '</table></body></html>';
         
         return $htmlmail;
     }
     
     public function get_message_plaintext() {
-        
+        return "plaintext";
     }
 
     protected function get_message_provider() {
@@ -56,6 +59,6 @@ class user_reminder extends reminder {
     }
 
     public function get_message_title() {
-        return $this->user->firstname . ' ' . $this->user->lastname . ' : ' . $this->event->name;
+        return fullname($this->user) . ' : ' . $this->event->name;
     }
 }
