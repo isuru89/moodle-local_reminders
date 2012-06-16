@@ -41,6 +41,10 @@ $messageproviders = array (
     
     // reminders for group events
     'reminders_group' => array (
+    ),
+    
+    // reminders for due events
+    'reminders_due' => array (
     )
         
 );

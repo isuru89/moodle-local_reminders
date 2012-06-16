@@ -19,20 +19,17 @@ global $CFG;
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 
 /**
- * Class to specify the reminder message object for group events.
+ * Class to specify the reminder message object for site (global) events.
  *
  * @package    local
  * @subpackage reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class group_reminder extends reminder {
+class site_reminder extends reminder {
     
-    private $group;
-    
-    public function __construct($event, $group, $aheaddays = 1) {
+    public function __construct($event, $aheaddays = 1) {
         parent::__construct($event, $aheaddays);
-        $this->group = $group;
     }
     
     public function get_message_html() {
@@ -42,7 +39,6 @@ class group_reminder extends reminder {
         $htmlmail .= '<tr><td colspan="2"><a href="'.$this->generate_event_link().'" style="text-decoration: none">'.
             '<h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></a></td></tr>';
         $htmlmail .= '<tr><td width="25%">When</td><td>'.$this->format_event_time_duration().'</td></tr>';
-        $htmlmail .= '<tr><td>Group</td><td>'.$this->group->name.'</td></tr>';
         $htmlmail .= '<tr><td>Description</td><td>'.$this->event->description.'</td></tr>';
         $htmlmail .= $this->get_html_footer();
         $htmlmail .= '</table></body></html>';
@@ -53,19 +49,16 @@ class group_reminder extends reminder {
     public function get_message_plaintext() {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
         $text .= 'When: '.$this->format_event_time_duration().'\n';
-        $text .= 'Group: '.$this->group->name.'\n';
         $text .= 'Description: '.$this->event->description.'\n';
         
         return $text;
     }
 
     protected function get_message_provider() {
-        return 'reminders_group';
+        return 'reminders_site';
     }
 
     public function get_message_title() {
-        $course = $DB->get_record('course', array('id' => $group->courseid));
-        return $course->shortname.' - '.$this->group->name.' - '.$this->event->name;
+        return $this->event->name;
     }
-    
 }

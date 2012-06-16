@@ -19,7 +19,7 @@ global $CFG;
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 
 /**
- * Class to specify the reminder message object for site (global) events.
+ * Class to specify the reminder message object for course events.
  *
  * @package    local
  * @subpackage reminders
@@ -30,8 +30,8 @@ class course_reminder extends reminder {
     
     private $course;
     
-    public function __construct($event, $course, $notificationstyle = 1) {
-        parent::__construct($event, $notificationstyle);
+    public function __construct($event, $course, $aheaddays = 1) {
+        parent::__construct($event, $aheaddays);
         $this->course = $course;
     }
     
@@ -51,7 +51,12 @@ class course_reminder extends reminder {
     }
     
     public function get_message_plaintext() {
-        return "plaintext";
+        $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
+        $text .= 'When: '.$this->format_event_time_duration().'\n';
+        $text .= 'Course: '.$this->course->fullname.'\n';
+        $text .= 'Description: '.$this->event->description.'\n';
+        
+        return $text;
     }
 
     protected function get_message_provider() {

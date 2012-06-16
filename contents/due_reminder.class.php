@@ -19,17 +19,22 @@ global $CFG;
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 
 /**
- * Class to specify the reminder message object for site (global) events.
+ * Class to specify the reminder message object for due events.
  *
  * @package    local
  * @subpackage reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class global_reminder extends reminder {
+class due_reminder extends reminder {
     
-    public function __construct($event, $notificationstyle = 1) {
-        parent::__construct($event, $notificationstyle);
+    private $course;
+    private $cm;
+    
+    public function __construct($event, $course, $cm, $aheaddays = 1) {
+        parent::__construct($event, $aheaddays);
+        $this->course = $course;
+        $this->cm = $cm;
     }
     
     public function get_message_html() {
@@ -39,6 +44,9 @@ class global_reminder extends reminder {
         $htmlmail .= '<tr><td colspan="2"><a href="'.$this->generate_event_link().'" style="text-decoration: none">'.
             '<h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></a></td></tr>';
         $htmlmail .= '<tr><td width="25%">When</td><td>'.$this->format_event_time_duration().'</td></tr>';
+        $htmlmail .= '<tr><td>Course</td><td>'.$this->course->fullname.'</a></td></tr>';
+        $htmlmail .= '<tr><td>Due: </td><td><a href="'.$this->cm->get_url().
+                '" target="_blank">'.$this->cm->get_context_name().'</a></td></tr>';
         $htmlmail .= '<tr><td>Description</td><td>'.$this->event->description.'</td></tr>';
         $htmlmail .= $this->get_html_footer();
         $htmlmail .= '</table></body></html>';
@@ -47,14 +55,22 @@ class global_reminder extends reminder {
     }
     
     public function get_message_plaintext() {
-        return "plaintext";
+        $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
+        $text .= 'When: '.$this->format_event_time_duration().'\n';
+        $text .= 'Course: '.$this->course->fullname.'\n';
+        $text .= 'Due: '.$this->cm->get_context_name().'\n';
+        $text .= 'Description: '.$this->event->description.'\n';
+        
+        return $text;
     }
 
     protected function get_message_provider() {
-        return 'reminders_site';
+        return 'reminders_due';
     }
 
     public function get_message_title() {
-        return $this->event->name;
+        return $this->course->shortname.' - '.$this->event->name;
     }
+
+
 }

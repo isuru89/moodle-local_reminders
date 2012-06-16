@@ -24,16 +24,17 @@
  */
 abstract class reminder {
     
-    protected $notification;
+    protected $aheaddays;
+    protected $notification = 1;
     protected $event;
     
     protected $tbodycssstyle = 'width:100%;font-family:Tahoma,Arial,Sans-serif;border-width:1px 2px 2px 1px;border:1px Solid #ccc';
     protected $titlestyle = 'padding:0 0 6px 0;margin:0;font-family:Arial,Sans-serif;font-size:16px;font-weight:bold;color:#222';
     protected $footerstyle = 'background-color:#f6f6f6;color:#888;border-top:1px Solid #ccc;font-family:Arial,Sans-serif;font-size:11px';
     
-    public function __construct($event, $notificationstyle=1) {
+    public function __construct($event, $aheaddays = 1) {
         $this->event = $event;
-        $this->notification = $notificationstyle;
+        $this->aheaddays = $aheaddays;
     }
     
     protected function get_html_header() {
@@ -120,7 +121,7 @@ abstract class reminder {
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
         $eventdata->smallmessage        = $titlehtml . ' - ' . $contenthtml;
-        $eventdata->notification        = 1;
+        $eventdata->notification        = $this->notification;
         
         return $eventdata;
     }

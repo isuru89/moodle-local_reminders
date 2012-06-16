@@ -41,8 +41,9 @@ if ($hassiteconfig) {
     $defaultuser = array('days7' => 0,'days3' => 1,'days1' => 1);
     $defaultcourse = array('days7' => 1,'days3' => 1,'days1' => 1);
     $defaultgroup = array('days7' => 0,'days3' => 1,'days1' => 0);
+    $defaultdue = array('days7' => 1,'days3' => 1,'days1' => 1);
     
-    // add days selection for global (site) events
+    // add days selection for site events
     $settings->add(new admin_setting_heading('local_reminders_site_heading', 
             get_string('siteheading', 'local_reminders'), get_string('explainsiteheading', 'local_reminders')));
     
@@ -56,12 +57,19 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_user_rdays', 
             get_string('reminderdaysahead', 'local_reminders'), '', $defaultuser, $daysarray));
     
-    // add days selection for course related activities events.
+    // add days selection for course related events.
     $settings->add(new admin_setting_heading('local_reminders_course_heading', 
             get_string('courseheading', 'local_reminders'), get_string('explaincourseheading', 'local_reminders')));
     
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_course_rdays', 
             get_string('reminderdaysahead', 'local_reminders'), '', $defaultcourse, $daysarray));
+    
+    // add days selection for due related events coming from activities in a course.
+    $settings->add(new admin_setting_heading('local_reminders_due_heading', 
+            get_string('dueheading', 'local_reminders'), get_string('explaindueheading', 'local_reminders')));
+    
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_due_rdays', 
+            get_string('reminderdaysahead', 'local_reminders'), '', $defaultdue, $daysarray));
     
     // add group related events
     $settings->add(new admin_setting_heading('local_reminders_group_heading', 
