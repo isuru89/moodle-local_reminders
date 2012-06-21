@@ -45,7 +45,7 @@ abstract class reminder {
         global $CFG;
         
         $footer = '<tr><td style="'.$this->footerstyle.'" colspan="2">';
-        $footer .= 'Reminder from <a href="'.$CFG->wwwroot.'/calendar/index.php" target="_blank">Moodle Calendar</a></p>';
+        $footer .= get_string('reminderfrom', 'local_reminders'). ' <a href="'.$CFG->wwwroot.'/calendar/index.php" target="_blank">Moodle Calendar</a></p>';
         $footer .= '</td></tr>';
         return $footer;
     }
@@ -110,13 +110,14 @@ abstract class reminder {
         
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
+        $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
         
         $eventdata = new stdClass();
         $eventdata->component           = 'local_reminders';   // plugin name
         $eventdata->name                = $this->get_message_provider();     // message interface name
         $eventdata->userfrom            = $admin;
         $eventdata->userto              = 3;
-        $eventdata->subject             = 'Reminder: '.$titlehtml;    // message title
+        $eventdata->subject             = $subjectprefix.': '.$titlehtml;    // message title
         $eventdata->fullmessage         = $this->get_message_plaintext(); 
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;

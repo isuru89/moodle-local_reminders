@@ -23,6 +23,12 @@
  */
 
 $string['admintreelabel'] = 'Reminders';
+$string['contentdescription'] = 'Description';
+$string['contenttypecourse'] = 'Course';
+$string['contenttypeactivity'] = 'Activity';
+$string['contenttypegroup'] = 'Group';
+$string['contenttypeuser'] = 'User';
+$string['contentwhen'] = 'When';
 $string['courseheading'] = 'Course Event Reminders';
 $string['days7'] = '7 Days';
 $string['days3'] = '3 Days';
@@ -43,5 +49,7 @@ $string['messageprovider:reminders_site'] = 'Reminder notifications for Site eve
 $string['messageprovider:reminders_user'] = 'Reminder notifications for User events';
 $string['pluginname'] = 'Event Reminders';
 $string['reminderdaysahead'] = 'Reminder days ahead:';
+$string['reminderfrom'] = 'Reminder from';
 $string['siteheading'] = 'Site Event Reminders';
+$string['titlesubjectprefix'] = 'Reminder';
 $string['userheading'] = 'User Event Reminders';

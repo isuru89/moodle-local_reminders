@@ -38,8 +38,8 @@ class site_reminder extends reminder {
         $htmlmail .= '<table cellspacing="0" cellpadding="8" border="0" summary="" style="'.$this->tbodycssstyle.'">';
         $htmlmail .= '<tr><td colspan="2"><a href="'.$this->generate_event_link().'" style="text-decoration: none">'.
             '<h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></a></td></tr>';
-        $htmlmail .= '<tr><td width="25%">When</td><td>'.$this->format_event_time_duration().'</td></tr>';
-        $htmlmail .= '<tr><td>Description</td><td>'.$this->event->description.'</td></tr>';
+        $htmlmail .= '<tr><td width="25%">'.get_string('contentwhen', 'local_reminders').'</td><td>'.$this->format_event_time_duration().'</td></tr>';
+        $htmlmail .= '<tr><td>'.get_string('contentdescription', 'local_reminders').'</td><td>'.$this->event->description.'</td></tr>';
         $htmlmail .= $this->get_html_footer();
         $htmlmail .= '</table></body></html>';
         
@@ -48,8 +48,8 @@ class site_reminder extends reminder {
     
     public function get_message_plaintext() {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
-        $text .= 'When: '.$this->format_event_time_duration().'\n';
-        $text .= 'Description: '.$this->event->description.'\n';
+        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration().'\n';
+        $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description.'\n';
         
         return $text;
     }

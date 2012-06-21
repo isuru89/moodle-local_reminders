@@ -29,7 +29,7 @@ require_once($CFG->libdir . '/accesslib.php');
 
 /// CONSTANTS ///////////////////////////////////////////////////////////
 
-DEFINE('LOCAL_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 3);
+DEFINE('LOCAL_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 2);
 DEFINE('LOCAL_REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE', 100);
 
 /// FUNCTIONS ///////////////////////////////////////////////////////////
@@ -55,25 +55,35 @@ function local_reminders_cron() {
         mtrace("   [Local Reminder] first cron cycle");
         $timewindowstart = $timewindowstart - LOCAL_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
     } else {
-        $lr = null;
-        foreach ($logrows as $lgr) {
-            $lr = $lgr;
-            break;
-        }
-        
         // info field includes that starting time of last cron cycle.
-        $timewindowstart = $lr->info;                  
+        $timewindowstart = $logrows[0]->info + 1;               
     }
     
     mtrace("======= retrieved logs...");
 
     $now = time();
     
-    // gets all events ahead of within specified time period.
-    $upcomingevents = get_reminder_ready_events($timewindowstart, $now);
+    // now lets filter appropiate events to send reminders
     
-    // no upcoming events, so let's stop.
-    if (empty($upcomingevents) || !$upcomingevents) {
+    $secondsaheads = array(7*24*3600, 3*24*3600, 24*3600);
+    
+    $whereclause = '(timestart > '.$timewindowend.') AND (';
+    $count = 0;
+    foreach ($secondsaheads as $sahead) {
+        if($count > 0) {
+            $whereclause .= ' OR ';
+        }
+        $whereclause .= '(timestart - '.$sahead.' >= '.$timewindowstart.' AND '.
+                        'timestart - '.$sahead.' <= '.$timewindowend.')';
+        $count++;
+    }
+    
+    $whereclause .= ') AND visible = 1';
+    
+    //mtrace($whereclause);
+    
+    $upcomingevents = $DB->get_records_select('event', $whereclause);
+    if ($upcomingevents === false) {     // no upcoming events, so let's stop.
         mtrace("======= no upcming events. Aborting...");
         add_to_log(0, 'local_reminders', 'cron', '', $now);
         return;
@@ -155,6 +165,8 @@ function local_reminders_cron() {
                     $reminder = new due_reminder($event, $course, $context, $aheadday);
                     $eventdata = $reminder->create_reminder_message_object($fromuser);
                 }
+                
+                break;
             case 'group':
                 $group = $DB->get_record('groups', array('id' => $event->groupid));
             
@@ -193,50 +205,13 @@ function local_reminders_cron() {
                         for eventid $event->id to user $eventdata->userto");
                 mtrace($mailresult);
             } else {
-                mtrace(" SUCCESSFULLY MESSAGE IS SENT!!!!");
+                mtrace(" MESSAGE IS SUCCESSFULLY SENT!!!!");
             }
         }
+        
+        unset($sendusers);
         
     }
     
     add_to_log(0, 'local_reminders', 'cron', '', $now);
 }
-
-/**
- * This function returns a set (possibly empty) of events which are ready to send
- * reminders within last time-window. Here last time-window can be defined as the time
- * between last cron cycle and this active cron cycle.
- * 
- * @return array of events
- */
-function get_reminder_ready_events($timewindowstart, $timewindowend, $ignorehidden=true) {
-    global $DB;
-    
-    $secondsaheads = array(7*24*3600, 3*24*3600, 24*3600);
-    
-    $whereclause = '(';//'(timestart > '.$timewindowend.') AND (';
-    $count = 0;
-    foreach ($secondsaheads as $sahead) {
-        if($count > 0) {
-            $whereclause .= ' OR ';
-        }
-        $whereclause .= '(timestart - '.$sahead.' >= '.$timewindowstart.' AND '.
-                        'timestart - '.$sahead.' <= '.$timewindowend.')';
-        $count++;
-    }
-    
-    $whereclause .= ')';
-    
-    if (!$ignorehidden) {
-        $whereclause .= ' AND visible = 1';
-    }
-    
-    mtrace($whereclause);
-    
-    $events = $DB->get_records_select('event', $whereclause);
-    if ($events === false) {
-        $events = array();
-    }
-    return $events;
-}
-
