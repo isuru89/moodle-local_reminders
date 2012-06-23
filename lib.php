@@ -134,6 +134,7 @@ function local_reminders_cron() {
                 $sendusers = $DB->get_records_sql($sql);
                 
                 break;
+            
             case 'user':
                 $user = $DB->get_record('user', array('id' => $event->userid));
             
@@ -144,6 +145,7 @@ function local_reminders_cron() {
                 }
                 
                 break;
+                
             case 'course':
                 $course = $DB->get_record('course', array('id' => $event->courseid));
             
@@ -155,7 +157,10 @@ function local_reminders_cron() {
                 }
                 
                 break;
+                
             case 'due':
+            case 'open':
+            case 'close':
                 $course = $DB->get_record('course', array('id' => $event->courseid));
                 $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
 
@@ -167,6 +172,7 @@ function local_reminders_cron() {
                 }
                 
                 break;
+                
             case 'group':
                 $group = $DB->get_record('groups', array('id' => $event->groupid));
             
