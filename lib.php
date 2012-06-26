@@ -43,7 +43,7 @@ DEFINE('LOCAL_REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE', 100);
 function local_reminders_cron() {
     global $CFG, $DB;
     
-    if (!$CFG->local_reminders_enable) return;
+    if (!isset($CFG->local_reminders_enable) || !$CFG->local_reminders_enable) return;
 
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     
@@ -162,7 +162,7 @@ function local_reminders_cron() {
                 
             case 'open':
                 // if we dont want to send reminders for activity openings...
-                if (!$CFG->local_reminders_due_send_opens) break;  
+                if (!isset($CFG->local_reminders_due_send_openings) || !$CFG->local_reminders_due_send_openings) break;  
             case 'due':
             case 'close':
                 $course = $DB->get_record('course', array('id' => $event->courseid));

@@ -74,7 +74,7 @@ if ($hassiteconfig) {
             get_string('reminderdaysahead', 'local_reminders'), get_string('explaindueheading', 'local_reminders'), 
             $defaultdue, $daysarray));
     
-    $settings->add(new admin_setting_configcheckbox('local_reminders_due_send_opens',
+    $settings->add(new admin_setting_configcheckbox('local_reminders_due_send_openings',
             get_string('sendactivityopens', 'local_reminders'), get_string('explainsendactivityopens', 'local_reminders'), 0));
     
     // add group related events
