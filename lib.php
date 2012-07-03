@@ -49,7 +49,7 @@ function local_reminders_cron() {
     // gets last local reminder cron log record
     $params = array();
     $selector = "l.course = 0 AND l.module = 'local_reminders' AND l.action = 'cron'";
-    $logrows = get_logs($selector, $params, 'l.time DESC', '', 1);
+    $logrows = get_logs($selector, $params, 'l.time DESC', '', 10);
     
     $timewindowstart = time();
     if (!$logrows) {  // this is the first cron cycle, after plugin is just installed
@@ -57,10 +57,12 @@ function local_reminders_cron() {
         $timewindowstart = $timewindowstart - LOCAL_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
     } else {
         // info field includes that starting time of last cron cycle.
-        $timewindowstart = $logrows[0]->info + 1;               
+        foreach ($logrows as $lrow) {
+            $timewindowstart = $lrow->info + 1;
+            break;
+        }
+        //$timewindowstart = $logrows[1]->info + 1;               
     }
-    
-    //mtrace("======= retrieved log info...");
     
     // end of the time window will be set as current
     $timewindowend = time();
@@ -86,10 +88,10 @@ function local_reminders_cron() {
         $whereclause .= 'AND visible = 1';
     }
     
-    //mtrace($whereclause);
+    mtrace("   [Local Reminder] Time window: ".userdate($timewindowstart)." to ".userdate($timewindowend));
     
     $upcomingevents = $DB->get_records_select('event', $whereclause);
-    if ($upcomingevents === false) {     // no upcoming events, so let's stop.
+    if ($upcomingevents == false) {     // no upcoming events, so let's stop.
         mtrace("   [Local Reminder] No upcming events. Aborting...");
         add_to_log(0, 'local_reminders', 'cron', '', $timewindowend);
         return;
@@ -102,8 +104,7 @@ function local_reminders_cron() {
     // iterating through each event...
     foreach ($upcomingevents as $event) {
         $event = new calendar_event($event);
-        mtrace("   [Local Reminder] Processing event".$event->id.  "...");
-        
+
         $aheadday = 0;
         
         if ($event->timestart-24*3600 >= $timewindowstart && $event->timestart-24*3600 <= $timewindowend) {
@@ -115,9 +116,18 @@ function local_reminders_cron() {
         }
         
         if ($aheadday == 0) continue;
+        mtrace("   [Local Reminder] Processing event".$event->id.  "...");
         
         $optionstr = 'local_reminders_'.$event->eventtype.'_rdays';
-        if (!isset($CFG->$optionstr)) continue;
+        if (!isset($CFG->$optionstr)) {
+            if ($event->modulename) {
+                $optionstr = 'local_reminders_due_rdays';
+            } else {
+                mtrace("   [Local Reminder] Couldn't find option for event ".$event->id." [type: ".$event->eventtype."]");
+                continue;
+            }
+        }
+        
         $options = $CFG->$optionstr;
         
         if (empty($options) || $options == null) continue;
@@ -128,6 +138,8 @@ function local_reminders_cron() {
         $reminder = null;
         $eventdata = null;
         $sendusers = array();
+        
+        mtrace("   [Local Reminder] Finding out users".$event->id.  "...");
         
         switch ($event->eventtype) {
             case 'site':
@@ -200,6 +212,19 @@ function local_reminders_cron() {
                 }
                 
                 break;
+            
+            default:
+                 if ($event->modulename) {
+                    $course = $DB->get_record('course', array('id' => $event->courseid));
+                    $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
+
+                    if (!empty($course) && !empty($cm)) {
+                        $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+                        $sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
+                        $reminder = new due_reminder($event, $course, $context, $aheadday);
+                        $eventdata = $reminder->create_reminder_message_object($fromuser);
+                    }
+                 }   
         }
 
         if ($eventdata == null) {
@@ -226,9 +251,7 @@ function local_reminders_cron() {
                 mtrace("Error: local/reminders/lib.php local_reminders_cron(): Could not send out message 
                         for eventid $event->id to user $eventdata->userto");
                 mtrace($mailresult);
-            } else {
-                //mtrace(" MESSAGE IS SUCCESSFULLY SENT!!!!");
-            }
+            } 
         }
         
         if ($failedcount > 0) {
