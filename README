@@ -7,10 +7,35 @@ License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 Version:   0.1
 
 == Introduction ==
+This plugin will create a set of reminders for Moodle calendar events and will send them automatically
+to relevant users in timely manner. Reminders are very useful for both students as well as teachers 
+to recall their scheduled event before the actual moment.
 
+== Folder Structure ==
+All following folders/files must be put in to the local directory of Moodle root folder to work properly.
 
+	/reminders/contents/course_reminder.class.php
+	/reminders/contents/due_reminder.class.php
+	/reminders/contents/group_reminder.class.php
+	/reminders/contents/site_reminder.class.php
+	/reminders/contents/user_reminder.class.php
+	/reminders/db/access.php
+	/reminders/db/install.php
+	/reminders/db/messages.php
+	/reminders/db/upgrade.php
+	/reminders/lang/en/local_reminders.php
+	/reminders/lib.php
+	/reminders/reminder.class.php
+	/reminders/settings.php
+	/reminders/version.php
+	/reminders/README
+
+== Requirements ==
+This plugin has been developed in Moodle 2.2 and successfully tested on a simple local server.
+This plugin should be working any Moodle version greater than or equal to v2.0.	
+	
 == Installation ==
-1. Fetch the plug-in either of possible locations.
+1. Fetch the plug-in from following location.
      + Goto https://github.com/isuru89/moodle-reminders-for-calendar-events and download the 
        repository as a zip file.
 2. Goto the Moodle root directory and go inside 'local' directory.
@@ -30,6 +55,8 @@ This frequency will be affected to the performance of Moodle cron system. Too mu
 will be an additional overhead while large value will be a problem of flooding the message
 interface because of trying to send too many reminders at once.
 
-== More Info ==
-You can tell about this plug-in individually me (uisurumadushanka89@gmail.com) or 
-to the Moodle contributed tracker (CONTRIB-3647).
+== Feedback ==
+You can tell about this plug-in directly to me (uisurumadushanka89@gmail.com) or 
+to the Moodle contributed tracker (http://tracker.moodle.org/browse/CONTRIB-3647).
+
+-Good Luck!-
