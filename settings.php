@@ -32,8 +32,8 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configcheckbox('local_reminders_enable', 
             get_string('enabled', 'local_reminders'), get_string('enableddescription', 'local_reminders'), 1));
     
-    $settings->add(new admin_setting_configcheckbox('local_reminders_only_visible',
-            get_string('onlyvisible', 'local_reminders'), get_string('onlyvisibledescription', 'local_reminders'), 0));
+    $settings->add(new admin_setting_configcheckbox('local_reminders_onlyvisible',
+            get_string('onlyvisible', 'local_reminders'), get_string('onlyvisibledescription', 'local_reminders'), 1));
     
     $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'), 
                        'days3' => ' '.get_string('days3', 'local_reminders'),
@@ -50,7 +50,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_heading('local_reminders_site_heading', 
             get_string('siteheading', 'local_reminders'), ''));
     
-    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_site_rdays', 
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_siterdays', 
             get_string('reminderdaysahead', 'local_reminders'), get_string('explainsiteheading', 'local_reminders'),
             $defaultsite , $daysarray));
     
@@ -58,14 +58,14 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_heading('local_reminders_user_heading', 
             get_string('userheading', 'local_reminders'), ''));
     
-    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_user_rdays', 
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_userrdays', 
             get_string('reminderdaysahead', 'local_reminders'), get_string('explainuserheading', 'local_reminders'), $defaultuser, $daysarray));
     
     // add days selection for course related events.
     $settings->add(new admin_setting_heading('local_reminders_course_heading', 
             get_string('courseheading', 'local_reminders'), ''));
     
-    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_course_rdays', 
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_courserdays', 
             get_string('reminderdaysahead', 'local_reminders'), get_string('explaincourseheading', 'local_reminders'), 
             $defaultcourse, $daysarray));
     
@@ -73,10 +73,10 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_heading('local_reminders_due_heading', 
             get_string('dueheading', 'local_reminders'), ''));
     
-    $settings->add(new admin_setting_configcheckbox('local_reminders_due_send_openings',
+    $settings->add(new admin_setting_configcheckbox('local_reminders_duesendopenings',
             get_string('sendactivityopens', 'local_reminders'), get_string('explainsendactivityopens', 'local_reminders'), 0));
     
-    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_due_rdays', 
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_duerdays', 
             get_string('reminderdaysahead', 'local_reminders'), get_string('explaindueheading', 'local_reminders'), 
             $defaultdue, $daysarray));
  
@@ -84,7 +84,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_heading('local_reminders_group_heading', 
             get_string('groupheading', 'local_reminders'), ''));
     
-    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_group_rdays', 
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_grouprdays', 
             get_string('reminderdaysahead', 'local_reminders'), get_string('explaingroupheading', 'local_reminders'), 
             $defaultgroup, $daysarray));
     

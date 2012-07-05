@@ -84,7 +84,7 @@ function local_reminders_cron() {
     
     $whereclause .= ')';
     
-    if (isset($CFG->local_reminders_only_visible) && $CFG->local_reminders_only_visible == 1) {
+    if (isset($CFG->local_reminders_onlyvisible) && $CFG->local_reminders_onlyvisible == 1) {
         $whereclause .= 'AND visible = 1';
     }
     
@@ -116,12 +116,12 @@ function local_reminders_cron() {
         }
         
         if ($aheadday == 0) continue;
-        mtrace("   [Local Reminder] Processing event".$event->id.  "...");
+        mtrace("   [Local Reminder] Processing event".$event->id."...");
         
-        $optionstr = 'local_reminders_'.$event->eventtype.'_rdays';
+        $optionstr = 'local_reminders_'.$event->eventtype.'rdays';
         if (!isset($CFG->$optionstr)) {
             if ($event->modulename) {
-                $optionstr = 'local_reminders_due_rdays';
+                $optionstr = 'local_reminders_duerdays';
             } else {
                 mtrace("   [Local Reminder] Couldn't find option for event ".$event->id." [type: ".$event->eventtype."]");
                 continue;
@@ -139,7 +139,7 @@ function local_reminders_cron() {
         $eventdata = null;
         $sendusers = array();
         
-        mtrace("   [Local Reminder] Finding out users".$event->id.  "...");
+        mtrace("   [Local Reminder] Finding out users".$event->id."...");
         
         switch ($event->eventtype) {
             case 'site':
@@ -178,7 +178,7 @@ function local_reminders_cron() {
                 
             case 'open':
                 // if we dont want to send reminders for activity openings...
-                if (!isset($CFG->local_reminders_due_send_openings) || !$CFG->local_reminders_due_send_openings) break;  
+                if (!isset($CFG->local_reminders_duesendopenings) || !$CFG->local_reminders_duesendopenings) break;  
             case 'due':
             case 'close':
                 $course = $DB->get_record('course', array('id' => $event->courseid));
@@ -202,7 +202,7 @@ function local_reminders_cron() {
 
                     $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
                     if ($groupmemberroles) {
-                        foreach($groupmemberroles as $roleid=>$roledata) {
+                        foreach($groupmemberroles as $roleid => $roledata) {
                             foreach($roledata->users as $member) {
                                 $sendusers[] = $member->id;
                             }
@@ -228,7 +228,7 @@ function local_reminders_cron() {
         }
 
         if ($eventdata == null) {
-            mtrace("  [Local Reminder] Event object is not set for the event ".$event->id. " [type: ".$event->eventtype."]");
+            mtrace("  [Local Reminder] Event object is not set for the event ".$event->id." [type: ".$event->eventtype."]");
             continue;
         }
         
@@ -238,7 +238,7 @@ function local_reminders_cron() {
             continue;
         }
         
-        mtrace("  [Local Reminder] Starting sending reminders for ".$event->id. " [type: ".$event->eventtype."]");
+        mtrace("  [Local Reminder] Starting sending reminders for ".$event->id." [type: ".$event->eventtype."]");
         $failedcount = 0;
         
         foreach ($sendusers as $touser) {

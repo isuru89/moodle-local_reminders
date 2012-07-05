@@ -39,9 +39,10 @@ class due_reminder extends course_reminder {
         $htmlmail = $this->get_html_header().'';
         $htmlmail .= '<body id=\"email\"><div>';
         $htmlmail .= '<table cellspacing="0" cellpadding="8" border="0" summary="" style="'.$this->tbodycssstyle.'">';
-        $htmlmail .= '<tr><td colspan="2"><a href="'.$this->generate_event_link().'" style="text-decoration: none">'.
-            '<h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></a></td></tr>';
-        $htmlmail .= '<tr><td width="25%">'.get_string('contentwhen', 'local_reminders').'</td><td>'.$this->format_event_time_duration().'</td></tr>';
+        $htmlmail .= '<tr><td colspan="2"><a href="'.$this->generate_event_link().
+                '" style="text-decoration: none"><h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></a></td></tr>';
+        $htmlmail .= '<tr><td width="25%">'.get_string('contentwhen', 'local_reminders').'</td><td>'.
+                $this->format_event_time_duration().'</td></tr>';
         $htmlmail .= '<tr><td>'.get_string('contenttypecourse', 'local_reminders').'</td><td>'.$this->course->fullname.'</a></td></tr>';
         $htmlmail .= '<tr><td>'.get_string('contenttypeactivity', 'local_reminders').'</td><td><a href="'.$this->cm->get_url().
                 '" target="_blank">'.$this->cm->get_context_name().'</a></td></tr>';

@@ -1,4 +1,35 @@
-moodle-reminders-for-calendar-events
-====================================
+=== Reminders "Local Plugin" ===
 
-Moodle-CONTRIB-3647
+Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
+Blog:      http://uisurumadushanka89.blogspot.com
+Copyright: 2012 Isuru Madushanka Weerarathna
+License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+Version:   0.1
+
+== Introduction ==
+
+
+== Installation ==
+1. Fetch the plug-in either of possible locations.
+     + Goto https://github.com/isuru89/moodle-reminders-for-calendar-events and download the 
+       repository as a zip file.
+2. Goto the Moodle root directory and go inside 'local' directory.
+3. Create a folder named 'reminders'.
+4. Now extract the downloaded zip file inside to this folder. After it is extracted,
+    all files and folders must compliance with given structure as shown in above.
+5. Log into the Moodle site as the admin user. Usually the new plug-in must be identified
+    and notified you when logged-in. If not then goto Site Administration -> Notifications
+    to install the local plug-in.
+6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
+
+== Configurations ==
+If you want to change the cron cycle frequency, open the version.php file in the plug-in's root
+directory and change the value for $plugin->cron. This value must be indicated by seconds. The
+default value is 3600 seconds (i.e. 1 hour).
+This frequency will be affected to the performance of Moodle cron system. Too much small value
+will be an additional overhead while large value will be a problem of flooding the message
+interface because of trying to send too many reminders at once.
+
+== More Info ==
+You can tell about this plug-in individually me (uisurumadushanka89@gmail.com) or 
+to the Moodle contributed tracker (CONTRIB-3647).
