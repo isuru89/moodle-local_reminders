@@ -14,8 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-global $CFG;
-
+/**
+ * Library function for reminders cron function.
+ *
+ * @package    local
+ * @subpackage reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/site_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/user_reminder.class.php');
@@ -32,6 +38,10 @@ require_once($CFG->libdir . '/accesslib.php');
 DEFINE('LOCAL_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 2);
 DEFINE('LOCAL_REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE', 100);
 
+DEFINE('LOCAL_REMINDERS_7DAYSBEFORE_INSECONDS', 7*24*3600);
+DEFINE('LOCAL_REMINDERS_3DAYSBEFORE_INSECONDS', 3*24*3600);
+DEFINE('LOCAL_REMINDERS_1DAYBEFORE_INSECONDS', 24*3600);
+
 /// FUNCTIONS ///////////////////////////////////////////////////////////
 
 /**
@@ -47,20 +57,19 @@ function local_reminders_cron() {
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     
     // gets last local reminder cron log record
+    $totalrecords = 0;
     $params = array();
     $selector = "l.course = 0 AND l.module = 'local_reminders' AND l.action = 'cron'";
-    $logrows = get_logs($selector, $params, 'l.time DESC', '', 10);
+    $logrows = get_logs($selector, $params, 'l.time DESC', '', 1, &$totalrecords);
     
     $timewindowstart = time();
-    if (!$logrows) {  // this is the first cron cycle, after plugin is just installed
+    if ($totalrecords == 0 || !$logrows) {  // this is the first cron cycle, after plugin is just installed
         mtrace("   [Local Reminder] This is the first cron cycle");
         $timewindowstart = $timewindowstart - LOCAL_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
     } else {
         // info field includes that starting time of last cron cycle.
-        foreach ($logrows as $lrow) {
-            $timewindowstart = $lrow->info + 1;
-            break;
-        }
+        $firstrecord = current($logrows);
+        $timewindowstart = $firstrecord + 1;
         //$timewindowstart = $logrows[1]->info + 1;               
     }
     
@@ -69,17 +78,18 @@ function local_reminders_cron() {
     
     // now lets filter appropiate events to send reminders
     
-    $secondsaheads = array(7 * 24 * 3600, 3 * 24 * 3600, 24 * 3600);
+    $secondsaheads = array(LOCAL_REMINDERS_7DAYSBEFORE_INSECONDS, 
+        LOCAL_REMINDERS_3DAYSBEFORE_INSECONDS, LOCAL_REMINDERS_1DAYBEFORE_INSECONDS);
     
     $whereclause = '(timestart > '.$timewindowend.') AND (';
-    $count = 0;
+    $flagor = false;
     foreach ($secondsaheads as $sahead) {
-        if($count > 0) {
+        if($flagor) {
             $whereclause .= ' OR ';
         }
         $whereclause .= '(timestart - '.$sahead.' >= '.$timewindowstart.' AND '.
                         'timestart - '.$sahead.' <= '.$timewindowend.')';
-        $count++;
+        $flagor = true;
     }
     
     $whereclause .= ')';
@@ -107,11 +117,14 @@ function local_reminders_cron() {
 
         $aheadday = 0;
         
-        if ($event->timestart-24*3600 >= $timewindowstart && $event->timestart-24*3600 <= $timewindowend) {
+        if ($event->timestart - LOCAL_REMINDERS_1DAYBEFORE_INSECONDS >= $timewindowstart && 
+                $event->timestart - LOCAL_REMINDERS_1DAYBEFORE_INSECONDS <= $timewindowend) {
             $aheadday = 1;
-        } else if ($event->timestart-3*24*3600 >= $timewindowstart && $event->timestart-3*24*3600 <= $timewindowend) {
+        } else if ($event->timestart - LOCAL_REMINDERS_3DAYSBEFORE_INSECONDS >= $timewindowstart && 
+                $event->timestart - LOCAL_REMINDERS_3DAYSBEFORE_INSECONDS <= $timewindowend) {
             $aheadday = 3;
-        } else if ($event->timestart-7*24*3600 >= $timewindowstart && $event->timestart-7*24*3600 <= $timewindowend) {
+        } else if ($event->timestart - LOCAL_REMINDERS_7DAYSBEFORE_INSECONDS >= $timewindowstart && 
+                $event->timestart - LOCAL_REMINDERS_7DAYSBEFORE_INSECONDS <= $timewindowend) {
             $aheadday = 7;
         }
         
@@ -146,10 +159,7 @@ function local_reminders_cron() {
                 $reminder = new site_reminder($event, $aheadday);
                 $eventdata = $reminder->create_reminder_message_object($fromuser);
                 
-                $sql = "SELECT u.id
-                            FROM {user} u 
-                            WHERE u.deleted = 0 AND u.suspended = 0 AND confirmed = 1";
-                $sendusers = $DB->get_records_sql($sql);
+                $sendusers = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0, 'confirmed' => 1), '', 'u.id');
                 
                 break;
             

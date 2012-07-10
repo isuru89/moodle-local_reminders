@@ -38,24 +38,28 @@ abstract class reminder {
     }
     
     protected function get_html_header() {
-        return '<head></head>';
+        return html_writer::tag('head', '');
     }
     
     protected function get_html_footer() {
         global $CFG;
         
-        $footer = '<tr><td style="'.$this->footerstyle.'" colspan="2">';
-        $footer .= get_string('reminderfrom', 'local_reminders'). ' <a href="'.$CFG->wwwroot.'/calendar/index.php" target="_blank">Moodle Calendar</a></p>';
-        $footer .= '</td></tr>';
+        $footer  = html_writer::start_tag('tr');
+        $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
+        $footer .= get_string('reminderfrom', 'local_reminders');
+        $footer .= html_writer::link($CFG->wwwroot.'/calendar/index.php', 'Moodle Calendar', array('target' => '_blank'));
+        $footer .= html_writer::end_tag('td').html_writer::end_tag('tr');
+
         return $footer;
     }
     
-    protected function generate_event_link() {
-        global $CFG;
+    protected function generate_event_link() {       
+        $params = array('view' => 'day', 'cal_d' => date('j', $this->event->timestart), 
+            'cal_m' => date('n', $this->event->timestart), 'cal_y' => date('Y', $this->event->timestart));
+        $calurl = new moodle_url('/calendar/view.php', $params);
+        $calurl->set_anchor('event_'.$this->event->id);
         
-        return $CFG->wwwroot.'/calendar/view.php?view=day&cal_d='.date('j', $this->event->timestart).
-                '&cal_m='.date('n', $this->event->timestart).
-                '&cal_y='.date('Y', $this->event->timestart).'#event_'.$this->event->id;
+        return $calurl->out(false);
     }
     
     protected function format_event_time_duration() {
@@ -116,7 +120,7 @@ abstract class reminder {
         $eventdata->component           = 'local_reminders';   // plugin name
         $eventdata->name                = $this->get_message_provider();     // message interface name
         $eventdata->userfrom            = $admin;
-        $eventdata->userto              = 3;
+        //$eventdata->userto              = 3;
         $eventdata->subject             = $subjectprefix.': '.$titlehtml;    // message title
         $eventdata->fullmessage         = $this->get_message_plaintext(); 
         $eventdata->fullmessageformat   = FORMAT_PLAIN;

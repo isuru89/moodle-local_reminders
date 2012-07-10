@@ -33,16 +33,30 @@ class site_reminder extends reminder {
     }
     
     public function get_message_html() {
-        $htmlmail = $this->get_html_header().'';
-        $htmlmail .= '<body id=\"email\"><div>';
-        $htmlmail .= '<table cellspacing="0" cellpadding="8" border="0" summary="" style="'.$this->tbodycssstyle.'">';
-        $htmlmail .= '<tr><td colspan="2"><a href="'.$this->generate_event_link().
-                '" style="text-decoration: none"><h3 style="'.$this->titlestyle.'">'.$this->get_message_title().'</h3></a></td></tr>';
-        $htmlmail .= '<tr><td width="25%">'.get_string('contentwhen', 'local_reminders').'</td><td>'.
-                $this->format_event_time_duration().'</td></tr>';
-        $htmlmail .= '<tr><td>'.get_string('contentdescription', 'local_reminders').'</td><td>'.$this->event->description.'</td></tr>';
+        $htmlmail = $this->get_html_header();
+        $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
+        $htmlmail .= html_writer::start_tag('div');
+        $htmlmail .= html_writer::start_tag('table', array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+        $htmlmail .= html_writer::start_tag('tr');
+        $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
+        $htmlmail .= html_writer::link($this->generate_event_link(), 
+                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)), 
+                array('style' => 'text-decoration: none'));
+        $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
+        
+        $htmlmail .= html_writer::start_tag('tr');
+        $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
+        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration());
+        $htmlmail .= html_writer::end_tag('tr');
+
+        $htmlmail .= html_writer::start_tag('tr');
+        $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
+        $htmlmail .= html_writer::tag('td', $this->event->description);
+        $htmlmail .= html_writer::end_tag('tr');
+        
         $htmlmail .= $this->get_html_footer();
-        $htmlmail .= '</table></body></html>';
+        $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
+                html_writer::end_tag('html');
         
         return $htmlmail;
     }
