@@ -22,6 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['activityremindersboth'] = 'For both openings and closings';
+$string['activityremindersonlyopenings'] = 'Only for activity openings';
+$string['activityremindersonlyclosings'] = 'Only for activity closings';
 $string['admintreelabel'] = 'Reminders';
 $string['contentdescription'] = 'Description';
 $string['contenttypecourse'] = 'Course';
@@ -39,21 +42,24 @@ $string['enableddescription'] = 'Enable/disable reminder plugin';
 $string['explaincourseheading'] = 'Reminder settings for course events. These events are coming from a course.';
 $string['explaindueheading'] = 'Reminder settings for activity events. These events are coming from activities/modules within a course.';
 $string['explaingroupheading'] = 'Reminder settings for group events. These events are based only for a specific group.';
-$string['explainsendactivityopens'] = 'Indicates whether reminders will be sent for events which are indicating activity openings.';
+$string['explainsendactivityreminders'] = 'Indicates in which activity state the reminders should be sent.';
 $string['explainsiteheading'] = 'Reminder settings for site events. These events are relavent to all the users in the site.';
 $string['explainuserheading'] = 'Reminder settings for user events. These events are individual to each user.';
+$string['filterevents'] = 'Filter calendar events:';
+$string['filtereventsdescription'] = 'Which calendar events should be filtered and send reminders for them.';
+$string['filtereventsonlyhidden'] = 'Only hidden events in calendar';
+$string['filtereventsonlyvisible'] = 'Only visible events in calendar';
+$string['filtereventssendall'] = 'All events';
 $string['groupheading'] = 'Group Event Reminders';
 $string['messageprovider:reminders_course'] = 'Reminder notifications for Course events';
 $string['messageprovider:reminders_due'] = 'Reminder notifications for Activity events';
 $string['messageprovider:reminders_group'] = 'Reminder notifications for Group events';
 $string['messageprovider:reminders_site'] = 'Reminder notifications for Site events';
 $string['messageprovider:reminders_user'] = 'Reminder notifications for User events';
-$string['onlyvisible'] = 'Only for visible events:';
-$string['onlyvisibledescription'] = 'Reminders will be sent only for the event which are visible in the calendar.';
 $string['pluginname'] = 'Event Reminders';
 $string['reminderdaysahead'] = 'Send before:';
 $string['reminderfrom'] = 'Reminder from';
-$string['sendactivityopens'] = 'Send reminders for activity openings:';
+$string['sendactivityreminders'] = 'Activity reminders:';
 $string['siteheading'] = 'Site Event Reminders';
 $string['titlesubjectprefix'] = 'Reminder';
 $string['userheading'] = 'User Event Reminders';

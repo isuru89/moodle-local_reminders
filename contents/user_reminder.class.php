@@ -85,4 +85,14 @@ class user_reminder extends reminder {
     public function get_message_title() {
         return fullname($this->user) . ' : ' . $this->event->name;
     }
+    
+    public function get_custom_headers() {
+        $headers = parent::get_custom_headers();
+        
+        $headers[] = 'X-User-Id: '.$this->user->id;
+        $headers[] = 'X-User-Name: '.fullname($this->user);
+        
+        return $headers;
+    }
+    
 }

@@ -104,6 +104,21 @@ abstract class reminder {
     public abstract function get_message_title();
     
     /**
+     * Gets an array of custom headers for the reminder message, specially
+     * for e-mails. For e-mails they will be easier to track when
+     * several e-mail reminders are received for a particular event. <br>
+     * If no header is wanted, just simply returns an empty array.
+     *  
+     * @return array array of strings containing header attributes.
+     */
+    public function get_custom_headers() {
+        $urlinfo = parse_url($CFG->wwwroot);
+        $hostname = $urlinfo['host'];
+        
+        return array('Message-ID: <moodlereminder'.$this->event->id.'@'.$hostname.'>');
+    }
+    
+    /**
      * @return object a message object which will be sent to the messaging API
      */
     public function create_reminder_message_object($admin=null) {  
@@ -115,6 +130,11 @@ abstract class reminder {
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
+        
+        $cheaders = $this->get_custom_headers();
+        if (!empty($cheaders)) {
+            $admin->customheaders = $cheaders;
+        }
         
         $eventdata = new stdClass();
         $eventdata->component           = 'local_reminders';   // plugin name

@@ -93,5 +93,13 @@ class due_reminder extends course_reminder {
         return $this->course->shortname.' - '.$this->event->name;
     }
 
+    public function get_custom_headers() {
+        $headers = parent::get_custom_headers();
+        
+        $headers[] = 'X-Activity-Id: '.$this->cm->id;
+        $headers[] = 'X-Activity-Name: '.$this->cm->get_context_name();
+        
+        return $headers;
+    }
 
 }

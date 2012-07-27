@@ -87,4 +87,10 @@ class group_reminder extends reminder {
         return $course->shortname.' - '.$this->group->name.' - '.$this->event->name;
     }
     
+    public function get_custom_headers() {
+        $headers = parent::get_custom_headers();
+        
+        $headers[] = 'X-Group-Id: '.$this->group->id;
+        return $headers;
+    }
 }

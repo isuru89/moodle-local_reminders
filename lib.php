@@ -94,8 +94,12 @@ function local_reminders_cron() {
     
     $whereclause .= ')';
     
-    if (isset($CFG->local_reminders_onlyvisible) && $CFG->local_reminders_onlyvisible == 1) {
-        $whereclause .= 'AND visible = 1';
+    if (isset($CFG->local_reminders_filterevents)) {
+        if ($CFG->local_reminders_filterevents == SEND_ONLY_VISIBLE) {
+            $whereclause .= 'AND visible = 1';
+        } else if ($CFG->local_reminders_filterevents == SEND_ONLY_HIDDEN) {
+            $whereclause .= 'AND visible = 0';
+        }
     }
     
     mtrace("   [Local Reminder] Time window: ".userdate($timewindowstart)." to ".userdate($timewindowend));
@@ -129,7 +133,7 @@ function local_reminders_cron() {
         }
         
         if ($aheadday == 0) continue;
-        mtrace("   [Local Reminder] Processing event".$event->id."...");
+        mtrace("   [Local Reminder] Processing event#".$event->id." [Type: $event->eventtype]...");
         
         $optionstr = 'local_reminders_'.$event->eventtype.'rdays';
         if (!isset($CFG->$optionstr)) {
@@ -152,7 +156,7 @@ function local_reminders_cron() {
         $eventdata = null;
         $sendusers = array();
         
-        mtrace("   [Local Reminder] Finding out users".$event->id."...");
+        mtrace("   [Local Reminder] Finding out users for event#".$event->id."...");
         
         switch ($event->eventtype) {
             case 'site':
@@ -188,9 +192,15 @@ function local_reminders_cron() {
                 
             case 'open':
                 // if we dont want to send reminders for activity openings...
-                if (!isset($CFG->local_reminders_duesendopenings) || !$CFG->local_reminders_duesendopenings) break;  
-            case 'due':
+                if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_CLOSINGS) {
+                    break; 
+                }
             case 'close':
+                // if we dont want to send reminders for activity closings...
+                if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_OPENINGS) {
+                    break; 
+                }
+            case 'due':
                 $course = $DB->get_record('course', array('id' => $event->courseid));
                 $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
 
@@ -265,7 +275,7 @@ function local_reminders_cron() {
         }
         
         if ($failedcount > 0) {
-            mtrace("  [Local Reminder] Failed to send ".$failedcount." reminders for event ".$event->id);
+            mtrace("  [Local Reminder] Failed to send ".$failedcount." reminders to users for event ".$event->id);
         } else {
             mtrace("  [Local Reminder] All reminders was sent successfully for event ".$event->id."!");
         }
