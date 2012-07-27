@@ -25,6 +25,8 @@ defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
 
+    require_once('lib.php');
+    
     $settings = new admin_settingpage('local_reminders', get_string('admintreelabel', 'local_reminders'));
     $ADMIN->add('localplugins', $settings);
     
@@ -33,14 +35,14 @@ if ($hassiteconfig) {
             get_string('enabled', 'local_reminders'), 
             get_string('enableddescription', 'local_reminders'), 1));
     
-    $choices = array(SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
-                     SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'),
-                     SEND_ONLY_HIDDEN => get_string('filtereventsonlyhidden', 'local_reminders'));
+    $choices = array(REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
+                     REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'),
+                     REMINDERS_SEND_ONLY_HIDDEN => get_string('filtereventsonlyhidden', 'local_reminders'));
     
     $settings->add(new admin_setting_configselect('local_reminders_filterevents',
             get_string('filterevents', 'local_reminders'), 
             get_string('filtereventsdescription', 'local_reminders'),
-            SEND_ALL_EVENTS, $choices));
+            REMINDERS_SEND_ALL_EVENTS, $choices));
     
     $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'), 
                        'days3' => ' '.get_string('days3', 'local_reminders'),

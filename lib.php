@@ -35,12 +35,20 @@ require_once($CFG->libdir . '/accesslib.php');
 
 /// CONSTANTS ///////////////////////////////////////////////////////////
 
-DEFINE('LOCAL_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 2);
-DEFINE('LOCAL_REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE', 100);
+DEFINE('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 2);
+DEFINE('REMINDERS_MAX_REMINDERS_FOR_CRON_CYCLE', 100);
 
-DEFINE('LOCAL_REMINDERS_7DAYSBEFORE_INSECONDS', 7*24*3600);
-DEFINE('LOCAL_REMINDERS_3DAYSBEFORE_INSECONDS', 3*24*3600);
-DEFINE('LOCAL_REMINDERS_1DAYBEFORE_INSECONDS', 24*3600);
+DEFINE('REMINDERS_7DAYSBEFORE_INSECONDS', 7*24*3600);
+DEFINE('REMINDERS_3DAYSBEFORE_INSECONDS', 3*24*3600);
+DEFINE('REMINDERS_1DAYBEFORE_INSECONDS', 24*3600);
+
+DEFINE('REMINDERS_SEND_ALL_EVENTS', 50);
+DEFINE('REMINDERS_SEND_ONLY_VISIBLE', 51);
+DEFINE('REMINDERS_SEND_ONLY_HIDDEN', 52);
+
+DEFINE('REMINDERS_ACTIVITY_BOTH', 60);
+DEFINE('REMINDERS_ACTIVITY_ONLY_OPENINGS', 61);
+DEFINE('REMINDERS_ACTIVITY_ONLY_CLOSINGS', 62);
 
 /// FUNCTIONS ///////////////////////////////////////////////////////////
 
@@ -65,7 +73,7 @@ function local_reminders_cron() {
     $timewindowstart = time();
     if ($totalrecords == 0 || !$logrows) {  // this is the first cron cycle, after plugin is just installed
         mtrace("   [Local Reminder] This is the first cron cycle");
-        $timewindowstart = $timewindowstart - LOCAL_REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
+        $timewindowstart = $timewindowstart - REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
     } else {
         // info field includes that starting time of last cron cycle.
         $firstrecord = current($logrows);
@@ -78,8 +86,8 @@ function local_reminders_cron() {
     
     // now lets filter appropiate events to send reminders
     
-    $secondsaheads = array(LOCAL_REMINDERS_7DAYSBEFORE_INSECONDS, 
-        LOCAL_REMINDERS_3DAYSBEFORE_INSECONDS, LOCAL_REMINDERS_1DAYBEFORE_INSECONDS);
+    $secondsaheads = array(REMINDERS_7DAYSBEFORE_INSECONDS, REMINDERS_3DAYSBEFORE_INSECONDS, 
+        REMINDERS_1DAYBEFORE_INSECONDS);
     
     $whereclause = '(timestart > '.$timewindowend.') AND (';
     $flagor = false;
@@ -95,9 +103,9 @@ function local_reminders_cron() {
     $whereclause .= ')';
     
     if (isset($CFG->local_reminders_filterevents)) {
-        if ($CFG->local_reminders_filterevents == SEND_ONLY_VISIBLE) {
+        if ($CFG->local_reminders_filterevents == REMINDERS_SEND_ONLY_VISIBLE) {
             $whereclause .= 'AND visible = 1';
-        } else if ($CFG->local_reminders_filterevents == SEND_ONLY_HIDDEN) {
+        } else if ($CFG->local_reminders_filterevents == REMINDERS_SEND_ONLY_HIDDEN) {
             $whereclause .= 'AND visible = 0';
         }
     }
@@ -121,14 +129,14 @@ function local_reminders_cron() {
 
         $aheadday = 0;
         
-        if ($event->timestart - LOCAL_REMINDERS_1DAYBEFORE_INSECONDS >= $timewindowstart && 
-                $event->timestart - LOCAL_REMINDERS_1DAYBEFORE_INSECONDS <= $timewindowend) {
+        if ($event->timestart - REMINDERS_1DAYBEFORE_INSECONDS >= $timewindowstart && 
+                $event->timestart - REMINDERS_1DAYBEFORE_INSECONDS <= $timewindowend) {
             $aheadday = 1;
-        } else if ($event->timestart - LOCAL_REMINDERS_3DAYSBEFORE_INSECONDS >= $timewindowstart && 
-                $event->timestart - LOCAL_REMINDERS_3DAYSBEFORE_INSECONDS <= $timewindowend) {
+        } else if ($event->timestart - REMINDERS_3DAYSBEFORE_INSECONDS >= $timewindowstart && 
+                $event->timestart - REMINDERS_3DAYSBEFORE_INSECONDS <= $timewindowend) {
             $aheadday = 3;
-        } else if ($event->timestart - LOCAL_REMINDERS_7DAYSBEFORE_INSECONDS >= $timewindowstart && 
-                $event->timestart - LOCAL_REMINDERS_7DAYSBEFORE_INSECONDS <= $timewindowend) {
+        } else if ($event->timestart - REMINDERS_7DAYSBEFORE_INSECONDS >= $timewindowstart && 
+                $event->timestart - REMINDERS_7DAYSBEFORE_INSECONDS <= $timewindowend) {
             $aheadday = 7;
         }
         
