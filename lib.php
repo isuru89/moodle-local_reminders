@@ -171,7 +171,7 @@ function local_reminders_cron() {
                 $reminder = new site_reminder($event, $aheadday);
                 $eventdata = $reminder->create_reminder_message_object($fromuser);
                 
-                $sendusers = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0, 'confirmed' => 1), '', 'u.id');
+                $sendusers = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0, 'confirmed' => 1), '', 'u.*');
                 
                 break;
             
