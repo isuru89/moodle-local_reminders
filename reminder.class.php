@@ -63,10 +63,15 @@ abstract class reminder {
     }
     
     protected function format_event_time_duration() {
-        $followedtimeformat = get_string('strftimetime', 'langconfig');
+        $followedtimeformat = get_string('strftimedatetime', 'langconfig');
 
         $formattedtime = userdate($this->event->timestart);
+        $sdate = usergetdate($this->event->timestart);
         if ($this->event->timeduration > 0) {
+            $ddate = usergetdate($this->event->timestart + $this->event->timeduration);
+            if ($sdate['year'] == $ddate['year'] && $sdate['mon'] == $ddate['mon'] && $sdate['mday'] == $ddate['mday']) {
+                $followedtimeformat = get_string('strftimetime', 'langconfig');
+            }
             $formattedtime .= ' - '.userdate($this->event->timestart + $this->event->timeduration, $followedtimeformat);
         }
         return $formattedtime;

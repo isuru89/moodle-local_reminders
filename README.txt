@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      http://uisurumadushanka89.blogspot.com
 Copyright: 2012 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   0.1
+Version:   1.0
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically

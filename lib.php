@@ -181,7 +181,7 @@ function local_reminders_cron() {
                 if (!empty($user)) {
                     $reminder = new user_reminder($event, $user, $aheadday);
                     $eventdata = $reminder->create_reminder_message_object($fromuser);
-                    $sendusers[] = $user->id;
+                    $sendusers[] = $user;
                 }
                 
                 break;
@@ -232,7 +232,7 @@ function local_reminders_cron() {
                     if ($groupmemberroles) {
                         foreach($groupmemberroles as $roleid => $roledata) {
                             foreach($roledata->users as $member) {
-                                $sendusers[] = $member->id;
+                                $sendusers[] = $DB->get_record('user', array('id' => $member->id));
                             }
                         }
                     }
@@ -271,7 +271,7 @@ function local_reminders_cron() {
         
         foreach ($sendusers as $touser) {
             $eventdata->userto = $touser;
-
+        
             $mailresult = message_send($eventdata);
 
             if (!$mailresult) {

@@ -25,9 +25,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2011120500;       
+$plugin->version   = 2012072701;       
 $plugin->requires  = 2011120500;  
-$plugin->release   = '2.2';
+$plugin->release   = '1.0';
 $plugin->maturity  = MATURITY_RC;
 $plugin->component = 'local_reminders';       
 $plugin->cron      = 3600;                  // Default: 3600, will run for every hour
