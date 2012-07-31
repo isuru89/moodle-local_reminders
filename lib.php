@@ -169,9 +169,10 @@ function local_reminders_cron() {
         switch ($event->eventtype) {
             case 'site':
                 $reminder = new site_reminder($event, $aheadday);
+                mtrace("   Seacrhing for site users...");
+                $sendusers = $DB->get_records_sql("SELECT * FROM {user} WHERE id > 1 AND deleted=0 AND suspended=0 AND confirmed=1;");
+                //$sendusers = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0, 'confirmed' => 1));
                 $eventdata = $reminder->create_reminder_message_object($fromuser);
-                
-                $sendusers = $DB->get_records('user', array('deleted' => 0, 'suspended' => 0, 'confirmed' => 1), '', 'u.*');
                 
                 break;
             
