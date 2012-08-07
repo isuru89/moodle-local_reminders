@@ -64,14 +64,12 @@ function local_reminders_cron() {
 
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     
-    // gets last local reminder cron log record
-    $totalrecords = 0;
     $params = array();
     $selector = "l.course = 0 AND l.module = 'local_reminders' AND l.action = 'cron'";
-    $logrows = get_logs($selector, $params, 'l.time DESC', '', 1, &$totalrecords);
+    $logrows = get_logs($selector, $params, 'l.time DESC', '', 1);
     
     $timewindowstart = time();
-    if ($totalrecords == 0 || !$logrows) {  // this is the first cron cycle, after plugin is just installed
+    if (!$logrows) {  // this is the first cron cycle, after plugin is just installed
         mtrace("   [Local Reminder] This is the first cron cycle");
         $timewindowstart = $timewindowstart - REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
     } else {

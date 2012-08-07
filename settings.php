@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die;
 
 if ($hassiteconfig) {
 
-    include_once('lib.php');
+    require_once($CFG->dirroot.'/local/reminders/lib.php');
     
     $settings = new admin_settingpage('local_reminders', get_string('admintreelabel', 'local_reminders'));
     $ADMIN->add('localplugins', $settings);
