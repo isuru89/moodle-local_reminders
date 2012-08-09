@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      http://uisurumadushanka89.blogspot.com
 Copyright: 2012 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   1.0
+Version:   1.0.1
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -35,6 +35,11 @@ default value is 3600 seconds (i.e. 1 hour).
 This frequency will be affected to the performance of Moodle cron system. Too much small value
 will be an additional overhead while large value will be a problem of flooding the message
 interface because of trying to send too many reminders at once.
+
+== Change Log == 
+v1.1
+    - Removed deprecated log fetching function
+    - Changed default settings
 
 == Folder Structure ==
 All following folders/files must be put in to the local directory of Moodle root folder to work properly.
