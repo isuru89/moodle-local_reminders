@@ -37,7 +37,7 @@ will be an additional overhead while large value will be a problem of flooding t
 interface because of trying to send too many reminders at once.
 
 == Change Log == 
-v1.1
+v1.0.1
     - Removed deprecated log fetching function
     - Changed default settings
 
