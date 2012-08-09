@@ -42,18 +42,18 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configselect('local_reminders_filterevents',
             get_string('filterevents', 'local_reminders'), 
             get_string('filtereventsdescription', 'local_reminders'),
-            REMINDERS_SEND_ALL_EVENTS, $choices));
+            REMINDERS_SEND_ONLY_VISIBLE, $choices));
     
     $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'), 
                        'days3' => ' '.get_string('days3', 'local_reminders'),
                        'days1' => ' '.get_string('days1', 'local_reminders'));
     
     // default settings for each event type
-    $defaultsite = array('days7' => 1,'days3' => 1,'days1' => 1);
-    $defaultuser = array('days7' => 0,'days3' => 1,'days1' => 1);
-    $defaultcourse = array('days7' => 1,'days3' => 1,'days1' => 1);
+    $defaultsite = array('days7' => 0,'days3' => 1,'days1' => 0);
+    $defaultuser = array('days7' => 0,'days3' => 0,'days1' => 1);
+    $defaultcourse = array('days7' => 0,'days3' => 1,'days1' => 0);
     $defaultgroup = array('days7' => 0,'days3' => 1,'days1' => 0);
-    $defaultdue = array('days7' => 1,'days3' => 1,'days1' => 1);
+    $defaultdue = array('days7' => 0,'days3' => 1,'days1' => 0);
     
     // add days selection for site events
     $settings->add(new admin_setting_heading('local_reminders_site_heading', 
