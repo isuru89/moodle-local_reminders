@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      http://uisurumadushanka89.blogspot.com
 Copyright: 2012 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   1.0.1
+Version:   1.1
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -28,6 +28,17 @@ This plugin should be working any Moodle version greater than or equal to v2.0.
     to install the local plug-in.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
+== Change Log ==
+v1.1
+    + fixed bug of repeatedly sending reminders for same event.
+    + removed 'Only hidden events from calendar' option from the settings page.
+    + removed unused constants from the plugin.
+    + improved cron trace of the plugin for ignored events.
+
+v1.0.1
+    + changed default settings
+    + removed usage of deprecated functions
+
 == Configurations ==
 If you want to change the cron cycle frequency, open the version.php file in the plug-in's root
 directory and change the value for $plugin->cron. This value must be indicated by seconds. The
@@ -35,11 +46,6 @@ default value is 3600 seconds (i.e. 1 hour).
 This frequency will be affected to the performance of Moodle cron system. Too much small value
 will be an additional overhead while large value will be a problem of flooding the message
 interface because of trying to send too many reminders at once.
-
-== Change Log == 
-v1.0.1
-    - Removed deprecated log fetching function
-    - Changed default settings
 
 == Folder Structure ==
 All following folders/files must be put in to the local directory of Moodle root folder to work properly.

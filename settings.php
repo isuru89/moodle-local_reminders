@@ -36,8 +36,7 @@ if ($hassiteconfig) {
             get_string('enableddescription', 'local_reminders'), 1));
     
     $choices = array(REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
-                     REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'),
-                     REMINDERS_SEND_ONLY_HIDDEN => get_string('filtereventsonlyhidden', 'local_reminders'));
+                     REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'));
     
     $settings->add(new admin_setting_configselect('local_reminders_filterevents',
             get_string('filterevents', 'local_reminders'), 

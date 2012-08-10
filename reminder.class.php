@@ -37,10 +37,16 @@ abstract class reminder {
         $this->aheaddays = $aheaddays;
     }
     
+    /**
+     * Gets the header content of the e-mail message.
+     */
     protected function get_html_header() {
         return html_writer::tag('head', '');
     }
     
+    /**
+     * Gets the footer content of the e-mail message.
+     */
     protected function get_html_footer() {
         global $CFG;
         
@@ -53,6 +59,11 @@ abstract class reminder {
         return $footer;
     }
     
+    /**
+     * Returns the correct link for the calendar event.
+     * 
+     * @return string complete url for the event
+     */
     protected function generate_event_link() {       
         $params = array('view' => 'day', 'cal_d' => date('j', $this->event->timestart), 
             'cal_m' => date('n', $this->event->timestart), 'cal_y' => date('Y', $this->event->timestart));
@@ -62,6 +73,12 @@ abstract class reminder {
         return $calurl->out(false);
     }
     
+    /**
+     * This function formats the due time of the event appropiately. If this event
+     * has a duration then formatted time will be [starttime]-[endtime].
+     * 
+     * @return string formatted time string
+     */
     protected function format_event_time_duration() {
         $followedtimeformat = get_string('strftimedatetime', 'langconfig');
 
@@ -130,7 +147,6 @@ abstract class reminder {
         if ($admin == null) {
             $admin = get_admin();
         }
-        //mtrace("Creating event object for "." {$USER->id} ".$this->get_message_provider());
         
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
