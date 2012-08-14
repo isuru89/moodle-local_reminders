@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['activityheading'] = 'Rappels d\'&eacute;v&eacute;nement li&eacute;s aux Activit&eacute;s';
 $string['activityremindersboth'] = 'Pour les 2 : ouverture et fermeture';
 $string['activityremindersonlyopenings'] = 'Seulement pour l\'ouverture des activit&eacute;s';
 $string['activityremindersonlyclosings'] = 'Seulement pour la fermeture des activit&eacute;s';
@@ -36,11 +37,10 @@ $string['courseheading'] = 'Rappels d\'&eacute;v&eacute;nement de Cours';
 $string['days7'] = '7 Jours';
 $string['days3'] = '3 Jours';
 $string['days1'] = '1 Jour';
-$string['dueheading'] = 'Rappels d\'&eacute;v&eacute;nement li&eacute;s aux Activit&eacute;s';
 $string['enabled'] = 'Activer :';
 $string['enableddescription'] = 'Activer/D&eacute;sactiver la fonction de rappel des &eacute;v&eacute;nements';
 $string['explaincourseheading'] = 'Param&egrave;tres de rappel pour les &eacute;v&eacute;nements de cours. Ces &eacute;v&eacute;nements sont relatifs &agrave; un cours.';
-$string['explaindueheading'] = 'Param&egrave;tres de rappel pour les &eacute;v&eacute;nements li&eacute;s aux activit&eacute;s. Ces &eacute;v&eacute;nements sont relatifs &agrave; des activit&eacute;s ou t&acirc;ches au sein d\'un cours.';
+$string['explainactivityheading'] = 'Param&egrave;tres de rappel pour les &eacute;v&eacute;nements li&eacute;s aux activit&eacute;s. Ces &eacute;v&eacute;nements sont relatifs &agrave; des activit&eacute;s ou t&acirc;ches au sein d\'un cours.';
 $string['explaingroupheading'] = 'Param&egrave;tres de rappel pour les &eacute;v&eacute;nements de groupe. Ces &eacute;v&eacute;nements sont relatifs &agrave; un groupe sp&eacute;cifique.';
 $string['explainsendactivityreminders'] = 'Indique pour quel(s) &eacute;tat(s) de l\'activit&eacute; les rappels doivent &ecirc;tre envoy&eacute;s.';
 $string['explainsiteheading'] = 'Param&egrave;tres de rappel pour les &eacute;v&eacute;nements du site. Ces &eacute;v&eacute;nements sont relatifs &agrave; tous les utilisateurs du site.';
@@ -52,7 +52,7 @@ $string['filtereventsonlyvisible'] = 'Seulement les &eacute;v&eacute;nements vis
 $string['filtereventssendall'] = 'Tous les &#233;v&#233;nements';
 $string['groupheading'] = 'Rappels d\'&eacute;v&eacute;nement de Groupe';
 $string['messageprovider:reminders_course'] = 'Notifications de rappels d\'&eacute;v&eacute;nement de Cours';
-$string['messageprovider:reminders_due'] = 'Notifications de rappels d\'&eacute;v&eacute;nement li&eacute;s &agrave; des Activit&eacute;s d\'un cours';
+$string['messageprovider:reminders_activity'] = 'Notifications de rappels d\'&eacute;v&eacute;nement li&eacute;s &agrave; des Activit&eacute;s d\'un cours';
 $string['messageprovider:reminders_group'] = 'Notifications de rappels d\'&eacute;v&eacute;nement de Groupe';
 $string['messageprovider:reminders_site'] = 'Notifications de rappels d\'&eacute;v&eacute;nement du Site';
 $string['messageprovider:reminders_user'] = 'Notifications de rappels d\'&eacute;v&eacute;nement Utilisateur';

@@ -35,40 +35,28 @@ class course_reminder extends reminder {
         $this->course = $course;
     }
     
-    public function get_message_html() {
-        $htmlmail = $this->get_html_header();
-        $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
-        $htmlmail .= html_writer::start_tag('div');
-        $htmlmail .= html_writer::start_tag('table', array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
-        $htmlmail .= html_writer::link($this->generate_event_link(), 
-                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)), 
-                array('style' => 'text-decoration: none'));
-        $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
+    protected function generate_event_link() {
+        $params = array('view' => 'day', 'course' => $this->course->id, 'cal_d' => date('j', $this->event->timestart), 
+            'cal_m' => date('n', $this->event->timestart), 'cal_y' => date('Y', $this->event->timestart));
+        $calurl = new moodle_url('/calendar/view.php', $params);
+        $calurl->set_anchor('event_'.$this->event->id);
         
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
-        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration());
-        $htmlmail .= html_writer::end_tag('tr');
-        
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contenttypecourse', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', $this->course->fullname);
-        $htmlmail .= html_writer::end_tag('tr');
-        
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', $this->event->description);
-        $htmlmail .= html_writer::end_tag('tr');
-
-        $htmlmail .= $this->get_html_footer();
-        $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
-                html_writer::end_tag('html');
-        
-        return $htmlmail;
+        return $calurl->out(false);
     }
     
+    protected function get_content_rows() {
+        global $CFG;
+        $rows = parent::get_content_rows();
+        
+        $row = new reminder_content_row();
+        $row->add_column(new reminder_content_column(get_string('contenttypecourse', 'local_reminders')));
+        $row->add_column(new reminder_content_column(
+            html_writer::link($CFG->wwwroot.'/course/view.php?id='.$this->course->id, $this->course->fullname, array('target' => '_blank'))));
+        $rows[] = $row;
+        
+        return $rows;
+    }
+
     public function get_message_plaintext() {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
         $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration().'\n';

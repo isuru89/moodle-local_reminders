@@ -29,6 +29,11 @@ This plugin should be working any Moodle version greater than or equal to v2.0.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v1.2
+    + Role based reminder message receiving for course and activity reminders
+    + due reminder has been renamed to activity reminder
+    + add number of days remaining for the event in reminder message
+
 v1.1
     + fixed bug of repeatedly sending reminders for same event.
     + removed 'Only hidden events from calendar' option from the settings page.
@@ -51,7 +56,7 @@ interface because of trying to send too many reminders at once.
 All following folders/files must be put in to the local directory of Moodle root folder to work properly.
 
 	/reminders/contents/course_reminder.class.php
-	/reminders/contents/due_reminder.class.php
+	/reminders/contents/activity_reminder.class.php
 	/reminders/contents/group_reminder.class.php
 	/reminders/contents/site_reminder.class.php
 	/reminders/contents/user_reminder.class.php

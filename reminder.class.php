@@ -52,8 +52,9 @@ abstract class reminder {
         
         $footer  = html_writer::start_tag('tr');
         $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
-        $footer .= get_string('reminderfrom', 'local_reminders');
-        $footer .= html_writer::link($CFG->wwwroot.'/calendar/index.php', 'Moodle Calendar', array('target' => '_blank'));
+        $footer .= get_string('reminderfrom', 'local_reminders').' ';
+        $footer .= html_writer::link($CFG->wwwroot.'/calendar/index.php', get_string('calendarname', 'local_reminders'),
+                array('target' => '_blank'));
         $footer .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
         return $footer;
@@ -95,6 +96,28 @@ abstract class reminder {
     }
     
     /**
+     * This function returns an array of reminder_content_row objects
+     * which will be  printed out in html content of the final message.
+     * 
+     * @return array of reminder_content_row objects.
+     */
+    protected function get_content_rows() {
+        $rows = array();
+        
+        $row = new reminder_content_row();
+        $row->add_column(new reminder_content_column(get_string('contentwhen', 'local_reminders'), array('width' => '25%')));
+        $row->add_column(new reminder_content_column($this->format_event_time_duration()));
+        $rows[] = $row;
+        
+        $row = new reminder_content_row();
+        $row->add_column(new reminder_content_column(get_string('daysremaining', 'local_reminders')));
+        $row->add_column(new reminder_content_column($this->aheaddays.' '.get_string('days', 'local_reminders')));
+        $rows[] = $row;
+        
+        return $rows;
+    }
+    
+    /**
      * This function setup the corresponding message provider for each
      * reminder type. It would be called everytime at the constructor.
      * 
@@ -108,7 +131,37 @@ abstract class reminder {
      * @param object $event The event object
      * @return string Message content as HTML text.
      */
-    public abstract function get_message_html();
+    public function get_message_html() {
+        $htmlmail = html_writer::start_tag('html');
+        $htmlmail .= $this->get_html_header();
+        $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
+        $htmlmail .= html_writer::start_tag('div');
+        $htmlmail .= html_writer::start_tag('table', array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+        
+        $htmlmail .= html_writer::start_tag('tr');
+        $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
+        $htmlmail .= html_writer::link($this->generate_event_link(), 
+                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)), 
+                array('style' => 'text-decoration: none'));
+        $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
+        
+        $rows = $this->get_content_rows();
+        if (!empty($rows)) {
+            foreach ($rows as $row) {
+                $htmlmail .= $row->html_out();
+            }
+        }
+        
+        $htmlmail .= html_writer::start_tag('tr');
+        $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
+        $htmlmail .= html_writer::tag('td', html_writer::tag('div', $this->event->description));
+        $htmlmail .= html_writer::end_tag('tr');
+        
+        $htmlmail .= $this->get_html_footer();
+        $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
+                html_writer::end_tag('html');
+        return $htmlmail;
+    }
     
     /**
      * Generates a message content as a plain-text. Suitable for popup messages.
@@ -134,6 +187,7 @@ abstract class reminder {
      * @return array array of strings containing header attributes.
      */
     public function get_custom_headers() {
+        global $CFG;
         $urlinfo = parse_url($CFG->wwwroot);
         $hostname = $urlinfo['host'];
         
@@ -151,6 +205,10 @@ abstract class reminder {
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
+        $subject = $titlehtml;
+        if (strlen(trim($subjectprefix)) > 0) {
+            $subject = $subjectprefix.': '.$subject;
+        } 
         
         $cheaders = $this->get_custom_headers();
         if (!empty($cheaders)) {
@@ -162,7 +220,7 @@ abstract class reminder {
         $eventdata->name                = $this->get_message_provider();     // message interface name
         $eventdata->userfrom            = $admin;
         //$eventdata->userto              = 3;
-        $eventdata->subject             = $subjectprefix.': '.$titlehtml;    // message title
+        $eventdata->subject             = $subject;    // message title
         $eventdata->fullmessage         = $this->get_message_plaintext(); 
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
@@ -172,4 +230,92 @@ abstract class reminder {
         return $eventdata;
     }
     
+}
+
+/**
+ * Represents a event detail row for a reminder message. A row can consist of several
+ * columns to represent these data.
+ */
+class reminder_content_row {
+    
+    /**
+     * Set of columns for this row.
+     * @var array of reminder_content_column 
+     */
+    private $columns = array();
+    
+    /**
+     * Adds a new column to this row.
+     * @param reminder_content_column $column column object
+     */
+    public function add_column(reminder_content_column $column) {
+        $this->columns[] = $column;
+    }
+    
+    /**
+     * Returns the whole content of the row as a HTML. 
+     * @return string html string content of the row
+     */
+    public function html_out() {
+        if (empty($this->columns)) return '';
+        $output = html_writer::start_tag('tr');
+        foreach ($this->columns as $col) {
+            $output .= $col->html_out();
+        }
+        $output .= html_writer::end_tag('tr');
+        
+        return $output;
+    }
+    
+}
+
+class reminder_content_column {
+    
+    /**
+     * Text content of the column
+     * @var string 
+     */
+    private $content;
+    
+        /**
+     * Column parameters/attributes. Key as the attribute name and value as 
+     * attribute value
+     * @var array of string
+     */
+    private $styleparams = array();
+    
+    /**
+     * Creates a column according to given parameters.
+     * 
+     * @param string $textcontent text content of the column
+     * @param array $styles array of string indicates styles for the column
+     */
+    public function __construct($textcontent, $styles=null) {
+        $this->content = $textcontent;
+        $this->styleparams = $styles;
+    }
+    
+    /**
+     * Returns the content of this column
+     * @return string text content of this column 
+     */
+    public function get_content() {
+        return $this->content;
+    }
+    
+    /**
+     * Returns style corresponding to this column.
+     * @return array string array indicating styles for this column
+     */
+    public function get_columnstyles() {
+        return $this->styleparams;
+    }
+    
+    /**
+     * Returns the whole content of the column as a HTML. 
+     * @return string html string content of the column
+     */
+    public function html_out() {
+        return html_writer::tag('td', $this->content, $this->styleparams);
+    }
 }

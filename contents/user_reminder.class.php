@@ -35,40 +35,17 @@ class user_reminder extends reminder {
         $this->user = $user;
     }
     
-    public function get_message_html() {
-        $htmlmail = $this->get_html_header();
-        $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
-        $htmlmail .= html_writer::start_tag('div');
-        $htmlmail .= html_writer::start_tag('table', array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
-        $htmlmail .= html_writer::link($this->generate_event_link(), 
-                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)), 
-                array('style' => 'text-decoration: none'));
-        $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
+    protected function get_content_rows() {
+        $rows = parent::get_content_rows();
         
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
-        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration());
-        $htmlmail .= html_writer::end_tag('tr');
+        $row = new reminder_content_row();
+        $row->add_column(new reminder_content_column(get_string('contenttypeuser', 'local_reminders')));
+        $row->add_column(new reminder_content_column(fullname($this->user)));
+        $rows[] = $row;
         
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contenttypeuser', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', fullname($this->user));
-        $htmlmail .= html_writer::end_tag('tr');
-
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', $this->event->description);
-        $htmlmail .= html_writer::end_tag('tr');
-        
-        $htmlmail .= $this->get_html_footer();
-        $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
-                html_writer::end_tag('html');
-        
-        return $htmlmail;
+        return $rows;
     }
-    
+
     public function get_message_plaintext() {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
         $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration().'\n';
