@@ -134,8 +134,12 @@ abstract class reminder {
      * @return array array of strings containing header attributes.
      */
     public function get_custom_headers() {
+        global $CFG;
+        
         $urlinfo = parse_url($CFG->wwwroot);
         $hostname = $urlinfo['host'];
+        
+        mtrace(" [Local Reminders] host [ $hostname ]");
         
         return array('Message-ID: <moodlereminder'.$this->event->id.'@'.$hostname.'>');
     }
