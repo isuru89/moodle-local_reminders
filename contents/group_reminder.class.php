@@ -17,6 +17,7 @@
 global $CFG;
 
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
+require_once($CFG->libdir . '/accesslib.php');
 
 /**
  * Class to specify the reminder message object for group events.
@@ -29,13 +30,30 @@ require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 class group_reminder extends reminder {
     
     private $group;
+    private $course;
+    private $cm;
     
     public function __construct($event, $group, $aheaddays = 1) {
         parent::__construct($event, $aheaddays);
         $this->group = $group;
+        $this->load_course_object();
+    }
+    
+    private function load_course_object() {
+        global $DB;
+        
+        $this->course = $DB->get_record('course', array('id' => $this->group->courseid));
+        if (!empty($this->course)) {
+            $cmx = get_coursemodule_from_instance($this->event->modulename, $this->event->instance, $this->group->courseid);
+            if (!empty($cmx)) {
+                $this->cm = get_context_instance(CONTEXT_MODULE, $cmx->id);
+            }
+        }
     }
     
     public function get_message_html() {
+        global $CFG;
+        
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
         $htmlmail .= html_writer::start_tag('div');
@@ -52,10 +70,27 @@ class group_reminder extends reminder {
         $htmlmail .= html_writer::tag('td', $this->format_event_time_duration());
         $htmlmail .= html_writer::end_tag('tr');
         
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contenttypegroup', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', $this->group->name);
-        $htmlmail .= html_writer::end_tag('tr');
+        if (!empty($this->course)) {
+            $htmlmail .= html_writer::start_tag('tr');
+            $htmlmail .= html_writer::tag('td', get_string('contenttypecourse', 'local_reminders'));
+            $htmlmail .= html_writer::tag('td', $this->course->fullname);
+            $htmlmail .= html_writer::end_tag('tr');
+        }
+        
+        if (!empty($this->cm)) {
+            $htmlmail .= html_writer::start_tag('tr');
+            $htmlmail .= html_writer::tag('td', get_string('contenttypeactivity', 'local_reminders'));
+            $htmlmail .= html_writer::start_tag('td');
+            $htmlmail .= html_writer::link($this->cm->get_url(), $this->cm->get_context_name(), array('target' => '_blank'));
+            $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
+        }
+        
+        if (isset($CFG->local_reminders_groupshowname) && $CFG->local_reminders_groupshowname) {
+            $htmlmail .= html_writer::start_tag('tr');
+            $htmlmail .= html_writer::tag('td', get_string('contenttypegroup', 'local_reminders'));
+            $htmlmail .= html_writer::tag('td', $this->group->name);
+            $htmlmail .= html_writer::end_tag('tr');
+        }
 
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
@@ -72,6 +107,12 @@ class group_reminder extends reminder {
     public function get_message_plaintext() {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
         $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration().'\n';
+        if (!empty($this->course)) {
+            $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname.'\n';
+        }
+        if (!empty($this->cm)) {
+            $text .= get_string('contenttypeactivity', 'local_reminders').': '.$this->cm->get_context_name().'\n';
+        }
         $text .= get_string('contenttypegroup', 'local_reminders').': '.$this->group->name.'\n';
         $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description.'\n';
         
@@ -83,14 +124,25 @@ class group_reminder extends reminder {
     }
 
     public function get_message_title() {
-        $course = $DB->get_record('course', array('id' => $group->courseid));
-        return $course->shortname.' - '.$this->group->name.' - '.$this->event->name;
+        $title = '';
+        if (!empty($this->course)) {
+            $title .= '('.$this->course->shortname;
+            if (!empty($this->cm)) {
+                $title .= '-'.get_string('modulename', $this->event->modulename);
+            }
+            $title .= ') ';
+        } 
+        $title .= $this->event->name;
+        return $title;
     }
     
     public function get_custom_headers() {
         $headers = parent::get_custom_headers();
         
         $headers[] = 'X-Group-Id: '.$this->group->id;
+        if (!empty($this->cm)) {
+            $headers[] = 'X-Activity-Id: '.$this->cm->id;
+        }
         return $headers;
     }
 }

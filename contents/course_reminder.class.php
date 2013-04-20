@@ -83,7 +83,7 @@ class course_reminder extends reminder {
     }
 
     public function get_message_title() {
-        return $this->course->shortname.' - '.$this->event->name;
+        return '('.$this->course->shortname.') '.$this->event->name;
     }
 
     public function get_custom_headers() {

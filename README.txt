@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      http://uisurumadushanka89.blogspot.com
 Copyright: 2012 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   1.1
+Version:   1.2
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -12,7 +12,7 @@ to relevant users in timely manner. Reminders are very useful for both students 
 to recall their scheduled event before the actual moment.
 
 == Requirements ==
-This plugin has been developed in Moodle 2.2 and successfully tested on a simple local server.
+This plugin has been developed in Moodle 2.2,2.3, and 2.4 and successfully tested on a simple local server.
 This plugin should be working any Moodle version greater than or equal to v2.0.	
 	
 == Installation ==
@@ -29,6 +29,13 @@ This plugin should be working any Moodle version greater than or equal to v2.0.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v1.2
+    + now works in Moodle 2.4.*
+    + fixed bug when sending reminders based on groups
+    + group reminder message content has been made richer by including course and activity details.
+    + added a setting to define the prefix for messages being sent, and 
+        added another setting to define to show/hide group name in the group reminder message.
+    + cron cycle interval for this plugin has been reduced from 1-hour to 15-minutes.
 v1.1
     + fixed bug of repeatedly sending reminders for same event.
     + removed 'Only hidden events from calendar' option from the settings page.
@@ -60,6 +67,8 @@ All following folders/files must be put in to the local directory of Moodle root
 	/reminders/db/messages.php
 	/reminders/db/upgrade.php
 	/reminders/lang/en/local_reminders.php
+        /reminders/lang/de/local_reminders.php
+        /reminders/lang/fr/local_reminders.php
 	/reminders/lib.php
 	/reminders/reminder.class.php
 	/reminders/settings.php

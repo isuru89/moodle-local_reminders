@@ -35,6 +35,10 @@ if ($hassiteconfig) {
             get_string('enabled', 'local_reminders'), 
             get_string('enableddescription', 'local_reminders'), 1));
     
+    $settings->add(new admin_setting_configtext('local_reminders_messagetitleprefix',
+            get_string('messagetitleprefix', 'local_reminders'),
+            get_string('messagetitleprefixdescription', 'local_reminders'), 'Moodle-Reminder'));
+    
     $choices = array(REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
                      REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'));
     
@@ -102,6 +106,10 @@ if ($hassiteconfig) {
     // add group related events
     $settings->add(new admin_setting_heading('local_reminders_group_heading', 
             get_string('groupheading', 'local_reminders'), ''));
+    
+    $settings->add(new admin_setting_configcheckbox('local_reminders_groupshowname', 
+            get_string('groupshowname', 'local_reminders'), 
+            get_string('explaingroupshowname', 'local_reminders'), 1));
     
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_grouprdays', 
             get_string('reminderdaysahead', 'local_reminders'), 

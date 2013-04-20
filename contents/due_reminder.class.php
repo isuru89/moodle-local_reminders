@@ -90,7 +90,11 @@ class due_reminder extends course_reminder {
     }
 
     public function get_message_title() {
-        return $this->course->shortname.' - '.$this->event->name;
+        $title = '('.$this->course->shortname;
+        if (!empty($this->cm)) {
+            $title .= '-'.get_string('modulename', $this->event->modulename);
+        }
+        return $title.') '.$this->event->name;
     }
 
     public function get_custom_headers() {

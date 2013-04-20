@@ -52,7 +52,7 @@ abstract class reminder {
         
         $footer  = html_writer::start_tag('tr');
         $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
-        $footer .= get_string('reminderfrom', 'local_reminders');
+        $footer .= get_string('reminderfrom', 'local_reminders').' ';
         $footer .= html_writer::link($CFG->wwwroot.'/calendar/index.php', 'Moodle Calendar', array('target' => '_blank'));
         $footer .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
@@ -148,6 +148,8 @@ abstract class reminder {
      * @return object a message object which will be sent to the messaging API
      */
     public function create_reminder_message_object($admin=null) {  
+        global $CFG;
+        
         if ($admin == null) {
             $admin = get_admin();
         }
@@ -155,6 +157,9 @@ abstract class reminder {
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
+        if (isset($CFG->local_reminders_messagetitleprefix) && !empty($CFG->local_reminders_messagetitleprefix)) {
+            $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+        }
         
         $cheaders = $this->get_custom_headers();
         if (!empty($cheaders)) {
@@ -166,7 +171,7 @@ abstract class reminder {
         $eventdata->name                = $this->get_message_provider();     // message interface name
         $eventdata->userfrom            = $admin;
         //$eventdata->userto              = 3;
-        $eventdata->subject             = $subjectprefix.': '.$titlehtml;    // message title
+        $eventdata->subject             = '['.$subjectprefix.'] '.$titlehtml;    // message title
         $eventdata->fullmessage         = $this->get_message_plaintext(); 
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
