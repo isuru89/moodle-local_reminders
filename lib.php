@@ -65,9 +65,28 @@ function local_reminders_cron() {
        
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     
+    // loading roles allowed to receive reminder messages from configuration
+    $allroles = get_all_roles();
+    $courseroleids = array();
+    $activityroleids = array();
+    if (!empty($allroles)) {
+        $flag = 0;
+        foreach ($allroles as $arole) {
+            $roleoption = $CFG->local_reminders_activityroles;
+            if ($roleoption[$flag] == '1') {
+                $activityroleids[] = $arole->id;
+            }
+            $roleoption = $CFG->local_reminders_courseroles;
+            if ($roleoption[$flag] == '1') {
+                $courseroleids[] = $arole->id;
+            }
+            $flag++;
+        }
+    }
+    
     $params = array();
     $selector = "l.course = 0 AND l.module = 'local_reminders' AND l.action = 'cron'";
-    $logrows = get_logs($selector, $params, 'l.time DESC', '', 1);
+    $logrows = get_logs($selector, $params, 'l.time DESC', '', 1, $totalcount);
     
     $timewindowstart = time();
     if (!$logrows) {  // this is the first cron cycle, after plugin is just installed
@@ -195,7 +214,8 @@ function local_reminders_cron() {
             
                 if (!empty($course)) {
                     $context = get_context_instance(CONTEXT_COURSE, $course->id);
-                    $sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
+                    $sendusers = get_role_users($courseroleids, $context, true, 'u.*');
+                    //$sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
                     $reminder = new course_reminder($event, $course, $aheadday);
                     $eventdata = $reminder->create_reminder_message_object($fromuser);
                 }
@@ -222,7 +242,8 @@ function local_reminders_cron() {
 
                 if (!empty($course) && !empty($cm)) {
                     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-                    $sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
+                    $sendusers = get_role_users($activityroleids, $context, true, 'u.*');
+                    //$sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
                     $reminder = new due_reminder($event, $course, $context, $aheadday);
                     $eventdata = $reminder->create_reminder_message_object($fromuser);
                 }
@@ -255,7 +276,8 @@ function local_reminders_cron() {
 
                     if (!empty($course) && !empty($cm)) {
                         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
-                        $sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
+                        $sendusers = get_role_users($activityroleids, $context, true, 'u.*');
+                        //$sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
                         $reminder = new due_reminder($event, $course, $context, $aheadday);
                         $eventdata = $reminder->create_reminder_message_object($fromuser);
                     }
@@ -281,8 +303,12 @@ function local_reminders_cron() {
         foreach ($sendusers as $touser) {
             $eventdata->userto = $touser;
         
-            $mailresult = message_send($eventdata);
-
+            $mailresult = 1; //message_send($eventdata);
+            
+            mtrace("-----------------------------------");
+            mtrace($eventdata->fullmessagehtml);
+            mtrace("-----------------------------------");
+            
             if (!$mailresult) {
                 $failedcount++;
                 mtrace("Error: local/reminders/lib.php local_reminders_cron(): Could not send out message 

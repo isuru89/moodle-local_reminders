@@ -30,6 +30,21 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_reminders', get_string('admintreelabel', 'local_reminders'));
     $ADMIN->add('localplugins', $settings);
     
+    // load all roles in the moodle
+    $systemcontext = context_system::instance();
+    $allroles = role_fix_names(get_all_roles(), $systemcontext, ROLENAME_ORIGINAL);
+    $rolesarray = array();
+    if (!empty($allroles)) {
+        foreach ($allroles as $arole) {
+            $rolesarray[$arole->shortname] = ' '.$arole->localname;
+            //echo '[SHORTNAME: '. $arole->shortname.', ROLENAME: '.$arole->localname.'<br>';
+        }
+    }
+    
+    // default settings for recieving reminders according to role
+    $defaultrolesforcourse = array('student' => 1);
+    $defaultrolesforactivity = array('student' => 1, 'editingteacher' => 1);
+    
     // adds a checkbox to enable/disable sending reminders
     $settings->add(new admin_setting_configcheckbox('local_reminders_enable', 
             get_string('enabled', 'local_reminders'), 
@@ -85,6 +100,11 @@ if ($hassiteconfig) {
             get_string('explaincourseheading', 'local_reminders'), 
             $defaultcourse, $daysarray));
     
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_courseroles',
+            get_string('rolesallowedfor', 'local_reminders'),
+            get_string('explainrolesallowedfor', 'local_reminders'),
+            $defaultrolesforcourse, $rolesarray));
+    
     // add days selection for due related events coming from activities in a course.
     $settings->add(new admin_setting_heading('local_reminders_due_heading', 
             get_string('dueheading', 'local_reminders'), ''));
@@ -103,6 +123,11 @@ if ($hassiteconfig) {
             get_string('explaindueheading', 'local_reminders'), 
             $defaultdue, $daysarray));
  
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_activityroles',
+            get_string('rolesallowedfor', 'local_reminders'),
+            get_string('explainrolesallowedfor', 'local_reminders'),
+            $defaultrolesforactivity, $rolesarray));
+    
     // add group related events
     $settings->add(new admin_setting_heading('local_reminders_group_heading', 
             get_string('groupheading', 'local_reminders'), ''));
