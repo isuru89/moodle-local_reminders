@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2013042000;       
-$plugin->requires  = 2011120500;  
+$plugin->requires  = 2012120300;  
 $plugin->release   = '1.2';
 $plugin->maturity  = MATURITY_RC;
 $plugin->component = 'local_reminders';       
