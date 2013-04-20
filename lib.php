@@ -303,11 +303,11 @@ function local_reminders_cron() {
         foreach ($sendusers as $touser) {
             $eventdata->userto = $touser;
         
-            $mailresult = 1; //message_send($eventdata);
-            
-            mtrace("-----------------------------------");
-            mtrace($eventdata->fullmessagehtml);
-            mtrace("-----------------------------------");
+            //$mailresult = 1; //message_send($eventdata);
+            $mailresult = message_send($eventdata);
+            //mtrace("-----------------------------------");
+            //mtrace($eventdata->fullmessagehtml);
+            //mtrace("-----------------------------------");
             
             if (!$mailresult) {
                 $failedcount++;
