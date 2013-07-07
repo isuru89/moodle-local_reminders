@@ -239,12 +239,22 @@ function local_reminders_cron() {
             case 'due':
                 $course = $DB->get_record('course', array('id' => $event->courseid));
                 $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
-
+                $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
+                
+                //foreach ($activityobj as $key => $value) {
+                //    mtrace(" $key => $value");
+                //}
+                
                 if (!empty($course) && !empty($cm)) {
                     $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+                    //foreach ($cm as $key => $value) {
+                    //    mtrace("$key : $value");
+                    //}
                     $sendusers = get_role_users($activityroleids, $context, true, 'u.*');
+                    //mtrace("  activity has " . count($sendusers). " for roles " . count($activityroleids));
                     //$sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
                     $reminder = new due_reminder($event, $course, $context, $aheadday);
+                    $reminder->set_activity($event->modulename, $activityobj);
                     $eventdata = $reminder->create_reminder_message_object($fromuser);
                 }
                 
@@ -252,9 +262,15 @@ function local_reminders_cron() {
                 
             case 'group':
                 $group = $DB->get_record('groups', array('id' => $event->groupid));
-            
+                
                 if (!empty($group)) {
                     $reminder = new group_reminder($event, $group, $aheadday);
+                    
+                    // add module details, if this event is a mod type event
+                    if ($event->modulename && $event->courseid > 0) {
+                        $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
+                        $reminder->set_activity($event->modulename, $activityobj);
+                    }
                     $eventdata = $reminder->create_reminder_message_object($fromuser);
 
                     $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
@@ -273,12 +289,14 @@ function local_reminders_cron() {
                  if ($event->modulename) {
                     $course = $DB->get_record('course', array('id' => $event->courseid));
                     $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
-
+                    $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
+                
                     if (!empty($course) && !empty($cm)) {
                         $context = get_context_instance(CONTEXT_MODULE, $cm->id);
                         $sendusers = get_role_users($activityroleids, $context, true, 'u.*');
                         //$sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
                         $reminder = new due_reminder($event, $course, $context, $aheadday);
+                        $reminder->set_activity($event->modulename, $activityobj);
                         $eventdata = $reminder->create_reminder_message_object($fromuser);
                     }
                  } else {
@@ -301,8 +319,12 @@ function local_reminders_cron() {
         $failedcount = 0;
         
         foreach ($sendusers as $touser) {
-            $eventdata->userto = $touser;
+            $eventdata = $reminder->set_sendto_user($touser);
+            //$eventdata->userto = $touser;
         
+            //foreach ($touser as $key => $value) {
+            //    mtrace(" User: $key : $value");
+            //}
             //$mailresult = 1; //message_send($eventdata);
             $mailresult = message_send($eventdata);
             //mtrace("-----------------------------------");
@@ -328,4 +350,43 @@ function local_reminders_cron() {
     }
     
     add_to_log(0, 'local_reminders', 'cron', '', $timewindowend);
+}
+
+/**
+ * Function to retrive module instace from corresponding module
+ * table. This function is written because when sending reminders 
+ * it can restrict showing some fields in the message which are sensitive
+ * to user. (Such as some descriptions are hidden until defined date)
+ * Function is very similar to the function in datalib.php/get_coursemodule_from_instance,
+ * but by below it returns all fields of the module.
+ * 
+ * Eg: can get the quiz instace from quiz table, can get the new assignment
+ * instace from assign table, etc.
+ * 
+ * @param string $modulename name of module type, eg. resource, assignment,...
+ * @param int $instance module instance number (id in resource, assignment etc. table)
+ * @param int $courseid optional course id for extra validation
+ * 
+ * @return individual module instance (a quiz, a assignment, etc)
+ */
+function fetch_module_instance($modulename, $instance, $courseid=0) {
+    global $DB;
+
+    $params = array('instance'=>$instance, 'modulename'=>$modulename);
+
+    $courseselect = "";
+
+    if ($courseid) {
+        $courseselect = "AND cm.course = :courseid";
+        $params['courseid'] = $courseid;
+    }
+
+    $sql = "SELECT m.*
+              FROM {course_modules} cm
+                   JOIN {modules} md ON md.id = cm.module
+                   JOIN {".$modulename."} m ON m.id = cm.instance
+             WHERE m.id = :instance AND md.name = :modulename
+                   $courseselect";
+
+    return $DB->get_record_sql($sql, $params, IGNORE_MISSING);
 }

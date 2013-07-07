@@ -32,7 +32,7 @@ class site_reminder extends reminder {
         parent::__construct($event, $aheaddays);
     }
     
-    public function get_message_html() {
+    public function get_message_html($user=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
         $htmlmail .= html_writer::start_tag('div');
@@ -46,7 +46,7 @@ class site_reminder extends reminder {
         
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
-        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration());
+        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration($user));
         $htmlmail .= html_writer::end_tag('tr');
 
         $htmlmail .= html_writer::start_tag('tr');
@@ -61,9 +61,9 @@ class site_reminder extends reminder {
         return $htmlmail;
     }
     
-    public function get_message_plaintext() {
+    public function get_message_plaintext($user=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
-        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration().'\n';
+        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user).'\n';
         $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description.'\n';
         
         return $text;

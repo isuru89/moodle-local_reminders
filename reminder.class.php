@@ -25,12 +25,14 @@
 abstract class reminder {
     
     protected $aheaddays;
-    protected $notification = 1;
+    protected $notification = 0;
     protected $event;
     
     protected $tbodycssstyle = 'width:100%;font-family:Tahoma,Arial,Sans-serif;border-width:1px 2px 2px 1px;border:1px Solid #ccc';
     protected $titlestyle = 'padding:0 0 6px 0;margin:0;font-family:Arial,Sans-serif;font-size:16px;font-weight:bold;color:#222';
     protected $footerstyle = 'background-color:#f6f6f6;color:#888;border-top:1px Solid #ccc;font-family:Arial,Sans-serif;font-size:11px';
+    
+    public $eventobject;
     
     public function __construct($event, $aheaddays = 1) {
         $this->event = $event;
@@ -77,19 +79,25 @@ abstract class reminder {
      * This function formats the due time of the event appropiately. If this event
      * has a duration then formatted time will be [starttime]-[endtime].
      * 
+     * @param object $user user object
      * @return string formatted time string
      */
-    protected function format_event_time_duration() {
+    protected function format_event_time_duration($user) {
         $followedtimeformat = get_string('strftimedatetime', 'langconfig');
 
-        $formattedtime = userdate($this->event->timestart);
-        $sdate = usergetdate($this->event->timestart);
+        $tzone = 99;
+        if (isset($user) && !empty($user)) {
+            $tzone = $user->timezone;
+        }
+        
+        $formattedtime = userdate($this->event->timestart, '', $tzone);
+        $sdate = usergetdate($this->event->timestart, $tzone);
         if ($this->event->timeduration > 0) {
-            $ddate = usergetdate($this->event->timestart + $this->event->timeduration);
+            $ddate = usergetdate($this->event->timestart + $this->event->timeduration, $tzone);
             if ($sdate['year'] == $ddate['year'] && $sdate['mon'] == $ddate['mon'] && $sdate['mday'] == $ddate['mday']) {
                 $followedtimeformat = get_string('strftimetime', 'langconfig');
             }
-            $formattedtime .= ' - '.userdate($this->event->timestart + $this->event->timeduration, $followedtimeformat);
+            $formattedtime .= ' - '.userdate($this->event->timestart + $this->event->timeduration, $followedtimeformat, $tzone);
         }
         return $formattedtime;
     }
@@ -108,7 +116,7 @@ abstract class reminder {
      * @param object $event The event object
      * @return string Message content as HTML text.
      */
-    public abstract function get_message_html();
+    public abstract function get_message_html($user=null);
     
     /**
      * Generates a message content as a plain-text. Suitable for popup messages.
@@ -116,7 +124,7 @@ abstract class reminder {
      * @param object $event The event object
      * @return string Message content as plain-text.
      */
-    public abstract function get_message_plaintext();
+    public abstract function get_message_plaintext($user=null);
     
     /**
      * Generates a message title for the reminder. Used for all message types.
@@ -152,7 +160,8 @@ abstract class reminder {
         
         if ($admin == null) {
             $admin = get_admin();
-        }
+            //$admin->maildisplay = false;
+        } 
         
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
@@ -178,7 +187,38 @@ abstract class reminder {
         $eventdata->smallmessage        = $titlehtml . ' - ' . $contenthtml;
         $eventdata->notification        = $this->notification;
         
+        // save created object with reminder object
+        $this->eventobject = $eventdata;
+        
         return $eventdata;
+    }
+    
+    /**
+     * Assign user which the reminder message is sent to
+     * 
+     * @param object $user user object (id field must contain)
+     * @param boolean $refreshcontent indicates whether content of message should
+     * be refresh based on given user
+     * 
+     * @return event object
+     */
+    public function set_sendto_user($user, $refreshcontent=true) {
+        if (!isset($this->eventobject) || empty($this->eventobject)) {
+            $this->create_reminder_message_object();
+        }
+        
+        $this->eventobject->userto = $user;
+        
+        if ($refreshcontent) {
+            $contenthtml = $this->get_message_html($user);
+            $titlehtml = $this->get_message_title();
+            
+            $this->eventobject->fullmessagehtml = $contenthtml;
+            $this->eventobject->smallmessage = $titlehtml . ' - ' . $contenthtml;
+            $this->eventobject->fullmessage = $this->get_message_plaintext($user);
+        }
+        
+        return $this->eventobject;
     }
     
 }
