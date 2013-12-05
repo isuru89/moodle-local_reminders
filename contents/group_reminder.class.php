@@ -33,10 +33,22 @@ class group_reminder extends reminder {
     private $course;
     private $cm;
     
+    private $activityobj;
+    private $modname;
+    
     public function __construct($event, $group, $aheaddays = 1) {
         parent::__construct($event, $aheaddays);
         $this->group = $group;
         $this->load_course_object();
+    }
+    
+    /**
+     * Set activity instance if there is any
+     * @param type $activity activity instance
+     */
+    public function set_activity($modulename, $activity) {
+        $this->activityobj = $activity;
+        $this->modname = $modulename;
     }
     
     private function load_course_object() {
@@ -51,7 +63,7 @@ class group_reminder extends reminder {
         }
     }
     
-    public function get_message_html() {
+    public function get_message_html($user=null) {
         global $CFG;
         
         $htmlmail = $this->get_html_header();
@@ -67,7 +79,7 @@ class group_reminder extends reminder {
         
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
-        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration());
+        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration($user));
         $htmlmail .= html_writer::end_tag('tr');
         
         if (!empty($this->course)) {
@@ -92,10 +104,19 @@ class group_reminder extends reminder {
             $htmlmail .= html_writer::end_tag('tr');
         }
 
+        if (!empty($this->modname) && !empty($this->activityobj)) {
+            $clsname =  $this->modname.'_formatter';
+            if (class_exists($clsname)) {
+                $formattercls = new $clsname;
+                $formattercls->append_info($htmlmail, $this->modname, $this->activityobj, $user, $this->event);
+            }
+        }
+        /*
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
         $htmlmail .= html_writer::tag('td', $this->event->description);
         $htmlmail .= html_writer::end_tag('tr');
+        */
         
         $htmlmail .= $this->get_html_footer();
         $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
@@ -104,9 +125,9 @@ class group_reminder extends reminder {
         return $htmlmail;
     }
     
-    public function get_message_plaintext() {
+    public function get_message_plaintext($user=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
-        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration().'\n';
+        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user).'\n';
         if (!empty($this->course)) {
             $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname.'\n';
         }
