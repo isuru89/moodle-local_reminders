@@ -23,15 +23,31 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class reminder {
-    
+   
+    /**
+     * @var int number of days in advance to actual event.
+     */
     protected $aheaddays;
-    protected $notification = 0;
+    
+    /**
+     * @var int indicates immediate sending of message as a notification.
+     */
+    protected $notification = 1;
+    
+    /**
+     *
+     * @var object event object correspond to this reminder.
+     */
     protected $event;
     
     protected $tbodycssstyle = 'width:100%;font-family:Tahoma,Arial,Sans-serif;border-width:1px 2px 2px 1px;border:1px Solid #ccc';
     protected $titlestyle = 'padding:0 0 6px 0;margin:0;font-family:Arial,Sans-serif;font-size:16px;font-weight:bold;color:#222';
     protected $footerstyle = 'background-color:#f6f6f6;color:#888;border-top:1px Solid #ccc;font-family:Arial,Sans-serif;font-size:11px';
     
+    /**
+     *
+     * @var object cahced reminder message object. This will be reused for other users too.
+     */
     public $eventobject;
     
     public function __construct($event, $aheaddays = 1) {
@@ -153,6 +169,11 @@ abstract class reminder {
     }
     
     /**
+     * Creates the final reminder message object from given information.
+     * 
+     * @param object $name impersonated user for sending messages. This 
+     *          name will display in 'from' field in every reminder message.
+     * 
      * @return object a message object which will be sent to the messaging API
      */
     public function create_reminder_message_object($admin=null) {  

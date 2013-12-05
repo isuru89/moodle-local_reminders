@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      http://uisurumadushanka89.blogspot.com
 Copyright: 2012 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   1.3
+Version:   1.3.1
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -12,13 +12,14 @@ to relevant users in timely manner. Reminders are very useful for both students 
 to recall their scheduled event before the actual moment.
 
 == Requirements ==
-This plugin has been developed in Moodle 2.2,2.3,2.4, and 2.5 and successfully tested on a simple local server.
-This plugin should be working any Moodle version greater than or equal to v2.0.	
-	
+    This plugin has been developed in Moodle 2.2,2.3,2.4, and 2.5 and successfully tested on a simple local server.
+    This plugin should be working any Moodle version greater than or equal to v2.0.	
+    Moodle logging must be enabled to operate properly.
+
 == Installation ==
 1. Fetch the plug-in from following location.
-     + Goto https://github.com/isuru89/moodle-reminders-for-calendar-events and download the 
-       repository as a zip file.
+     + https://moodle.org/plugins/view.php?plugin=local_reminders
+     + Download a suitable version compatible with your Moodle server.
 2. Goto the Moodle root directory and go inside 'local' directory.
 3. Create a folder named 'reminders'.
 4. Now extract the downloaded zip file inside to this folder. After it is extracted,
@@ -29,6 +30,11 @@ This plugin should be working any Moodle version greater than or equal to v2.0.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v1.3.1
+    + bug fixes
+    + prevent users receiving alerts for an activity that they can't see. (Contributed by Julian Boulen)
+    + exception handling
+ 
 v1.3
     + now works in Moodle 2.5.*
     + time zone adjustment based on recipient of the reminder
