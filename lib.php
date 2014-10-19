@@ -84,12 +84,19 @@ function local_reminders_cron() {
             $flag++;
         }
     }
-    
-    $params = array();
-    $selector = "l.course = 0 AND l.module = 'local_reminders' AND l.action = 'cron'";
-    $totalcount = 0;
-    $logrows = get_logs($selector, $params, 'l.time DESC', '', 1, $totalcount);
-    
+
+    // older implementation to retrieve most recent execution about reminders cron
+    // cycle
+    //
+    //$params = array();
+    //$selector = "l.course = 0 AND l.module = 'local_reminders' AND l.action = 'cron'";
+    //$totalcount = 0;
+    //$logrows = get_logs($selector, $params, 'l.time DESC', '', 1, $totalcount);
+
+    // we need only last record only, so we limit the returning number of rows at most by one.
+    //
+    $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
+
     $timewindowstart = time();
     if (!$logrows) {  // this is the first cron cycle, after plugin is just installed
         mtrace("   [Local Reminder] This is the first cron cycle");
@@ -97,7 +104,7 @@ function local_reminders_cron() {
     } else {
         // info field includes that starting time of last cron cycle.
         $firstrecord = current($logrows);
-        $timewindowstart = $firstrecord->info + 1;              
+        $timewindowstart = $firstrecord->time + 1;
     }
     
     // end of the time window will be set as current
@@ -130,8 +137,9 @@ function local_reminders_cron() {
     
     $upcomingevents = $DB->get_records_select('event', $whereclause);
     if ($upcomingevents == false) {     // no upcoming events, so let's stop.
-        mtrace("   [Local Reminder] No upcming events. Aborting...");
-        add_to_log(0, 'local_reminders', 'cron', '', $timewindowend, 0, 0);
+        mtrace("   [Local Reminder] No upcoming events. Aborting...");
+
+        add_flag_record_db($timewindowend, 'no_events');
         return;
     }
     
@@ -217,7 +225,7 @@ function local_reminders_cron() {
                     $course = $DB->get_record('course', array('id' => $event->courseid));
 
                     if (!empty($course)) {
-                        $context = get_context_instance(CONTEXT_COURSE, $course->id);
+                        $context = context_course::instance($course->id); //get_context_instance(CONTEXT_COURSE, $course->id);
                         $sendusers = get_role_users($courseroleids, $context, true, 'u.*');
 
                         // create reminder object...
@@ -254,7 +262,7 @@ function local_reminders_cron() {
 
                         if (!empty($course) && !empty($cm)) {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
-                            $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+                            $context = context_module::instance($cm->id); //get_context_instance(CONTEXT_MODULE, $cm->id);
 
                             // patch provided by Julien Boulen (jboulen)
                             // to prevent a user receives an alert for an activity that he can't see.
@@ -305,7 +313,7 @@ function local_reminders_cron() {
 
                         if (!empty($course) && !empty($cm)) {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
-                            $context = get_context_instance(CONTEXT_MODULE, $cm->id);
+                            $context = context_module::instance($cm->id); // get_context_instance(CONTEXT_MODULE, $cm->id);
                             $sendusers = get_role_users($activityroleids, $context, true, 'u.*');
                             
                             //$sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
@@ -320,7 +328,7 @@ function local_reminders_cron() {
 
         } catch (Exception $ex) {
             mtrace("  [Local Reminder - ERROR] Error occured when initializing ".
-                    "for event#[$event->id] (type: $event->eventtype) ".$ex.getMessage());
+                    "for event#[$event->id] (type: $event->eventtype) ".$ex->getMessage());
             continue;
         }
         
@@ -351,13 +359,13 @@ function local_reminders_cron() {
             //mtrace("-----------------------------------");
             try {
                 $mailresult = message_send($eventdata);
-                
+
                 if (!$mailresult) {
                     throw new coding_exception("Could not send out message for event#$event->id to user $eventdata->userto");
                 } 
             } catch (moodle_exception $mex) {
                 $failedcount++;
-                mtrace('Error: local/reminders/lib.php local_reminders_cron(): '.$mex.getMessage());
+                mtrace('Error: local/reminders/lib.php local_reminders_cron(): '.$mex->getMessage());
             }
         }
         
@@ -371,7 +379,26 @@ function local_reminders_cron() {
         
     }
     
-    add_to_log(0, 'local_reminders', 'cron', '', $timewindowend, 0, 0);
+    //add_to_log(0, 'local_reminders', 'cron', '', $timewindowend, 0, 0);
+    add_flag_record_db($timewindowend, 'sent');
+}
+
+/**
+ * Adds a database record to local_reminders table, to mark
+ * that the current cron cycle is over. Then we flag the time
+ * of end of the cron time window, so that no reminders sent
+ * twice.
+ *
+ * @param $timewindowend string cron window time end.
+ * @param string $crontype type of reminders cron.
+ */
+function add_flag_record_db($timewindowend, $crontype = '') {
+    global $DB;
+
+    $newRecord = new stdClass();
+    $newRecord->time = $timewindowend;
+    $newRecord->type = $crontype;
+    $DB->insert_record("local_reminders", $newRecord);
 }
 
 /**
