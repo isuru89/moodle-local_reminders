@@ -223,6 +223,11 @@ function local_reminders_cron() {
 
                 case 'course':
                     $course = $DB->get_record('course', array('id' => $event->courseid));
+                    $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$event->courseid));
+                    if (isset($coursesettings->status_course) && $coursesettings->status_course == 0) {
+                        mtrace("  [Local Reminder] Reminder sending for course events has been restricted in the course specific configurations.");
+                        break;
+                    }
 
                     if (!empty($course)) {
                         $context = context_course::instance($course->id); //get_context_instance(CONTEXT_COURSE, $course->id);
@@ -258,6 +263,11 @@ function local_reminders_cron() {
 
                     if (!isemptyString($event->modulename)) {
                         $course = $DB->get_record('course', array('id' => $event->courseid));
+                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$event->courseid));
+                        if (isset($coursesettings->status_activities) && $coursesettings->status_activities == 0) {
+                            mtrace("  [Local Reminder] Reminder sending for activities has been restricted in the course specific configurations.");
+                            break;
+                        }
                         $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
 
                         if (!empty($course) && !empty($cm)) {
@@ -284,6 +294,12 @@ function local_reminders_cron() {
                     $group = $DB->get_record('groups', array('id' => $event->groupid));
 
                     if (!empty($group)) {
+                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$group->courseid));
+                        if (isset($coursesettings->status_group) && $coursesettings->status_group == 0) {
+                            mtrace("  [Local Reminder] Reminder sending for group events has been restricted in the course specific configurations.");
+                            break;
+                        }
+
                         $reminder = new group_reminder($event, $group, $aheadday);
 
                         // add module details, if this event is a mod type event
@@ -455,4 +471,35 @@ function fetch_module_instance($modulename, $instance, $courseid=0) {
  */
 function isemptyString($str) {
     return !isset($str) || empty($str) || trim($str) === '';
+}
+
+function local_reminders_extends_settings_navigation($settingsnav, $context) {
+    global $PAGE;
+ 
+    // Only add this settings item on non-site course pages.
+    if (!$PAGE->course or $PAGE->course->id == 1) {
+        return;
+    }
+ 
+    // Only let users with the appropriate capability see this settings item.
+    if (!has_capability('moodle/course:update', context_course::instance($PAGE->course->id))) {
+        return;
+    }
+ 
+    if ($settingnode = $settingsnav->find('courseadmin', navigation_node::TYPE_COURSE)) {
+        $name = get_string('admintreelabel', 'local_reminders');
+        $url = new moodle_url('/local/reminders/coursesettings.php', array('courseid' => $PAGE->course->id));
+        $navnode = navigation_node::create(
+            $name,
+            $url,
+            navigation_node::NODETYPE_LEAF,
+            'reminders',
+            'reminders',
+            new pix_icon('i/calendar', $name)
+        );
+        if ($PAGE->url->compare($url, URL_MATCH_BASE)) {
+            $navnode->make_active();
+        }
+        $settingnode->add_node($navnode);
+    }
 }
