@@ -33,6 +33,9 @@ require_once($CFG->dirroot . '/calendar/lib.php');
 require_once($CFG->dirroot . '/group/lib.php');
 require_once($CFG->libdir . '/accesslib.php');
 
+require_once($CFG->dirroot . '/availability/classes/info_module.php');
+require_once($CFG->libdir . '/modinfolib.php');
+
 /// CONSTANTS ///////////////////////////////////////////////////////////
 
 DEFINE('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 2);
@@ -223,11 +226,6 @@ function local_reminders_cron() {
 
                 case 'course':
                     $course = $DB->get_record('course', array('id' => $event->courseid));
-                    $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$event->courseid));
-                    if (isset($coursesettings->status_course) && $coursesettings->status_course == 0) {
-                        mtrace("  [Local Reminder] Reminder sending for course events has been restricted in the course specific configurations.");
-                        break;
-                    }
 
                     if (!empty($course)) {
                         $context = context_course::instance($course->id); //get_context_instance(CONTEXT_COURSE, $course->id);
@@ -262,26 +260,22 @@ function local_reminders_cron() {
                 case 'due':
 
                     if (!isemptyString($event->modulename)) {
-                        $course = $DB->get_record('course', array('id' => $event->courseid));
-                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$event->courseid));
-                        if (isset($coursesettings->status_activities) && $coursesettings->status_activities == 0) {
-                            mtrace("  [Local Reminder] Reminder sending for activities has been restricted in the course specific configurations.");
-                            break;
-                        }
-                        $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
+                        $courseandcm = get_course_and_cm_from_instance($event->instance, $event->modulename, $event->courseid);
+                        $course = $courseandcm[0];
+                        $cm = $courseandcm[1];
 
                         if (!empty($course) && !empty($cm)) {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
                             $context = context_module::instance($cm->id); //get_context_instance(CONTEXT_MODULE, $cm->id);
 
-                            // patch provided by Julien Boulen (jboulen)
-                            // to prevent a user receives an alert for an activity that he can't see.
-                            //
-                            if ($cm->groupmembersonly === '0') {
-                                $sendusers = get_role_users($activityroleids, $context, true, 'u.*');
-                            } else {
-                                $sendusers = groups_get_grouping_members($cm->groupingid);
-                            }
+                            // 'ra.id field added to avoid printing debug message from get_role_users (has odd behaivior when called with an array for $roleid param'
+                            $sendusers = get_role_users($activityroleids, $context, true, 'ra.id, u.*');
+
+                            // filter user list, replacement for deprecated/removed $cm->groupmembersonly & groups_get_grouping_members($cm->groupingid);
+                            //   see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity
+                            $info = new \core_availability\info_module($cm);
+                            $sendusers = $info->filter_user_list($sendusers);
+
                             $reminder = new due_reminder($event, $course, $context, $aheadday);
                             $reminder->set_activity($event->modulename, $activityobj);
                             $eventdata = $reminder->create_reminder_message_object($fromuser);
@@ -294,12 +288,6 @@ function local_reminders_cron() {
                     $group = $DB->get_record('groups', array('id' => $event->groupid));
 
                     if (!empty($group)) {
-                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$group->courseid));
-                        if (isset($coursesettings->status_group) && $coursesettings->status_group == 0) {
-                            mtrace("  [Local Reminder] Reminder sending for group events has been restricted in the course specific configurations.");
-                            break;
-                        }
-
                         $reminder = new group_reminder($event, $group, $aheadday);
 
                         // add module details, if this event is a mod type event
@@ -471,35 +459,4 @@ function fetch_module_instance($modulename, $instance, $courseid=0) {
  */
 function isemptyString($str) {
     return !isset($str) || empty($str) || trim($str) === '';
-}
-
-function local_reminders_extends_settings_navigation($settingsnav, $context) {
-    global $PAGE;
- 
-    // Only add this settings item on non-site course pages.
-    if (!$PAGE->course or $PAGE->course->id == 1) {
-        return;
-    }
- 
-    // Only let users with the appropriate capability see this settings item.
-    if (!has_capability('moodle/course:update', context_course::instance($PAGE->course->id))) {
-        return;
-    }
- 
-    if ($settingnode = $settingsnav->find('courseadmin', navigation_node::TYPE_COURSE)) {
-        $name = get_string('admintreelabel', 'local_reminders');
-        $url = new moodle_url('/local/reminders/coursesettings.php', array('courseid' => $PAGE->course->id));
-        $navnode = navigation_node::create(
-            $name,
-            $url,
-            navigation_node::NODETYPE_LEAF,
-            'reminders',
-            'reminders',
-            new pix_icon('i/calendar', $name)
-        );
-        if ($PAGE->url->compare($url, URL_MATCH_BASE)) {
-            $navnode->make_active();
-        }
-        $settingnode->add_node($navnode);
-    }
 }
