@@ -30,4 +30,4 @@ $plugin->requires  = 2014051200;        // require moodle 2.7 or higher
 $plugin->release   = '1.4';
 $plugin->maturity  = MATURITY_RC;
 $plugin->component = 'local_reminders';       
-$plugin->cron      = 30;                  // Default: 900, will run for 15-minutes
+$plugin->cron      = 900;                  // Default: 900, will run for 15-minutes
