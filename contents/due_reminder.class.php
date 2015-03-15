@@ -98,11 +98,11 @@ class due_reminder extends course_reminder {
     }
     
     public function get_message_plaintext($user=null) {
-        $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
-        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user).'\n';
-        $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname.'\n';
-        $text .= get_string('contenttypeactivity', 'local_reminders').': '.$this->cm->get_context_name().'\n';
-        $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description.'\n';
+        $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
+        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user)."\n";
+        $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname."\n";
+        $text .= get_string('contenttypeactivity', 'local_reminders').': '.$this->cm->get_context_name()."\n";
+        $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description."\n";
         
         return $text;
     }

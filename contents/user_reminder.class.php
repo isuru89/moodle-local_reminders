@@ -70,10 +70,10 @@ class user_reminder extends reminder {
     }
     
     public function get_message_plaintext($user=null) {
-        $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]\n';
-        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user).'\n';
-        $text .= get_string('contenttypeuser', 'local_reminders').': '.$this->course->fullname.'\n';
-        $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description.'\n';
+        $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
+        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user)."\n";
+        $text .= get_string('contenttypeuser', 'local_reminders').': '.$this->course->fullname."\n";
+        $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description."\n";
         
         return $text;
     }
