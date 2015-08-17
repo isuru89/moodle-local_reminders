@@ -72,7 +72,10 @@ if ($hassiteconfig) {
     $defaultcourse = array('days7' => 0,'days3' => 1,'days1' => 0);
     $defaultgroup = array('days7' => 0,'days3' => 1,'days1' => 0);
     $defaultdue = array('days7' => 0,'days3' => 1,'days1' => 0);
-    
+
+
+    ///// SITE EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+
     // add days selection for site events
     $settings->add(new admin_setting_heading('local_reminders_site_heading', 
             get_string('siteheading', 'local_reminders'), ''));
@@ -81,7 +84,15 @@ if ($hassiteconfig) {
             get_string('reminderdaysahead', 'local_reminders'), 
             get_string('explainsiteheading', 'local_reminders'),
             $defaultsite , $daysarray));
-    
+
+    // added custom day selection for site events
+    $settings->add(new admin_setting_configduration('local_reminders_sitecustom',
+            get_string('reminderdaysaheadcustom', 'local_reminders'),
+            get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
+            array('value' => '0')));
+
+    ///// USER EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+
     // add days selection for user related events.
     $settings->add(new admin_setting_heading('local_reminders_user_heading', 
             get_string('userheading', 'local_reminders'), ''));
@@ -90,7 +101,15 @@ if ($hassiteconfig) {
             get_string('reminderdaysahead', 'local_reminders'), 
             get_string('explainuserheading', 'local_reminders'),
             $defaultuser, $daysarray));
-    
+
+    // added custom day selection for user events
+    $settings->add(new admin_setting_configduration('local_reminders_usercustom',
+            get_string('reminderdaysaheadcustom', 'local_reminders'),
+            get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
+            array('value' => '0')));
+
+    ///// COURSE EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+
     // add days selection for course related events.
     $settings->add(new admin_setting_heading('local_reminders_course_heading', 
             get_string('courseheading', 'local_reminders'), ''));
@@ -99,12 +118,21 @@ if ($hassiteconfig) {
             get_string('reminderdaysahead', 'local_reminders'), 
             get_string('explaincourseheading', 'local_reminders'), 
             $defaultcourse, $daysarray));
-    
+
+    // added custom day selection for course events
+    $settings->add(new admin_setting_configduration('local_reminders_coursecustom',
+        get_string('reminderdaysaheadcustom', 'local_reminders'),
+        get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
+        array('value' => '0')));
+
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_courseroles',
             get_string('rolesallowedfor', 'local_reminders'),
             get_string('explainrolesallowedfor', 'local_reminders'),
             $defaultrolesforcourse, $rolesarray));
-    
+
+
+    ///// DUE EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+
     // add days selection for due related events coming from activities in a course.
     $settings->add(new admin_setting_heading('local_reminders_due_heading', 
             get_string('dueheading', 'local_reminders'), ''));
@@ -122,12 +150,20 @@ if ($hassiteconfig) {
             get_string('reminderdaysahead', 'local_reminders'), 
             get_string('explaindueheading', 'local_reminders'), 
             $defaultdue, $daysarray));
+
+    // added custom day selection for acivity events
+    $settings->add(new admin_setting_configduration('local_reminders_duecustom',
+        get_string('reminderdaysaheadcustom', 'local_reminders'),
+        get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
+        array('value' => '0')));
  
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_activityroles',
             get_string('rolesallowedfor', 'local_reminders'),
             get_string('explainrolesallowedfor', 'local_reminders'),
             $defaultrolesforactivity, $rolesarray));
-    
+
+    ///// GROUP EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+
     // add group related events
     $settings->add(new admin_setting_heading('local_reminders_group_heading', 
             get_string('groupheading', 'local_reminders'), ''));
@@ -140,5 +176,11 @@ if ($hassiteconfig) {
             get_string('reminderdaysahead', 'local_reminders'), 
             get_string('explaingroupheading', 'local_reminders'), 
             $defaultgroup, $daysarray));
-    
+
+    // added custom day selection for group events
+    $settings->add(new admin_setting_configduration('local_reminders_groupcustom',
+        get_string('reminderdaysaheadcustom', 'local_reminders'),
+        get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
+        array('value' => '0')));
+
 }
