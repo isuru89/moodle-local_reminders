@@ -508,7 +508,7 @@ function isemptyString($str) {
     return !isset($str) || empty($str) || trim($str) === '';
 }
 
-function local_reminders_extends_settings_navigation($settingsnav, $context) {
+function local_reminders_extend_settings_navigation($settingsnav, $context) {
     global $PAGE;
  
     // Only add this settings item on non-site course pages.
