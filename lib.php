@@ -265,7 +265,9 @@ function local_reminders_cron() {
 
                     if (!empty($course)) {
                         $context = context_course::instance($course->id); //get_context_instance(CONTEXT_COURSE, $course->id);
-                        $sendusers = get_role_users($courseroleids, $context, true, 'u.*');
+                        $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
+                        $senduserids = array_map(function($u) { return $u->id; ), $roleusers});
+                        $sendusers = array_combine($senduserids, $roleusers);
 
                         // create reminder object...
                         //
