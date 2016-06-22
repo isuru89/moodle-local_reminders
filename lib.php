@@ -80,11 +80,11 @@ function local_reminders_cron() {
         $flag = 0;
         foreach ($allroles as $arole) {
             $roleoptionactivity = $CFG->local_reminders_activityroles;
-            if ($roleoptionactivity[$flag] == '1') {
+            if (isset($roleoptionactivity[$flag]) && $roleoptionactivity[$flag] == '1') {
                 $activityroleids[] = $arole->id;
             }
             $roleoption = $CFG->local_reminders_courseroles;
-            if ($roleoption[$flag] == '1') {
+            if (isset($roleoption[$flag]) && $roleoption[$flag] == '1') {
                 $courseroleids[] = $arole->id;
             }
             $flag++;
