@@ -111,11 +111,33 @@ abstract class reminder {
         if ($this->event->timeduration > 0) {
             $ddate = usergetdate($this->event->timestart + $this->event->timeduration, $tzone);
             if ($sdate['year'] == $ddate['year'] && $sdate['mon'] == $ddate['mon'] && $sdate['mday'] == $ddate['mday']) {
-                $followedtimeformat = get_string('strftimetime', 'langconfig');
+                // bug fix for not correctly displaying times in incorrect formats
+                // issue report: https://tracker.moodle.org/browse/CONTRIB-3647?focusedCommentId=408657&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-408657
+                //$followedtimeformat = get_string('strftimetime', 'langconfig');
+                $followedtimeformat = get_correct_timeformat_user($user);
             }
             $formattedtime .= ' - '.userdate($this->event->timestart + $this->event->timeduration, $followedtimeformat, $tzone);
         }
         return $formattedtime;
+    }
+    
+    /**
+     * This function would return time formats relevent for the given user.
+     * Sometimes a user might have changed time display format in his/her preferences.
+     *
+     */
+    protected function get_correct_timeformat_user($user) {
+        static $langtimeformat = NULL;
+        if ($langtimeformat === NULL) {
+            $langtimeformat = get_string('strftimetime', 'langconfig');
+        }
+        
+        // we get user time formattings... if such exist, will return non-empty value
+        $utimeformat = get_user_preferences('calendar_timeformat', '', $user);
+        if (empty($utimeformat)) {
+            $utimeformat = get_config(NULL,'calendar_site_timeformat');
+        }
+        return empty($utimeformat) ? $langtimeformat : $utimeformat;
     }
     
     /**
