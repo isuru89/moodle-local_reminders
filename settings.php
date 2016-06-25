@@ -53,7 +53,19 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configtext('local_reminders_messagetitleprefix',
             get_string('messagetitleprefix', 'local_reminders'),
             get_string('messagetitleprefixdescription', 'local_reminders'), 'Moodle-Reminder'));
-    
+
+    $replyChoices = array(REMINDERS_SEND_AS_ADMIN => get_string('sendasadmin', 'local_reminders'),
+                          REMINDERS_SEND_AS_NO_REPLY => get_string('sendasnoreply', 'local_reminders'));
+
+    $settings->add(new admin_setting_configselect('local_reminders_sendas',
+        get_string('sendas', 'local_reminders'),
+        get_string('sendasdescription', 'local_reminders'),
+        REMINDERS_SEND_AS_ADMIN, $replyChoices));
+
+    $settings->add(new admin_setting_configtext('local_reminders_sendasname',
+        get_string('sendasnametitle', 'local_reminders'),
+        get_string('sendasnamedescription', 'local_reminders'), 'No Reply'));
+
     $choices = array(REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
                      REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'));
     
@@ -89,7 +101,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configduration('local_reminders_sitecustom',
             get_string('reminderdaysaheadcustom', 'local_reminders'),
             get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
-            array('value' => '0')));
+            0));
 
     ///// USER EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
 
@@ -106,7 +118,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configduration('local_reminders_usercustom',
             get_string('reminderdaysaheadcustom', 'local_reminders'),
             get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
-            array('value' => '0')));
+            0));
 
     ///// COURSE EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
 
@@ -123,7 +135,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configduration('local_reminders_coursecustom',
         get_string('reminderdaysaheadcustom', 'local_reminders'),
         get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
-        array('value' => '0')));
+        0));
 
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_courseroles',
             get_string('rolesallowedfor', 'local_reminders'),
@@ -155,7 +167,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configduration('local_reminders_duecustom',
         get_string('reminderdaysaheadcustom', 'local_reminders'),
         get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
-        array('value' => '0')));
+        0));
  
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_activityroles',
             get_string('rolesallowedfor', 'local_reminders'),
@@ -181,6 +193,6 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configduration('local_reminders_groupcustom',
         get_string('reminderdaysaheadcustom', 'local_reminders'),
         get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
-        array('value' => '0')));
+        0));
 
 }

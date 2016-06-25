@@ -53,6 +53,9 @@ DEFINE('REMINDERS_ACTIVITY_BOTH', 60);
 DEFINE('REMINDERS_ACTIVITY_ONLY_OPENINGS', 61);
 DEFINE('REMINDERS_ACTIVITY_ONLY_CLOSINGS', 62);
 
+DEFINE('REMINDERS_SEND_AS_NO_REPLY', 70);
+DEFINE('REMINDERS_SEND_AS_ADMIN', 71);
+
 /// FUNCTIONS ///////////////////////////////////////////////////////////
 
 /**
@@ -149,7 +152,9 @@ function local_reminders_cron() {
     }
 
     mtrace("   [Local Reminder] Time window: ".userdate($timewindowstart)." to ".userdate($timewindowend));
-    
+    //mtrace("   [Local Reminder] Time window: ".$timewindowstart." to ".$timewindowend);
+    //mtrace("   [Local Reminder] Where clause: ".$whereclause);
+
     $upcomingevents = $DB->get_records_select('event', $whereclause);
     if ($upcomingevents == false) {     // no upcoming events, so let's stop.
         mtrace("   [Local Reminder] No upcoming events. Aborting...");
@@ -160,7 +165,14 @@ function local_reminders_cron() {
     
     mtrace("   [Local Reminder] Found ".count($upcomingevents)." upcoming events. Continuing...");
     
-    $fromuser = get_admin();
+    $fromuser = core_user::get_noreply_user();
+    if (isset($CFG->local_reminders_sendasname) && !empty($CFG->local_reminders_sendasname)) {
+        $fromuser->firstname = $CFG->local_reminders_sendasname;
+    }
+    if (isset($CFG->local_reminders_sendas) && $CFG->local_reminders_sendas == REMINDERS_SEND_AS_ADMIN) {
+        mtrace("  [Local Reminder] Sending all reminders as Admin User...");
+        $fromuser = get_admin();
+    }
     
     // iterating through each event...
     foreach ($upcomingevents as $event) {
@@ -266,7 +278,7 @@ function local_reminders_cron() {
                     if (!empty($course)) {
                         $context = context_course::instance($course->id); //get_context_instance(CONTEXT_COURSE, $course->id);
                         $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
-                        $senduserids = array_map(function($u) { return $u->id; ), $roleusers});
+                        $senduserids = array_map(function($u) { return $u->id; }, $roleusers);
                         $sendusers = array_combine($senduserids, $roleusers);
 
                         // create reminder object...
@@ -311,13 +323,25 @@ function local_reminders_cron() {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
                             $context = context_module::instance($cm->id); //get_context_instance(CONTEXT_MODULE, $cm->id);
 
-                            // 'ra.id field added to avoid printing debug message from get_role_users (has odd behaivior when called with an array for $roleid param'
-                            $sendusers = get_role_users($activityroleids, $context, true, 'ra.id, u.*');
+                            if ($event->courseid <= 0 && $event->userid > 0) {
+                                // a user overridden activity...
+                                mtrace("  [Local Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");
+                                $user = $DB->get_record('user', array('id' => $event->userid));
+                                $sendusers[] = $user;
+                            } else if ($event->courseid <= 0 && $event->groupid > 0) {
+                                // a group overridden activity...
+                                mtrace("  [Local Reminder] Event #".$event->id." is a group overridden ".$event->modulename." event.");
+                                $group = $DB->get_record('groups', array('id' => $event->groupid));
+                                $sendusers = get_users_in_group($group);
+                            } else {
+                                // 'ra.id field added to avoid printing debug message from get_role_users (has odd behaivior when called with an array for $roleid param'
+                                $sendusers = get_role_users($activityroleids, $context, true, 'ra.id, u.*');
 
-                            // filter user list, replacement for deprecated/removed $cm->groupmembersonly & groups_get_grouping_members($cm->groupingid);
-                            //   see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity
-                            $info = new \core_availability\info_module($cm);
-                            $sendusers = $info->filter_user_list($sendusers);
+                                // filter user list, replacement for deprecated/removed $cm->groupmembersonly & groups_get_grouping_members($cm->groupingid);
+                                //   see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity
+                                $info = new \core_availability\info_module($cm);
+                                $sendusers = $info->filter_user_list($sendusers);
+                            }
 
                             $reminder = new due_reminder($event, $course, $context, $aheadday);
                             $reminder->set_activity($event->modulename, $activityobj);
@@ -347,14 +371,7 @@ function local_reminders_cron() {
                         }
                         $eventdata = $reminder->create_reminder_message_object($fromuser);
 
-                        $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
-                        if ($groupmemberroles) {
-                            foreach($groupmemberroles as $roleid => $roledata) {
-                                foreach($roledata->users as $member) {
-                                    $sendusers[] = $DB->get_record('user', array('id' => $member->id));
-                                }
-                            }
-                        }
+                        $sendusers = get_users_in_group($group);
                     }
 
                     break;
@@ -382,6 +399,7 @@ function local_reminders_cron() {
         } catch (Exception $ex) {
             mtrace("  [Local Reminder - ERROR] Error occured when initializing ".
                     "for event#[$event->id] (type: $event->eventtype) ".$ex->getMessage());
+            mtrace("  [Local Reminder - ERROR] ".$ex->getTraceAsString());
             continue;
         }
         
@@ -412,6 +430,7 @@ function local_reminders_cron() {
             //mtrace("-----------------------------------");
             try {
                 $mailresult = message_send($eventdata);
+                mtrace('[LOCAL_REMINDERS] Mail Result: '.$mailresult);
 
                 if (!$mailresult) {
                     throw new coding_exception("Could not send out message for event#$event->id to user $eventdata->userto");
@@ -434,6 +453,27 @@ function local_reminders_cron() {
     
     //add_to_log(0, 'local_reminders', 'cron', '', $timewindowend, 0, 0);
     add_flag_record_db($timewindowend, 'sent');
+}
+
+/**
+ * Returns all users belong to the given group.
+ *
+ * @param $group group object as received from db.
+ * @return array users in an array
+ */
+function get_users_in_group($group) {
+    global $DB;
+
+    $sendusers = array();
+    $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
+    if ($groupmemberroles) {
+        foreach($groupmemberroles as $roleid => $roledata) {
+            foreach($roledata->users as $member) {
+                $sendusers[] = $DB->get_record('user', array('id' => $member->id));
+            }
+        }
+    }
+    return $sendusers;
 }
 
 /**

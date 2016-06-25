@@ -99,25 +99,43 @@ abstract class reminder {
      * @return string formatted time string
      */
     protected function format_event_time_duration($user) {
-        $followedtimeformat = get_string('strftimedatetime', 'langconfig');
+        $followedtimeformat = get_string('strftimedaydate', 'langconfig');
+        $usertimeformat = self::get_correct_timeformat_user($user);
 
         $tzone = 99;
         if (isset($user) && !empty($user)) {
-            $tzone = $user->timezone;
+            $tzone = core_date::get_user_timezone($user);
         }
-        
-        $formattedtime = userdate($this->event->timestart, '', $tzone);
+
+        $addflag = false;
+        $formattedtimeprefix = userdate($this->event->timestart, $followedtimeformat, $tzone);
+        $formattedtime = userdate($this->event->timestart, $usertimeformat, $tzone);
         $sdate = usergetdate($this->event->timestart, $tzone);
         if ($this->event->timeduration > 0) {
-            $ddate = usergetdate($this->event->timestart + $this->event->timeduration, $tzone);
+            $etime = $this->event->timestart + $this->event->timeduration;
+            $ddate = usergetdate($etime, $tzone);
+
+            // falls in the same day...
             if ($sdate['year'] == $ddate['year'] && $sdate['mon'] == $ddate['mon'] && $sdate['mday'] == $ddate['mday']) {
                 // bug fix for not correctly displaying times in incorrect formats
                 // issue report: https://tracker.moodle.org/browse/CONTRIB-3647?focusedCommentId=408657&page=com.atlassian.jira.plugin.system.issuetabpanels:comment-tabpanel#comment-408657
                 //$followedtimeformat = get_string('strftimetime', 'langconfig');
-                $followedtimeformat = get_correct_timeformat_user($user);
+                $formattedtime .= ' - '.userdate($etime, $usertimeformat, $tzone);
+                $addflag = true;
+            } else {
+                $formattedtime .= ' - '.userdate($etime, $followedtimeformat, $tzone)." ".userdate($etime, $usertimeformat, $tzone);
             }
-            $formattedtime .= ' - '.userdate($this->event->timestart + $this->event->timeduration, $followedtimeformat, $tzone);
+
+            if ($addflag) {
+                $formattedtime = $formattedtimeprefix.'  ['.$formattedtime.']';
+            } else {
+                $formattedtime = $formattedtimeprefix.' '.$formattedtime;
+            }
+
+        } else {
+            $formattedtime = $formattedtimeprefix.' '.$formattedtime;
         }
+
         return $formattedtime;
     }
     

@@ -2,9 +2,9 @@
 
 Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      http://uisurumadushanka89.blogspot.com
-Copyright: 2015 Isuru Madushanka Weerarathna
+Copyright: 2016 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   1.4.2
+Version:   1.5
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -12,7 +12,7 @@ to relevant users in timely manner. Reminders are very useful for both students 
 to recall their scheduled event before the actual moment.
 
 == Requirements ==
-    This plugin has been developed in Moodle 2.2,2.3,2.4,2.5,2.6,2.7,2.8 and 2.9 and successfully tested on a simple local server.
+    This plugin has been developed in Moodle 2.2,2.3,2.4,2.5,2.6,2.7,2.8, 2.9 and 3.0 and successfully tested on a simple local server.
     This plugin should be working any Moodle version greater than or equal to v2.0.	
     Moodle logging must be enabled to operate properly. (Only if you are using a version 2.6 or below)
 
@@ -30,8 +30,17 @@ to recall their scheduled event before the actual moment.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v1.5
+    + support for moodle 3.0+
+    + Ability to change mail sent user through configurations (#14)
+    + Notice: undefined variable when opening admin settings page in Moodle 2.9 (#12)
+    + Event reminders sent for individual quiz overrides (#11)
+    + Fix time formatting when user has set 24hour format in calendar preferences
+    + Fix cron errors resulting from new role (thanks to [colin-umn]: https://github.com/colin-umn)
+    + Fix cron error caused by $courseroleids (thanks to [cdsmith-umn]: https://github.com/cdsmith-umn)
+
 v1.4.2
-    + support for mooduel 2.9+
+    + support for moodle 2.9+
     + ability to specify a custom schedule for sending reminders for any event type.
 
 v1.4.1

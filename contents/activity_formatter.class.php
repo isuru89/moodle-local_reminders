@@ -37,10 +37,31 @@ abstract class activity_formatter {
     protected function format_datetime($datetime, $user) {
         $tzone = 99;
         if (isset($user) && !empty($user)) {
-            $tzone = $user->timezone;
+            $tzone = core_date::get_user_timezone($user);
         }
-        
-        return userdate($datetime, '', $tzone);
+
+        $daytimeformat = get_string('strftimedaydate', 'langconfig');
+        $utimeformat = self::get_correct_timeformat_user($user);
+        return userdate($datetime, $daytimeformat, $tzone).' '.userdate($datetime, $utimeformat, $tzone);
+    }
+
+    /**
+     * This function would return time formats relevent for the given user.
+     * Sometimes a user might have changed time display format in his/her preferences.
+     *
+     */
+    private function get_correct_timeformat_user($user) {
+        static $langtimeformat = NULL;
+        if ($langtimeformat === NULL) {
+            $langtimeformat = get_string('strftimetime', 'langconfig');
+        }
+
+        // we get user time formattings... if such exist, will return non-empty value
+        $utimeformat = get_user_preferences('calendar_timeformat', '', $user);
+        if (empty($utimeformat)) {
+            $utimeformat = get_config(NULL,'calendar_site_timeformat');
+        }
+        return empty($utimeformat) ? $langtimeformat : $utimeformat;
     }
     
 }
