@@ -55,7 +55,7 @@ class group_reminder extends reminder {
         global $DB;
         
         $this->course = $DB->get_record('course', array('id' => $this->group->courseid));
-        if (!empty($this->course)) {
+        if (!empty($this->course) && !empty($this->event->instance)) {
             $cmx = get_coursemodule_from_instance($this->event->modulename, $this->event->instance, $this->group->courseid);
             if (!empty($cmx)) {
                 $this->cm = get_context_instance(CONTEXT_MODULE, $cmx->id);
