@@ -15,20 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Reminder plugin version information
+ * Capability definition(s) for the reminder plugin.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2019020900;
-$plugin->requires  = 2015111600;        // require moodle 3.0 or higher
-$plugin->release   = '1.5.1';
-$plugin->maturity  = MATURITY_RC;
-$plugin->component = 'local_reminders'; 
-// deprecated since v3.5      
-// $plugin->cron      = 10;                  // Default: 900, will run for 15-minutes
+$tasks = [
+    [
+        'classname' => 'local_reminders\\task\\send_reminders',
+        'blocking' => 0,
+        'minute' => '*/15',
+        'hour' => '*',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
+    ],
+];
