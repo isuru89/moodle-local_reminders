@@ -236,7 +236,16 @@ abstract class reminder {
             $admin->customheaders = $cheaders;
         }
         
+        /* OLD CODE 
         $eventdata = new stdClass();
+        */
+        
+        /*
+        BUG FIX: $eventdata must be a new \core\message\message() for
+            Moodle 3.5+
+        */
+        $eventdata = new \core\message\message();
+    
         $eventdata->component           = 'local_reminders';   // plugin name
         $eventdata->name                = $this->get_message_provider();     // message interface name
         $eventdata->userfrom            = $admin;
