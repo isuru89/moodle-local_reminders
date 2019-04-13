@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      http://uisurumadushanka89.blogspot.com
 Copyright: 2016 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   1.5.1
+Version:   1.6
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -30,6 +30,9 @@ to recall their scheduled event before the actual moment.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v1.6
+    + Support for Moodle v3.5 and above.
+    + Migrated to new Moodle task API.
 v1.5.1
     + Fixed a bug where group reminders are not assigned when the event instance is empty
 v1.5
@@ -82,6 +85,13 @@ v1.0.1
     + removed usage of deprecated functions
 
 == Configurations ==
+Since Moodle v3.5
+To change the schedule of this plugin, go to Site administration -> Server -> Scheduled tasks,
+and find the Local Reminders item from the list.
+Click the settings icon, and change the cron expression as desired.
+
+
+Before Moodle v3.5:
 If you want to change the cron cycle frequency, open the version.php file in the plug-in's root
 directory and change the value for $plugin->cron. This value must be indicated by seconds. The
 default value is 3600 seconds (i.e. 1 hour).
@@ -92,6 +102,8 @@ interface because of trying to send too many reminders at once.
 == Folder Structure ==
 All following folders/files must be put in to the local directory of Moodle root folder to work properly.
 
+	/reminders/classes/task/send_reminders.php
+	/reminders/contents/activity_formatter.class.php
 	/reminders/contents/course_reminder.class.php
 	/reminders/contents/due_reminder.class.php
 	/reminders/contents/group_reminder.class.php
@@ -99,11 +111,15 @@ All following folders/files must be put in to the local directory of Moodle root
 	/reminders/contents/user_reminder.class.php
 	/reminders/db/access.php
 	/reminders/db/install.php
+	/reminders/db/install.xml
 	/reminders/db/messages.php
+	/reminders/db/tasks.php
 	/reminders/db/upgrade.php
 	/reminders/lang/en/local_reminders.php
     /reminders/lang/de/local_reminders.php
     /reminders/lang/fr/local_reminders.php
+	/reminders/coursesettings_form.php
+	/reminders/coursesettings.php
 	/reminders/lib.php
 	/reminders/reminder.class.php
 	/reminders/settings.php
