@@ -56,6 +56,8 @@ DEFINE('REMINDERS_ACTIVITY_ONLY_CLOSINGS', 62);
 DEFINE('REMINDERS_SEND_AS_NO_REPLY', 70);
 DEFINE('REMINDERS_SEND_AS_ADMIN', 71);
 
+require_login();
+
 /// FUNCTIONS ///////////////////////////////////////////////////////////
 
 /**
@@ -64,7 +66,7 @@ DEFINE('REMINDERS_SEND_AS_ADMIN', 71);
  *  
  */
 function local_reminders_cron() {
-    global $CFG, $DB;
+    global $CFG, $DB, $PAGE;
     
     if (!isset($CFG->local_reminders_enable) || !$CFG->local_reminders_enable) {
         mtrace("   [Local Reminder] This cron cycle will be skipped, because plugin is not enabled!");
@@ -277,6 +279,7 @@ function local_reminders_cron() {
 
                     if (!empty($course)) {
                         $context = context_course::instance($course->id); //get_context_instance(CONTEXT_COURSE, $course->id);
+                        $PAGE->set_context($context);
                         $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
                         $senduserids = array_map(function($u) { return $u->id; }, $roleusers);
                         $sendusers = array_combine($senduserids, $roleusers);
@@ -322,6 +325,7 @@ function local_reminders_cron() {
                         if (!empty($course) && !empty($cm)) {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
                             $context = context_module::instance($cm->id); //get_context_instance(CONTEXT_MODULE, $cm->id);
+                            $PAGE->set_context($context);
 
                             if ($event->courseid <= 0 && $event->userid > 0) {
                                 // a user overridden activity...
@@ -384,6 +388,7 @@ function local_reminders_cron() {
                         if (!empty($course) && !empty($cm)) {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
                             $context = context_module::instance($cm->id); // get_context_instance(CONTEXT_MODULE, $cm->id);
+                            $PAGE->set_context($context);
                             $sendusers = get_role_users($activityroleids, $context, true, 'u.*');
                             
                             //$sendusers = get_enrolled_users($context, '', $event->groupid, 'u.*');
