@@ -36,7 +36,7 @@ if (!$coursesettings) {
 $coursesettings->courseid = $courseid;
 $coursecontext = context_course::instance($course->id);
 
-require_login($course);
+// require_login($course);
 require_capability('moodle/course:update', $coursecontext);
 
 $PAGE->set_pagelayout('admin');
