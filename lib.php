@@ -22,6 +22,9 @@
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+defined('MOODLE_INTERNAL') || die();
+
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/site_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/user_reminder.class.php');
@@ -57,7 +60,6 @@ DEFINE('REMINDERS_SEND_AS_NO_REPLY', 70);
 DEFINE('REMINDERS_SEND_AS_ADMIN', 71);
 
 // require_login();
-
 /// FUNCTIONS ///////////////////////////////////////////////////////////
 
 /**
