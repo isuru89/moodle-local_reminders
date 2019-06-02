@@ -59,6 +59,7 @@ DEFINE('REMINDERS_ACTIVITY_ONLY_CLOSINGS', 62);
 DEFINE('REMINDERS_SEND_AS_NO_REPLY', 70);
 DEFINE('REMINDERS_SEND_AS_ADMIN', 71);
 
+// require_login();
 /// FUNCTIONS ///////////////////////////////////////////////////////////
 
 /**
