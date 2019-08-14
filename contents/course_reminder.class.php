@@ -26,7 +26,7 @@ require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class course_reminder extends reminder {
+class course_reminder extends local_reminder {
     
     protected $course;
     

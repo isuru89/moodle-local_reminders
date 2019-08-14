@@ -26,7 +26,7 @@ require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class site_reminder extends reminder {
+class site_reminder extends local_reminder {
     
     public function __construct($event, $aheaddays = 1) {
         parent::__construct($event, $aheaddays);
