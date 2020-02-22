@@ -34,7 +34,7 @@ require_once($CFG->dirroot . '/local/reminders/lib.php');
 class send_reminders extends \core\task\scheduled_task {
 
     public function execute() {
-        local_reminders_cron();
+        local_reminders_cron_task();
     }
 
     public function get_name() {

@@ -67,7 +67,7 @@ DEFINE('REMINDERS_SEND_AS_ADMIN', 71);
  * Finds all events due for a reminder and send them out to the users.
  *  
  */
-function local_reminders_cron() {
+function local_reminders_cron_task() {
     global $CFG, $DB, $PAGE;
     
     if (!isset($CFG->local_reminders_enable) || !$CFG->local_reminders_enable) {
@@ -444,7 +444,7 @@ function local_reminders_cron() {
                 } 
             } catch (moodle_exception $mex) {
                 $failedcount++;
-                mtrace('Error: local/reminders/lib.php local_reminders_cron(): '.$mex->getMessage());
+                mtrace('Error: local/reminders/lib.php local_reminders_cron_task(): '.$mex->getMessage());
             }
         }
         
