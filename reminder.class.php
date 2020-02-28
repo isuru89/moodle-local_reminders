@@ -22,7 +22,7 @@
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class reminder {
+abstract class local_reminder {
    
     /**
      * @var int number of days in advance to actual event.

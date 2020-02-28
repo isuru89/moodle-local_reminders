@@ -1,10 +1,10 @@
 === Reminders "Local Plugin" ===
 
 Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
-Blog:      http://uisurumadushanka89.blogspot.com
-Copyright: 2016 Isuru Madushanka Weerarathna
+Blog:      https://medium.com/@isuru89
+Copyright: 2020 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   1.6.1
+Version:   1.7
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -30,6 +30,13 @@ to recall their scheduled event before the actual moment.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v1.7
+    + Excluded suspended users from course/activity events (#27)
+    + Renamed admin cron function so that conflicting with legacy (#26)
+    + Totara conflicting class name issue fixed (#25)
+    + Support for moodle v3.8
+v1.6.2
+    + Fixed issue of conflicting class name
 v1.6.1
     + Fix login redirect loop in Moodle v3.5, 3.6 and 3.7.
 v1.6

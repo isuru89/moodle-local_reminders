@@ -27,7 +27,7 @@ require_once($CFG->libdir . '/accesslib.php');
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class group_reminder extends reminder {
+class group_reminder extends local_reminder {
     
     private $group;
     private $course;
