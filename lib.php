@@ -149,8 +149,6 @@ function local_reminders_cron() {
     }
 
     mtrace("   [Local Reminder] Time window: ".userdate($timewindowstart)." to ".userdate($timewindowend));
-    //mtrace("   [Local Reminder] Time window: ".$timewindowstart." to ".$timewindowend);
-    //mtrace("   [Local Reminder] Where clause: ".$whereclause);
 
     $upcomingevents = $DB->get_records_select('event', $whereclause);
     if ($upcomingevents == false) {     // no upcoming events, so let's stop.
@@ -171,6 +169,7 @@ function local_reminders_cron() {
         $fromuser = get_admin();
     }
 
+    $allemailfailed = TRUE;
     // iterating through each event...
     foreach ($upcomingevents as $event) {
         $event = new calendar_event($event);
@@ -447,17 +446,24 @@ function local_reminders_cron() {
             mtrace("  [Local Reminder] All reminders was sent successfully for event#$event->id !");
         }
 
+        if ($usize != $failedcount) {
+            $allemailfailed = FALSE;
+        }
         unset($sendusers);
-
     }
 
-    add_flag_record_db($timewindowend, 'sent');
+    if (!$allemailfailed) {
+        add_flag_record_db($timewindowend, 'sent');
+        mtrace('  [Local Reminder] Marked this reminder execution as success.');
+    } else {
+        mtrace('  [Local Reminder] Failed to send any email to any user! Will retry again next time.');
+    }
 }
 
 /**
- * Returns array of users active (not suspended) in the provided contexts and 
+ * Returns array of users active (not suspended) in the provided contexts and
  * at the same time belongs to the given roles.
- * 
+ *
  * @param $activityroleids role ids
  * @param $context context to search for users
  * @return array of user records
