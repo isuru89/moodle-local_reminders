@@ -99,14 +99,6 @@ function local_reminders_cron() {
         }
     }
 
-    // older implementation to retrieve most recent execution about reminders cron
-    // cycle
-    //
-    //$params = array();
-    //$selector = "l.course = 0 AND l.module = 'local_reminders' AND l.action = 'cron'";
-    //$totalcount = 0;
-    //$logrows = get_logs($selector, $params, 'l.time DESC', '', 1, $totalcount);
-
     // we need only last record only, so we limit the returning number of rows at most by one.
     //
     $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
@@ -281,7 +273,7 @@ function local_reminders_cron() {
                     }
 
                     if (!empty($course)) {
-                        $context = context_course::instance($course->id); //get_context_instance(CONTEXT_COURSE, $course->id);
+                        $context = context_course::instance($course->id);
                         $PAGE->set_context($context);
                         $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
                         $senduserids = array_map(function($u) { return $u->id; }, $roleusers);
@@ -327,7 +319,7 @@ function local_reminders_cron() {
 
                         if (!empty($course) && !empty($cm)) {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
-                            $context = context_module::instance($cm->id); //get_context_instance(CONTEXT_MODULE, $cm->id);
+                            $context = context_module::instance($cm->id);
                             $PAGE->set_context($context);
 
                             if ($event->courseid <= 0 && $event->userid > 0) {
@@ -342,10 +334,7 @@ function local_reminders_cron() {
                                 $sendusers = get_users_in_group($group);
                             } else {
                                 // 'ra.id field added to avoid printing debug message from get_role_users (has odd behaivior when called with an array for $roleid param'
-                                $sendusers = get_role_users($activityroleids, $context, true, 'ra.id, u.*',
-                                                            null, false, '', '', '',
-                                                            'ue.status = :userenrolstatus',
-                                                            array('userenrolstatus' => ENROL_USER_ACTIVE));
+                                $sendusers = get_active_role_users($activityroleids, $context);
 
                                 // filter user list, replacement for deprecated/removed $cm->groupmembersonly & groups_get_grouping_members($cm->groupingid);
                                 //   see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity
@@ -395,10 +384,7 @@ function local_reminders_cron() {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
                             $context = context_module::instance($cm->id);
                             $PAGE->set_context($context);
-                            $sendusers = get_role_users($activityroleids, $context, true, 'u.*',
-                                                        null, false, '', '', '',
-                                                        'ue.status = :userenrolstatus',
-                                                        array('userenrolstatus' => ENROL_USER_ACTIVE));
+                            $sendusers = get_active_role_users($activityroleids, $context);
 
                             if (strcmp($event->eventtype, 'gradingdue') == 0 and isset($context)) {
                                 $filteredusers = array();
@@ -441,15 +427,7 @@ function local_reminders_cron() {
 
         foreach ($sendusers as $touser) {
             $eventdata = $reminder->set_sendto_user($touser);
-            //$eventdata->userto = $touser;
 
-            //foreach ($touser as $key => $value) {
-            //    mtrace(" User: $key : $value");
-            //}
-            //$mailresult = 1; //message_send($eventdata);
-            //mtrace("-----------------------------------");
-            //mtrace($eventdata->fullmessagehtml);
-            //mtrace("-----------------------------------");
             try {
                 $mailresult = message_send($eventdata);
                 mtrace('[LOCAL_REMINDERS] Mail Result: '.$mailresult);
@@ -473,8 +451,22 @@ function local_reminders_cron() {
 
     }
 
-    //add_to_log(0, 'local_reminders', 'cron', '', $timewindowend, 0, 0);
     add_flag_record_db($timewindowend, 'sent');
+}
+
+/**
+ * Returns array of users active (not suspended) in the provided contexts and 
+ * at the same time belongs to the given roles.
+ * 
+ * @param $activityroleids role ids
+ * @param $context context to search for users
+ * @return array of user records
+ */
+function get_active_role_users($activityroleids, $context) {
+    return get_role_users($activityroleids, $context, true, 'ra.id, u.*',
+                    null, false, '', '', '',
+                    'ue.status = :userenrolstatus',
+                    array('userenrolstatus' => ENROL_USER_ACTIVE));
 }
 
 /**
