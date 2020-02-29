@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die();
+
 /**
  * Post-install code for the reminders plugin.
  *
@@ -23,7 +25,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 function xmldb_local_reminders_install() {
-    
-    // what should be done when the plugin is installed for the first time.
-    
+
+    // What should be done when the plugin is installed for the first time.
+
 }

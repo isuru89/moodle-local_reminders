@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -26,10 +25,10 @@ require_once($CFG->dirroot.'/local/reminders/coursesettings_form.php');
 
 $courseid = required_param('courseid', PARAM_INT);
 
-$return = new moodle_url('/course/view.php', array('id'=>$courseid));
+$return = new moodle_url('/course/view.php', array('id' => $courseid));
 
-$course = $DB->get_record('course', array('id'=>$courseid), '*', MUST_EXIST);
-$coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$courseid));
+$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $courseid));
 if (!$coursesettings) {
     $coursesettings = new stdClass();
 }
@@ -40,7 +39,7 @@ require_login($course);
 require_capability('moodle/course:update', $coursecontext);
 
 $PAGE->set_pagelayout('admin');
-$PAGE->set_url('/local/reminders/coursesettings.php', array('courseid'=>$courseid));
+$PAGE->set_url('/local/reminders/coursesettings.php', array('courseid' => $courseid));
 $PAGE->set_title(get_string('admintreelabel', 'local_reminders'));
 $PAGE->set_heading($course->fullname);
 

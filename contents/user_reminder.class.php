@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die;
+
 global $CFG;
 
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
@@ -27,31 +29,32 @@ require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_reminder extends local_reminder {
-    
+
     private $user;
-    
+
     public function __construct($event, $user, $aheaddays = 1) {
         parent::__construct($event, $aheaddays);
         $this->user = $user;
     }
-    
+
     public function get_message_html($user=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
         $htmlmail .= html_writer::start_tag('div');
-        $htmlmail .= html_writer::start_tag('table', array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+        $htmlmail .= html_writer::start_tag('table',
+                array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
-        $htmlmail .= html_writer::link($this->generate_event_link(), 
-                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)), 
+        $htmlmail .= html_writer::link($this->generate_event_link(),
+                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)),
                 array('style' => 'text-decoration: none'));
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
-        
+
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
         $htmlmail .= html_writer::tag('td', $this->format_event_time_duration($user));
         $htmlmail .= html_writer::end_tag('tr');
-        
+
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::tag('td', get_string('contenttypeuser', 'local_reminders'));
         $htmlmail .= html_writer::tag('td', fullname($this->user));
@@ -61,20 +64,20 @@ class user_reminder extends local_reminder {
         $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
         $htmlmail .= html_writer::tag('td', $this->event->description);
         $htmlmail .= html_writer::end_tag('tr');
-        
+
         $htmlmail .= $this->get_html_footer();
         $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
                 html_writer::end_tag('html');
-        
+
         return $htmlmail;
     }
-    
+
     public function get_message_plaintext($user=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
         $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user)."\n";
         $text .= get_string('contenttypeuser', 'local_reminders').': '.$this->course->fullname."\n";
         $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description."\n";
-        
+
         return $text;
     }
 
@@ -85,14 +88,14 @@ class user_reminder extends local_reminder {
     public function get_message_title() {
         return '('.fullname($this->user) . ') ' . $this->event->name;
     }
-    
+
     public function get_custom_headers() {
         $headers = parent::get_custom_headers();
-        
+
         $headers[] = 'X-User-Id: '.$this->user->id;
         $headers[] = 'X-User-Name: '.fullname($this->user);
-        
+
         return $headers;
     }
-    
+
 }

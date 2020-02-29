@@ -40,28 +40,27 @@ require_once($CFG->dirroot . '/availability/classes/info_module.php');
 require_once($CFG->libdir . '/modinfolib.php');
 require_once($CFG->dirroot . '/lib/enrollib.php');
 
-/// CONSTANTS ///////////////////////////////////////////////////////////
+// CONSTANTS ///////////////////////////////////////////////////////////
 
-DEFINE('REMINDERS_DAYIN_SECONDS', 24 * 3600);
+define('REMINDERS_DAYIN_SECONDS', 24 * 3600);
 
-DEFINE('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 5);
+define('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 5);
 
-DEFINE('REMINDERS_7DAYSBEFORE_INSECONDS', 7*24*3600);
-DEFINE('REMINDERS_3DAYSBEFORE_INSECONDS', 3*24*3600);
-DEFINE('REMINDERS_1DAYBEFORE_INSECONDS', 24*3600);
+define('REMINDERS_7DAYSBEFORE_INSECONDS', 7 * 24* 3600);
+define('REMINDERS_3DAYSBEFORE_INSECONDS', 3 * 24* 3600);
+define('REMINDERS_1DAYBEFORE_INSECONDS', 24 * 3600);
 
-DEFINE('REMINDERS_SEND_ALL_EVENTS', 50);
-DEFINE('REMINDERS_SEND_ONLY_VISIBLE', 51);
+define('REMINDERS_SEND_ALL_EVENTS', 50);
+define('REMINDERS_SEND_ONLY_VISIBLE', 51);
 
-DEFINE('REMINDERS_ACTIVITY_BOTH', 60);
-DEFINE('REMINDERS_ACTIVITY_ONLY_OPENINGS', 61);
-DEFINE('REMINDERS_ACTIVITY_ONLY_CLOSINGS', 62);
+define('REMINDERS_ACTIVITY_BOTH', 60);
+define('REMINDERS_ACTIVITY_ONLY_OPENINGS', 61);
+define('REMINDERS_ACTIVITY_ONLY_CLOSINGS', 62);
 
-DEFINE('REMINDERS_SEND_AS_NO_REPLY', 70);
-DEFINE('REMINDERS_SEND_AS_ADMIN', 71);
+define('REMINDERS_SEND_AS_NO_REPLY', 70);
+define('REMINDERS_SEND_AS_ADMIN', 71);
 
-// require_login();
-/// FUNCTIONS ///////////////////////////////////////////////////////////
+// FUNCTIONS ///////////////////////////////////////////////////////////
 
 /**
  * Function to be run periodically according to the moodle cron
@@ -79,8 +78,7 @@ function local_reminders_cron() {
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     $eventtypearray = array('site', 'user', 'course', 'due', 'group');
 
-    // loading roles allowed to receive reminder messages from configuration
-    //
+    // Loading roles allowed to receive reminder messages from configuration.
     $allroles = get_all_roles();
     $courseroleids = array();
     $activityroleids = array();
@@ -99,12 +97,11 @@ function local_reminders_cron() {
         }
     }
 
-    // we need only last record only, so we limit the returning number of rows at most by one.
-    //
+    // We need only last record only, so we limit the returning number of rows at most by one.
     $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
 
     $timewindowstart = time();
-    if (!$logrows) {  // this is the first cron cycle, after plugin is just installed
+    if (!$logrows) {  // This is the first cron cycle, after plugin is just installed.
         mtrace("   [Local Reminder] This is the first cron cycle");
         $timewindowstart = $timewindowstart - REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
     } else {
@@ -113,10 +110,10 @@ function local_reminders_cron() {
         $timewindowstart = $firstrecord->time + 1;
     }
 
-    // end of the time window will be set as current
+    // End of the time window will be set as current.
     $timewindowend = time();
 
-    // now lets filter appropiate events to send reminders
+    // Now lets filter appropiate events to send reminders.
     //
     $secondsaheads = array(REMINDERS_7DAYSBEFORE_INSECONDS, REMINDERS_3DAYSBEFORE_INSECONDS,
         REMINDERS_1DAYBEFORE_INSECONDS);
@@ -133,7 +130,7 @@ function local_reminders_cron() {
     $whereclause = '(timestart > '.$timewindowend.') AND (';
     $flagor = false;
     foreach ($secondsaheads as $sahead) {
-        if($flagor) {
+        if ($flagor) {
             $whereclause .= ' OR ';
         }
         $whereclause .= '(timestart - '.$sahead.' >= '.$timewindowstart.' AND '.
@@ -151,7 +148,7 @@ function local_reminders_cron() {
     mtrace("   [Local Reminder] Time window: ".userdate($timewindowstart)." to ".userdate($timewindowend));
 
     $upcomingevents = $DB->get_records_select('event', $whereclause);
-    if ($upcomingevents == false) {     // no upcoming events, so let's stop.
+    if ($upcomingevents == false) {
         mtrace("   [Local Reminder] No upcoming events. Aborting...");
 
         add_flag_record_db($timewindowend, 'no_events');
@@ -170,7 +167,7 @@ function local_reminders_cron() {
     }
 
     $allemailfailed = TRUE;
-    // iterating through each event...
+    // Iterating through each event.
     foreach ($upcomingevents as $event) {
         $event = new calendar_event($event);
 
@@ -187,7 +184,7 @@ function local_reminders_cron() {
                 $event->timestart - REMINDERS_7DAYSBEFORE_INSECONDS <= $timewindowend) {
             $aheadday = 7;
         } else {
-            // find if custom schedule has been defined by user...
+            // Find if custom schedule has been defined by user.
             $tempconfigstr = 'local_reminders_'.$event->eventtype.'custom';
             if (isset($CFG->$tempconfigstr) && !empty($CFG->$tempconfigstr) && $CFG->$tempconfigstr > 0) {
                 $customsecs = $CFG->$tempconfigstr;
@@ -200,7 +197,9 @@ function local_reminders_cron() {
             }
         }
 
-        if ($aheadday == 0) continue;
+        if ($aheadday == 0) {
+            continue;
+        }
         mtrace("   [Local Reminder] Processing event#$event->id [Type: $event->eventtype, inaheadof=$aheadday days]...");
 
         if (!$fromcustom) {
@@ -222,7 +221,7 @@ function local_reminders_cron() {
                 continue;
             }
 
-            // this reminder will not be set up to send by configurations
+            // This reminder will not be set up to send by configurations.
             if ($options[$aheaddaysindex[$aheadday]] == '0') {
                 mtrace("   [Local Reminder] No reminder is due in ahead of $aheadday for eventtype $event->eventtype " .
                     "[event#$event->id is ignored!]...");
@@ -265,7 +264,7 @@ function local_reminders_cron() {
 
                 case 'course':
                     $course = $DB->get_record('course', array('id' => $event->courseid));
-                    $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$event->courseid));
+                    $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
                     if (isset($coursesettings->status_course) && $coursesettings->status_course == 0) {
                         mtrace("  [Local Reminder] Reminder sending for course events has been restricted in the course specific configurations.");
                         break;
@@ -275,11 +274,12 @@ function local_reminders_cron() {
                         $context = context_course::instance($course->id);
                         $PAGE->set_context($context);
                         $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
-                        $senduserids = array_map(function($u) { return $u->id; }, $roleusers);
+                        $senduserids = array_map(function($u) {
+                                                    return $u->id;
+                                                }, $roleusers);
                         $sendusers = array_combine($senduserids, $roleusers);
 
-                        // create reminder object...
-                        //
+                        // Create reminder object.
                         $reminder = new course_reminder($event, $course, $aheadday);
                         $eventdata = $reminder->create_reminder_message_object($fromuser);
                     }
@@ -288,8 +288,7 @@ function local_reminders_cron() {
 
                 case 'open':
 
-                    // if we dont want to send reminders for activity openings...
-                    //
+                    // If we dont want to send reminders for activity openings.
                     if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_CLOSINGS) {
                         mtrace("  [Local Reminder] Reminder sending for activity openings has been restricted in the configurations.");
                         break;
@@ -297,8 +296,7 @@ function local_reminders_cron() {
 
                 case 'close':
 
-                    // if we dont want to send reminders for activity closings...
-                    //
+                    // If we dont want to send reminders for activity closings.
                     if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_OPENINGS) {
                         mtrace("  [Local Reminder] Reminder sending for activity closings has been restricted in the configurations.");
                         break;
@@ -306,11 +304,11 @@ function local_reminders_cron() {
 
                 case 'due':
 
-                    if (!isemptyString($event->modulename)) {
+                    if (!isemptystring($event->modulename)) {
                         $courseandcm = get_course_and_cm_from_instance($event->instance, $event->modulename, $event->courseid);
                         $course = $courseandcm[0];
                         $cm = $courseandcm[1];
-                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$event->courseid));
+                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
                         if (isset($coursesettings->status_activities) && $coursesettings->status_activities == 0) {
                             mtrace("  [Local Reminder] Reminder sending for activities has been restricted in the course specific configurations.");
                             break;
@@ -322,21 +320,26 @@ function local_reminders_cron() {
                             $PAGE->set_context($context);
 
                             if ($event->courseid <= 0 && $event->userid > 0) {
-                                // a user overridden activity...
+                                // A user overridden activity.
                                 mtrace("  [Local Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");
                                 $user = $DB->get_record('user', array('id' => $event->userid));
                                 $sendusers[] = $user;
                             } else if ($event->courseid <= 0 && $event->groupid > 0) {
-                                // a group overridden activity...
+                                // A group overridden activity.
                                 mtrace("  [Local Reminder] Event #".$event->id." is a group overridden ".$event->modulename." event.");
                                 $group = $DB->get_record('groups', array('id' => $event->groupid));
                                 $sendusers = get_users_in_group($group);
                             } else {
-                                // 'ra.id field added to avoid printing debug message from get_role_users (has odd behaivior when called with an array for $roleid param'
+                                /**
+                                 * Here 'ra.id field added to avoid printing debug message
+                                 * from get_role_users (has odd behaivior when called with an array for $roleid param'.
+                                 */
                                 $sendusers = get_active_role_users($activityroleids, $context);
 
-                                // filter user list, replacement for deprecated/removed $cm->groupmembersonly & groups_get_grouping_members($cm->groupingid);
-                                //   see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity
+                                /**
+                                 * Filter user list,
+                                 * see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity
+                                 */
                                 $info = new \core_availability\info_module($cm);
                                 $sendusers = $info->filter_user_list($sendusers);
                             }
@@ -353,7 +356,7 @@ function local_reminders_cron() {
                     $group = $DB->get_record('groups', array('id' => $event->groupid));
 
                     if (!empty($group)) {
-                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid'=>$group->courseid));
+                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $group->courseid));
                         if (isset($coursesettings->status_group) && $coursesettings->status_group == 0) {
                             mtrace("  [Local Reminder] Reminder sending for group events has been restricted in the course specific configurations.");
                             break;
@@ -361,9 +364,8 @@ function local_reminders_cron() {
 
                         $reminder = new group_reminder($event, $group, $aheadday);
 
-                        // add module details, if this event is a mod type event
-                        //
-                        if (!isemptyString($event->modulename) && $event->courseid > 0) {
+                        // Add module details, if this event is a mod type event.
+                        if (!isemptystring($event->modulename) && $event->courseid > 0) {
                             $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
                             $reminder->set_activity($event->modulename, $activityobj);
                         }
@@ -375,7 +377,7 @@ function local_reminders_cron() {
                     break;
 
                 default:
-                     if (!isemptyString($event->modulename)) {
+                    if (!isemptystring($event->modulename)) {
                         $course = $DB->get_record('course', array('id' => $event->courseid));
                         $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
 
@@ -398,9 +400,9 @@ function local_reminders_cron() {
                             $reminder->set_activity($event->modulename, $activityobj);
                             $eventdata = $reminder->create_reminder_message_object($fromuser);
                         }
-                     } else {
-                         mtrace("  [Local Reminder] Unknown event type [$event->eventtype]");
-                     }
+                    } else {
+                        mtrace("  [Local Reminder] Unknown event type [$event->eventtype]");
+                    }
             }
 
         } catch (Exception $ex) {
@@ -487,8 +489,8 @@ function get_users_in_group($group) {
     $sendusers = array();
     $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
     if ($groupmemberroles) {
-        foreach($groupmemberroles as $roleid => $roledata) {
-            foreach($roledata->users as $member) {
+        foreach ($groupmemberroles as $roleid => $roledata) {
+            foreach ($roledata->users as $member) {
                 $sendusers[] = $DB->get_record('user', array('id' => $member->id));
             }
         }
@@ -508,10 +510,10 @@ function get_users_in_group($group) {
 function add_flag_record_db($timewindowend, $crontype = '') {
     global $DB;
 
-    $newRecord = new stdClass();
-    $newRecord->time = $timewindowend;
-    $newRecord->type = $crontype;
-    $DB->insert_record("local_reminders", $newRecord);
+    $newrecord = new stdClass();
+    $newrecord->time = $timewindowend;
+    $newrecord->type = $crontype;
+    $DB->insert_record("local_reminders", $newrecord);
 }
 
 /**
@@ -535,7 +537,7 @@ function add_flag_record_db($timewindowend, $crontype = '') {
 function fetch_module_instance($modulename, $instance, $courseid=0) {
     global $DB;
 
-    $params = array('instance'=>$instance, 'modulename'=>$modulename);
+    $params = array('instance' => $instance, 'modulename' => $modulename);
 
     $courseselect = "";
 
@@ -566,7 +568,7 @@ function fetch_module_instance($modulename, $instance, $courseid=0) {
  *
  * @return boolean true if string is empty or whitespace
  */
-function isemptyString($str) {
+function isemptystring($str) {
     return !isset($str) || empty($str) || trim($str) === '';
 }
 
