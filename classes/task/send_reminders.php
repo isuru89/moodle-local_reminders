@@ -24,7 +24,6 @@
 
 namespace local_reminders\task;
 
-
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;

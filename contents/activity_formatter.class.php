@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die;
+
 /**
  * Abstract class for formatting reminder message based on activity type.
  *
@@ -23,14 +25,14 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class activity_formatter {
-    
+
     /**
      * This function will format/append reminder messages with necessary info
      * based on constraints in that activity instance
-     *  
+     *
      */
     public abstract function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null);
-    
+
     /**
      * formats given date and time based on given user's timezone
      */
@@ -51,23 +53,23 @@ abstract class activity_formatter {
      *
      */
     private function get_correct_timeformat_user($user) {
-        static $langtimeformat = NULL;
-        if ($langtimeformat === NULL) {
+        static $langtimeformat = null;
+        if ($langtimeformat === null) {
             $langtimeformat = get_string('strftimetime', 'langconfig');
         }
 
-        // we get user time formattings... if such exist, will return non-empty value
+        // We get user time formattings... if such exist, will return non-empty value.
         $utimeformat = get_user_preferences('calendar_timeformat', '', $user);
         if (empty($utimeformat)) {
-            $utimeformat = get_config(NULL,'calendar_site_timeformat');
+            $utimeformat = get_config(null, 'calendar_site_timeformat');
         }
         return empty($utimeformat) ? $langtimeformat : $utimeformat;
     }
-    
+
 }
 
 class quiz_formatter extends activity_formatter {
-    
+
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null) {
         if (isset($activity->timeopen)) {
             $utime = time();
@@ -82,7 +84,7 @@ class quiz_formatter extends activity_formatter {
 }
 
 class assign_formatter extends activity_formatter {
-    
+
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null) {
         if (isset($activity->alwaysshowdescription)) {
             $utime = time();
@@ -91,7 +93,7 @@ class assign_formatter extends activity_formatter {
                 $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
                 $htmlmail .= html_writer::tag('td', $event->description);
                 $htmlmail .= html_writer::end_tag('tr');
-            } 
+            }
         }
         if (isset($activity->cutoffdate) && $activity->cutoffdate > 0) {
             $htmlmail .= html_writer::start_tag('tr');

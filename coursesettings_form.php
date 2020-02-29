@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -27,20 +26,23 @@ require_once($CFG->libdir.'/formslib.php');
 
 class local_reminders_coursesettings_edit_form extends moodleform {
 
-	function definition() {
+    public function definition() {
         $mform = $this->_form;
         list($coursesettings) = $this->_customdata;
 
-        // $mform->addElement('header', 'header', 'ueberschrift');
-
-        $mform->addElement('advcheckbox', 'status_course', get_string('enabled', 'local_reminders'), get_string('courseheading', 'local_reminders'));
+        $mform->addElement('advcheckbox', 'status_course',
+            get_string('enabled', 'local_reminders'),
+            get_string('courseheading', 'local_reminders'));
         $mform->setDefault('status_course', 1);
-        // $mform->addHelpButton('status_course', 'status_course', 'status_course');
-        
-        $mform->addElement('advcheckbox', 'status_activities', get_string('enabled', 'local_reminders'), get_string('dueheading', 'local_reminders'));
+
+        $mform->addElement('advcheckbox', 'status_activities',
+            get_string('enabled', 'local_reminders'),
+            get_string('dueheading', 'local_reminders'));
         $mform->setDefault('status_activities', 1);
 
-        $mform->addElement('advcheckbox', 'status_group', get_string('enabled', 'local_reminders'), get_string('groupheading', 'local_reminders'));
+        $mform->addElement('advcheckbox', 'status_group',
+            get_string('enabled', 'local_reminders'),
+            get_string('groupheading', 'local_reminders'));
         $mform->setDefault('status_group', 1);
 
         $mform->addElement('hidden', 'courseid');
@@ -49,6 +51,5 @@ class local_reminders_coursesettings_edit_form extends moodleform {
         $this->add_action_buttons(true);
 
         $this->set_data($coursesettings);
-
     }
 }
