@@ -67,6 +67,7 @@ $string['reminderdaysaheadcustom'] = 'Custom schedule:';
 $string['reminderdaysaheadcustomdetails'] = 'Additionally specify desired schedule to send reminders in ahead of time for an event.';
 $string['reminderfrom'] = 'Reminder from';
 $string['reminderstask'] = 'Local Reminders';
+$string['reminderstaskclean'] = 'Clean Local Reminders Logs';
 $string['rolesallowedfor'] = 'Allowed Roles:';
 $string['sendactivityreminders'] = 'Activity reminders:';
 $string['sendas'] = 'Send As:';

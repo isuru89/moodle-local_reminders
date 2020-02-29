@@ -22,25 +22,22 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_reminders\task;
+
 defined('MOODLE_INTERNAL') || die();
 
-$tasks = [
-    [
-        'classname' => 'local_reminders\\task\\send_reminders',
-        'blocking' => 0,
-        'minute' => '*/15',
-        'hour' => '*',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
-    ],
-    [
-        'classname' => 'local_reminders\\task\\clean_reminders_logs',
-        'blocking' => 0,
-        'minute' => '0',
-        'hour' => '1',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
-    ]
-];
+global $CFG;
+
+require_once($CFG->dirroot . '/local/reminders/scripts/clean_logs.php');
+
+class clean_reminders_logs extends \core\task\scheduled_task {
+
+    public function execute() {
+        clean_local_reminders_logs();
+    }
+
+    public function get_name() {
+        return get_string('reminderstaskclean', 'local_reminders');
+    }
+
+}
