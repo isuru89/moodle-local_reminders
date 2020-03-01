@@ -84,7 +84,7 @@ if ($hassiteconfig) {
     $defaultdue = array('days7' => 0, 'days3' => 1, 'days1' => 0);
 
 
-    // SITE EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+    // SITE EVENT SETTINGS.
 
     // Add days selection for site events.
     $settings->add(new admin_setting_heading('local_reminders_site_heading',
@@ -101,7 +101,7 @@ if ($hassiteconfig) {
             get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
             0));
 
-    // USER EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+    // USER EVENT SETTINGS.
 
     // Add days selection for user related events.
     $settings->add(new admin_setting_heading('local_reminders_user_heading',
@@ -112,13 +112,13 @@ if ($hassiteconfig) {
             get_string('explainuserheading', 'local_reminders'),
             $defaultuser, $daysarray));
 
-    // Added custom day selection for user events
+    // Added custom day selection for user events.
     $settings->add(new admin_setting_configduration('local_reminders_usercustom',
             get_string('reminderdaysaheadcustom', 'local_reminders'),
             get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
             0));
 
-    // COURSE EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+    // COURSE EVENT SETTINGS.
 
     // Add days selection for course related events.
     $settings->add(new admin_setting_heading('local_reminders_course_heading',
@@ -141,7 +141,7 @@ if ($hassiteconfig) {
             $defaultrolesforcourse, $rolesarray));
 
 
-    // DUE EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+    // DUE EVENT SETTINGS.
 
     // Add days selection for due related events coming from activities in a course.
     $settings->add(new admin_setting_heading('local_reminders_due_heading',
@@ -172,7 +172,7 @@ if ($hassiteconfig) {
             get_string('explainrolesallowedfor', 'local_reminders'),
             $defaultrolesforactivity, $rolesarray));
 
-    // GROUP EVENT SETTINGS ///////////////////////////////////////////////////////////////////////////////
+    // GROUP EVENT SETTINGS.
 
     // Add group related events.
     $settings->add(new admin_setting_heading('local_reminders_group_heading',

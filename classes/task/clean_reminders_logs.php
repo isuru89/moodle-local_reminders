@@ -15,18 +15,29 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Reminder plugin version information
+ * Capability definition(s) for the reminder plugin.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_reminders\task;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020022811;
-$plugin->requires  = 2018051700;        // Require moodle 3.5 or higher.
-$plugin->release   = '2.0';
-$plugin->maturity  = MATURITY_RC;
-$plugin->component = 'local_reminders';
+global $CFG;
+
+require_once($CFG->dirroot . '/local/reminders/scripts/clean_logs.php');
+
+class clean_reminders_logs extends \core\task\scheduled_task {
+
+    public function execute() {
+        clean_local_reminders_logs();
+    }
+
+    public function get_name() {
+        return get_string('reminderstaskclean', 'local_reminders');
+    }
+
+}
