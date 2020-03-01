@@ -40,7 +40,9 @@ require_once($CFG->dirroot . '/availability/classes/info_module.php');
 require_once($CFG->libdir . '/modinfolib.php');
 require_once($CFG->dirroot . '/lib/enrollib.php');
 
-// CONSTANTS ///////////////////////////////////////////////////////////
+/**
+ * ======== CONSTANTS ==========================================
+ */
 
 define('REMINDERS_DAYIN_SECONDS', 24 * 3600);
 
@@ -60,7 +62,9 @@ define('REMINDERS_ACTIVITY_ONLY_CLOSINGS', 62);
 define('REMINDERS_SEND_AS_NO_REPLY', 70);
 define('REMINDERS_SEND_AS_ADMIN', 71);
 
-// FUNCTIONS ///////////////////////////////////////////////////////////
+/**
+ * ======== FUNCTIONS =========================================
+ */
 
 /**
  * Function to be run periodically according to the moodle cron
@@ -105,7 +109,7 @@ function local_reminders_cron() {
         mtrace("   [Local Reminder] This is the first cron cycle");
         $timewindowstart = $timewindowstart - REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
     } else {
-        // info field includes that starting time of last cron cycle.
+        // Info field includes that starting time of last cron cycle.
         $firstrecord = current($logrows);
         $timewindowstart = $firstrecord->time + 1;
     }
@@ -114,11 +118,10 @@ function local_reminders_cron() {
     $timewindowend = time();
 
     // Now lets filter appropiate events to send reminders.
-    //
     $secondsaheads = array(REMINDERS_7DAYSBEFORE_INSECONDS, REMINDERS_3DAYSBEFORE_INSECONDS,
         REMINDERS_1DAYBEFORE_INSECONDS);
 
-    // append custom schedule if any of event categories has defined it.
+    // Append custom schedule if any of event categories has defined it.
     foreach ($eventtypearray as $etype) {
         $tempconfigstr = 'local_reminders_'.$etype.'custom';
         if (isset($CFG->$tempconfigstr) && !empty($CFG->$tempconfigstr)
@@ -166,7 +169,7 @@ function local_reminders_cron() {
         $fromuser = get_admin();
     }
 
-    $allemailfailed = TRUE;
+    $allemailfailed = true;
     // Iterating through each event.
     foreach ($upcomingevents as $event) {
         $event = new calendar_event($event);
@@ -266,7 +269,7 @@ function local_reminders_cron() {
                     $course = $DB->get_record('course', array('id' => $event->courseid));
                     $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
                     if (isset($coursesettings->status_course) && $coursesettings->status_course == 0) {
-                        mtrace("  [Local Reminder] Reminder sending for course events has been restricted in the course specific configurations.");
+                        mtrace("  [Local Reminder] Reminders for course events has been restricted.");
                         break;
                     }
 
@@ -274,9 +277,10 @@ function local_reminders_cron() {
                         $context = context_course::instance($course->id);
                         $PAGE->set_context($context);
                         $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
-                        $senduserids = array_map(function($u) {
-                                                    return $u->id;
-                                                }, $roleusers);
+                        $senduserids = array_map(
+                        function($u) {
+                            return $u->id;
+                        }, $roleusers);
                         $sendusers = array_combine($senduserids, $roleusers);
 
                         // Create reminder object.
@@ -290,7 +294,7 @@ function local_reminders_cron() {
 
                     // If we dont want to send reminders for activity openings.
                     if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_CLOSINGS) {
-                        mtrace("  [Local Reminder] Reminder sending for activity openings has been restricted in the configurations.");
+                        mtrace("  [Local Reminder] Reminders for activity openings has been restricted in the configs.");
                         break;
                     }
 
@@ -298,7 +302,7 @@ function local_reminders_cron() {
 
                     // If we dont want to send reminders for activity closings.
                     if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_OPENINGS) {
-                        mtrace("  [Local Reminder] Reminder sending for activity closings has been restricted in the configurations.");
+                        mtrace("  [Local Reminder] Reminders for activity closings has been restricted in the configs.");
                         break;
                     }
 
@@ -310,7 +314,7 @@ function local_reminders_cron() {
                         $cm = $courseandcm[1];
                         $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
                         if (isset($coursesettings->status_activities) && $coursesettings->status_activities == 0) {
-                            mtrace("  [Local Reminder] Reminder sending for activities has been restricted in the course specific configurations.");
+                            mtrace("  [Local Reminder] Reminders for activities has been restricted in the configs.");
                             break;
                         }
 
@@ -330,16 +334,12 @@ function local_reminders_cron() {
                                 $group = $DB->get_record('groups', array('id' => $event->groupid));
                                 $sendusers = get_users_in_group($group);
                             } else {
-                                /**
-                                 * Here 'ra.id field added to avoid printing debug message
-                                 * from get_role_users (has odd behaivior when called with an array for $roleid param'.
-                                 */
+                                // Here 'ra.id field added to avoid printing debug message,
+                                // from get_role_users (has odd behaivior when called with an array for $roleid param'.
                                 $sendusers = get_active_role_users($activityroleids, $context);
 
-                                /**
-                                 * Filter user list,
-                                 * see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity
-                                 */
+                                // Filter user list,
+                                // see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity.
                                 $info = new \core_availability\info_module($cm);
                                 $sendusers = $info->filter_user_list($sendusers);
                             }
@@ -358,7 +358,7 @@ function local_reminders_cron() {
                     if (!empty($group)) {
                         $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $group->courseid));
                         if (isset($coursesettings->status_group) && $coursesettings->status_group == 0) {
-                            mtrace("  [Local Reminder] Reminder sending for group events has been restricted in the course specific configurations.");
+                            mtrace("  [Local Reminder] Reminders for group events has been restricted in the configs.");
                             break;
                         }
 
@@ -449,7 +449,7 @@ function local_reminders_cron() {
         }
 
         if ($usize != $failedcount) {
-            $allemailfailed = FALSE;
+            $allemailfailed = false;
         }
         unset($sendusers);
     }

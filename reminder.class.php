@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die;
+
 /**
  * Abstract class for reminder object.
  *
@@ -115,12 +117,10 @@ abstract class local_reminder {
             $etime = $this->event->timestart + $this->event->timeduration;
             $ddate = usergetdate($etime, $tzone);
 
-            // falls in the same day...
+            // Falls in the same day.
             if ($sdate['year'] == $ddate['year'] && $sdate['mon'] == $ddate['mon'] && $sdate['mday'] == $ddate['mday']) {
-                /**
-                 * Bug fix for not correctly displaying times in incorrect formats.
-                 * issue report: https://tracker.moodle.org/browse/CONTRIB-3647?focusedCommentId=408657
-                 */
+                 // Bug fix for not correctly displaying times in incorrect formats.
+                 // Issue report: https://tracker.moodle.org/browse/CONTRIB-3647?focusedCommentId=408657.
                 $formattedtime .= ' - '.userdate($etime, $usertimeformat, $tzone);
                 $addflag = true;
             } else {
@@ -153,7 +153,7 @@ abstract class local_reminder {
             $langtimeformat = get_string('strftimetime', 'langconfig');
         }
 
-        // we get user time formattings... if such exist, will return non-empty value
+        // We get user time formattings... if such exist, will return non-empty value.
         $utimeformat = get_user_preferences('calendar_timeformat', '', $user);
         if (empty($utimeformat)) {
             $utimeformat = get_config(null, 'calendar_site_timeformat');
@@ -238,10 +238,7 @@ abstract class local_reminder {
             $admin->customheaders = $cheaders;
         }
 
-        /**
-         * BUG FIX: $eventdata must be a new \core\message\message() for
-         * Moodle 3.5+
-         */
+         // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
         $eventdata = new \core\message\message();
 
         $eventdata->component           = 'local_reminders';

@@ -45,10 +45,10 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_local_reminders_upgrade($oldversion) {
     global $CFG, $DB, $OUTPUT;
 
-    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes
+    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
-    // Moodle v2.2.0 release upgrade line
-    // Put any upgrade step following this
+    // Moodle v2.2.0 release upgrade line.
+    // Put any upgrade step following this.
 
     if ($oldversion < 2014121301) {
 
