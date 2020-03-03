@@ -266,12 +266,15 @@ abstract class local_reminder {
      *
      * @return event object
      */
-    public function set_sendto_user($user, $refreshcontent=true) {
+    public function set_sendto_user($user, $refreshcontent=true, $fromuser = null) {
         if (!isset($this->eventobject) || empty($this->eventobject)) {
             $this->create_reminder_message_object();
         }
 
         $this->eventobject->userto = $user;
+        if (isset($fromuser)) {
+            $this->eventobject->userfrom = $fromuser;
+        }
 
         if ($refreshcontent) {
             $contenthtml = $this->get_message_html($user);
@@ -283,6 +286,10 @@ abstract class local_reminder {
         }
 
         return $this->eventobject;
+    }
+
+    public function get_sending_event($fromuser, $touser) {
+        return $this->set_sendto_user($touser, true, $fromuser);
     }
 
 }

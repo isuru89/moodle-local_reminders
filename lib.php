@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/local/reminders/contents/course_reminder.class.ph
 require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php');
 
+
 require_once($CFG->dirroot . '/calendar/lib.php');
 require_once($CFG->dirroot . '/group/lib.php');
 require_once($CFG->libdir . '/accesslib.php');
@@ -39,6 +40,8 @@ require_once($CFG->libdir . '/accesslib.php');
 require_once($CFG->dirroot . '/availability/classes/info_module.php');
 require_once($CFG->libdir . '/modinfolib.php');
 require_once($CFG->dirroot . '/lib/enrollib.php');
+
+require_once($CFG->dirroot . '/local/reminders/locallib.php');
 
 /**
  * ======== CONSTANTS ==========================================
@@ -118,7 +121,8 @@ function local_reminders_cron() {
     $timewindowend = time();
 
     // Now lets filter appropiate events to send reminders.
-    $secondsaheads = array(REMINDERS_7DAYSBEFORE_INSECONDS, REMINDERS_3DAYSBEFORE_INSECONDS,
+    $secondsaheads = array(REMINDERS_7DAYSBEFORE_INSECONDS,
+        REMINDERS_3DAYSBEFORE_INSECONDS,
         REMINDERS_1DAYBEFORE_INSECONDS);
 
     // Append custom schedule if any of event categories has defined it.
@@ -151,7 +155,7 @@ function local_reminders_cron() {
     mtrace("   [Local Reminder] Time window: ".userdate($timewindowstart)." to ".userdate($timewindowend));
 
     $upcomingevents = $DB->get_records_select('event', $whereclause);
-    if ($upcomingevents == false) {
+    if (!$upcomingevents) {
         mtrace("   [Local Reminder] No upcoming events. Aborting...");
 
         add_flag_record_db($timewindowend, 'no_events');
@@ -170,7 +174,6 @@ function local_reminders_cron() {
     }
 
     $allemailfailed = true;
-    // Iterating through each event.
     foreach ($upcomingevents as $event) {
         $event = new calendar_event($event);
 
@@ -236,173 +239,45 @@ function local_reminders_cron() {
                     ", detected through custom schedule.");
         }
 
-        $reminder = null;
-        $eventdata = null;
-        $sendusers = array();
-
+        $reminderref = null;
         mtrace("   [Local Reminder] Finding out users for event#".$event->id."...");
 
         try {
-
             switch ($event->eventtype) {
                 case 'site':
-                    $reminder = new site_reminder($event, $aheadday);
-                    $sendusers = $DB->get_records_sql("SELECT *
-                        FROM {user}
-                        WHERE id > 1 AND deleted=0 AND suspended=0 AND confirmed=1;");
-                    $eventdata = $reminder->create_reminder_message_object($fromuser);
-
+                    $reminderref = process_site_event($event, $aheadday);
                     break;
 
                 case 'user':
-                    $user = $DB->get_record('user', array('id' => $event->userid));
-
-                    if (!empty($user)) {
-                        $reminder = new user_reminder($event, $user, $aheadday);
-                        $eventdata = $reminder->create_reminder_message_object($fromuser);
-                        $sendusers[] = $user;
-                    }
-
+                    $reminderref = process_user_event($event, $aheadday);
                     break;
 
                 case 'course':
-                    $course = $DB->get_record('course', array('id' => $event->courseid));
-                    $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
-                    if (isset($coursesettings->status_course) && $coursesettings->status_course == 0) {
-                        mtrace("  [Local Reminder] Reminders for course events has been restricted.");
-                        break;
-                    }
-
-                    if (!empty($course)) {
-                        $context = context_course::instance($course->id);
-                        $PAGE->set_context($context);
-                        $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
-                        $senduserids = array_map(
-                        function($u) {
-                            return $u->id;
-                        }, $roleusers);
-                        $sendusers = array_combine($senduserids, $roleusers);
-
-                        // Create reminder object.
-                        $reminder = new course_reminder($event, $course, $aheadday);
-                        $eventdata = $reminder->create_reminder_message_object($fromuser);
-                    }
-
+                    $reminderref = process_course_event($event, $aheadday, $courseroleids);
                     break;
 
                 case 'open':
-
                     // If we dont want to send reminders for activity openings.
                     if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_CLOSINGS) {
                         mtrace("  [Local Reminder] Reminders for activity openings has been restricted in the configs.");
                         break;
                     }
-
                 case 'close':
-
                     // If we dont want to send reminders for activity closings.
                     if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_OPENINGS) {
                         mtrace("  [Local Reminder] Reminders for activity closings has been restricted in the configs.");
                         break;
                     }
-
                 case 'due':
-
-                    if (!isemptystring($event->modulename)) {
-                        $courseandcm = get_course_and_cm_from_instance($event->instance, $event->modulename, $event->courseid);
-                        $course = $courseandcm[0];
-                        $cm = $courseandcm[1];
-                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
-                        if (isset($coursesettings->status_activities) && $coursesettings->status_activities == 0) {
-                            mtrace("  [Local Reminder] Reminders for activities has been restricted in the configs.");
-                            break;
-                        }
-
-                        if (!empty($course) && !empty($cm)) {
-                            $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
-                            $context = context_module::instance($cm->id);
-                            $PAGE->set_context($context);
-
-                            if ($event->courseid <= 0 && $event->userid > 0) {
-                                // A user overridden activity.
-                                mtrace("  [Local Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");
-                                $user = $DB->get_record('user', array('id' => $event->userid));
-                                $sendusers[] = $user;
-                            } else if ($event->courseid <= 0 && $event->groupid > 0) {
-                                // A group overridden activity.
-                                mtrace("  [Local Reminder] Event #".$event->id." is a group overridden ".$event->modulename." event.");
-                                $group = $DB->get_record('groups', array('id' => $event->groupid));
-                                $sendusers = get_users_in_group($group);
-                            } else {
-                                // Here 'ra.id field added to avoid printing debug message,
-                                // from get_role_users (has odd behaivior when called with an array for $roleid param'.
-                                $sendusers = get_active_role_users($activityroleids, $context);
-
-                                // Filter user list,
-                                // see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity.
-                                $info = new \core_availability\info_module($cm);
-                                $sendusers = $info->filter_user_list($sendusers);
-                            }
-
-                            $reminder = new due_reminder($event, $course, $context, $aheadday);
-                            $reminder->set_activity($event->modulename, $activityobj);
-                            $eventdata = $reminder->create_reminder_message_object($fromuser);
-                        }
-                    }
-
+                    $reminderref = process_activity_event($event, $aheadday, $activityroleids);
                     break;
 
                 case 'group':
-                    $group = $DB->get_record('groups', array('id' => $event->groupid));
-
-                    if (!empty($group)) {
-                        $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $group->courseid));
-                        if (isset($coursesettings->status_group) && $coursesettings->status_group == 0) {
-                            mtrace("  [Local Reminder] Reminders for group events has been restricted in the configs.");
-                            break;
-                        }
-
-                        $reminder = new group_reminder($event, $group, $aheadday);
-
-                        // Add module details, if this event is a mod type event.
-                        if (!isemptystring($event->modulename) && $event->courseid > 0) {
-                            $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
-                            $reminder->set_activity($event->modulename, $activityobj);
-                        }
-                        $eventdata = $reminder->create_reminder_message_object($fromuser);
-
-                        $sendusers = get_users_in_group($group);
-                    }
-
+                    $reminderref = process_group_event($event, $aheadday);
                     break;
 
                 default:
-                    if (!isemptystring($event->modulename)) {
-                        $course = $DB->get_record('course', array('id' => $event->courseid));
-                        $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
-
-                        if (!empty($course) && !empty($cm)) {
-                            $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid);
-                            $context = context_module::instance($cm->id);
-                            $PAGE->set_context($context);
-                            $sendusers = get_active_role_users($activityroleids, $context);
-
-                            if (strcmp($event->eventtype, 'gradingdue') == 0 and isset($context)) {
-                                $filteredusers = array();
-                                foreach ($sendusers as $guser) {
-                                    if (has_capability('mod/assign:grade', $context, $guser)) {
-                                        $filteredusers[] = $guser;
-                                    }
-                                }
-                                $sendusers = $filteredusers;
-                            }
-                            $reminder = new due_reminder($event, $course, $context, $aheadday);
-                            $reminder->set_activity($event->modulename, $activityobj);
-                            $eventdata = $reminder->create_reminder_message_object($fromuser);
-                        }
-                    } else {
-                        mtrace("  [Local Reminder] Unknown event type [$event->eventtype]");
-                    }
+                    $reminderref = process_unknown_event($event, $aheadday, $activityroleids);
             }
 
         } catch (Exception $ex) {
@@ -412,12 +287,12 @@ function local_reminders_cron() {
             continue;
         }
 
-        if ($eventdata == null) {
-            mtrace("  [Local Reminder] Event object is not set for the event $event->id [type: $event->eventtype]");
+        if ($reminderref == null) {
+            mtrace("  [Local Reminder] Reminder is not available for the event $event->id [type: $event->eventtype]");
             continue;
         }
 
-        $usize = count($sendusers);
+        $usize = $reminderref->get_total_users_to_send();
         if ($usize == 0) {
             mtrace("  [Local Reminder] No users found to send reminder for the event#$event->id");
             continue;
@@ -426,8 +301,9 @@ function local_reminders_cron() {
         mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype]");
         $failedcount = 0;
 
+        $sendusers = $reminderref->get_sending_users();
         foreach ($sendusers as $touser) {
-            $eventdata = $reminder->set_sendto_user($touser);
+            $eventdata = $reminderref->get_event_to_send($fromuser, $touser);
 
             try {
                 $mailresult = message_send($eventdata);
@@ -451,7 +327,7 @@ function local_reminders_cron() {
         if ($usize != $failedcount) {
             $allemailfailed = false;
         }
-        unset($sendusers);
+        $reminderref->cleanup();
     }
 
     if (!$allemailfailed) {
@@ -460,42 +336,6 @@ function local_reminders_cron() {
     } else {
         mtrace('  [Local Reminder] Failed to send any email to any user! Will retry again next time.');
     }
-}
-
-/**
- * Returns array of users active (not suspended) in the provided contexts and
- * at the same time belongs to the given roles.
- *
- * @param $activityroleids role ids
- * @param $context context to search for users
- * @return array of user records
- */
-function get_active_role_users($activityroleids, $context) {
-    return get_role_users($activityroleids, $context, true, 'ra.id, u.*',
-                    null, false, '', '', '',
-                    'ue.status = :userenrolstatus',
-                    array('userenrolstatus' => ENROL_USER_ACTIVE));
-}
-
-/**
- * Returns all users belong to the given group.
- *
- * @param $group group object as received from db.
- * @return array users in an array
- */
-function get_users_in_group($group) {
-    global $DB;
-
-    $sendusers = array();
-    $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
-    if ($groupmemberroles) {
-        foreach ($groupmemberroles as $roleid => $roledata) {
-            foreach ($roledata->users as $member) {
-                $sendusers[] = $DB->get_record('user', array('id' => $member->id));
-            }
-        }
-    }
-    return $sendusers;
 }
 
 /**
@@ -514,62 +354,6 @@ function add_flag_record_db($timewindowend, $crontype = '') {
     $newrecord->time = $timewindowend;
     $newrecord->type = $crontype;
     $DB->insert_record("local_reminders", $newrecord);
-}
-
-/**
- * Function to retrive module instace from corresponding module
- * table. This function is written because when sending reminders
- * it can restrict showing some fields in the message which are sensitive
- * to user. (Such as some descriptions are hidden until defined date)
- * Function is very similar to the function in datalib.php/get_coursemodule_from_instance,
- * but by below it returns all fields of the module.
- *
- * Eg: can get the quiz instace from quiz table, can get the new assignment
- * instace from assign table, etc.
- *
- * @param string $modulename name of module type, eg. resource, assignment,...
- * @param int $instance module instance number (id in resource, assignment etc. table)
- * @param int $courseid optional course id for extra validation
- *
- * @return individual module instance (a quiz, a assignment, etc).
- *          If fails returns null
- */
-function fetch_module_instance($modulename, $instance, $courseid=0) {
-    global $DB;
-
-    $params = array('instance' => $instance, 'modulename' => $modulename);
-
-    $courseselect = "";
-
-    if ($courseid) {
-        $courseselect = "AND cm.course = :courseid";
-        $params['courseid'] = $courseid;
-    }
-
-    $sql = "SELECT m.*
-              FROM {course_modules} cm
-                   JOIN {modules} md ON md.id = cm.module
-                   JOIN {".$modulename."} m ON m.id = cm.instance
-             WHERE m.id = :instance AND md.name = :modulename
-                   $courseselect";
-
-    try {
-        return $DB->get_record_sql($sql, $params, IGNORE_MISSING);
-    } catch (moodle_exception $mex) {
-        mtrace('  [Local Reminder - ERROR] Failed to fetch module instance! '.$mex.getMessage);
-        return null;
-    }
-}
-
-/**
- * Returns true if input string is empty/whitespaces only, otherwise false.
- *
- * @param type $str string
- *
- * @return boolean true if string is empty or whitespace
- */
-function isemptystring($str) {
-    return !isset($str) || empty($str) || trim($str) === '';
 }
 
 function local_reminders_extend_settings_navigation($settingsnav, $context) {
