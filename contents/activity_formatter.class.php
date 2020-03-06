@@ -70,14 +70,13 @@ abstract class activity_formatter {
 
 class quiz_formatter extends activity_formatter {
 
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         if (isset($activity->timeopen)) {
             $utime = time();
             if ($utime > $activity->timeopen) {
-                $htmlmail .= html_writer::start_tag('tr');
-                $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
-                $htmlmail .= html_writer::tag('td', $activity->intro);
-                $htmlmail .= html_writer::end_tag('tr');
+                $htmlmail .= $reminder->write_table_row(
+                    get_string('contentdescription', 'local_reminders'),
+                    $activity->intro);
             }
         }
     }
@@ -85,21 +84,19 @@ class quiz_formatter extends activity_formatter {
 
 class assign_formatter extends activity_formatter {
 
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         if (isset($activity->alwaysshowdescription)) {
             $utime = time();
             if ($activity->alwaysshowdescription > 0 || $utime > $activity->allowsubmissionsfromdate) {
-                $htmlmail .= html_writer::start_tag('tr');
-                $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
-                $htmlmail .= html_writer::tag('td', $event->description);
-                $htmlmail .= html_writer::end_tag('tr');
+                $htmlmail .= $reminder->write_table_row(
+                    get_string('contentdescription', 'local_reminders'),
+                    $event->description);
             }
         }
         if (isset($activity->cutoffdate) && $activity->cutoffdate > 0) {
-            $htmlmail .= html_writer::start_tag('tr');
-            $htmlmail .= html_writer::tag('td', get_string('cutoffdate', 'assign'));
-            $htmlmail .= html_writer::tag('td', $this->format_datetime($activity->cutoffdate, $user));
-            $htmlmail .= html_writer::end_tag('tr');
+            $htmlmail .= $reminder->write_table_row(
+                get_string('cutoffdate', 'assign'),
+                $this->format_datetime($activity->cutoffdate, $user));
         }
     }
 }

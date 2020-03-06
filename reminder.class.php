@@ -45,6 +45,7 @@ abstract class local_reminder {
     protected $tbodycssstyle = 'width:100%;font-family:Tahoma,Arial,Sans-serif;border-width:1px 2px 2px 1px;border:1px Solid #ccc';
     protected $titlestyle = 'padding:0 0 6px 0;margin:0;font-family:Arial,Sans-serif;font-size:16px;font-weight:bold;color:#222';
     protected $footerstyle = 'background-color:#f6f6f6;color:#888;border-top:1px Solid #ccc;font-family:Arial,Sans-serif;font-size:11px';
+    protected $defheaderstyle = 'padding: 0 5px; color: #666';
 
     /**
      *
@@ -55,6 +56,31 @@ abstract class local_reminder {
     public function __construct($event, $aheaddays = 1) {
         $this->event = $event;
         $this->aheaddays = $aheaddays;
+    }
+
+    /**
+     * Writes an email row including header and its value.
+     *
+     * @param $headervalue string the content for header
+     * @param $value string value to show
+     * @param $customizedstyle array of style values.
+     * @param $overridestyle boolean to override or not the specified styles if given.
+     * @return string generated html row.
+     */
+    public function write_table_row($headervalue, $value, $customizedstyle=null, $overridestyle=true) {
+        $htmltext = html_writer::start_tag('tr');
+        $defheadercss = array('style' => $this->defheaderstyle);
+        if (isset($customizedstyle)) {
+            $finalstyles = $customizedstyle;
+            if (!$overridestyle) {
+                $finalstyles = array_merge($defheadercss, $customizedstyle);
+            }
+            $htmltext .= html_writer::tag('td', $headervalue, $finalstyles);
+        } else {
+            $htmltext .= html_writer::tag('td', $headervalue, $defheadercss);
+        }
+        $htmltext .= html_writer::tag('td', $value);
+        return $htmltext.html_writer::end_tag('tr');
     }
 
     /**

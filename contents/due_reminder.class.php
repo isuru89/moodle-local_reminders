@@ -62,35 +62,29 @@ class due_reminder extends course_reminder {
                 array('style' => 'text-decoration: none'));
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
-        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration($user));
-        $htmlmail .= html_writer::end_tag('tr');
 
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contenttypecourse', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', $this->course->fullname);
-        $htmlmail .= html_writer::end_tag('tr');
+        $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
+            $this->format_event_time_duration($user),
+            array('width' => '25%'), false);
 
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contenttypeactivity', 'local_reminders'));
-        $htmlmail .= html_writer::start_tag('td');
-        $htmlmail .= html_writer::link($this->cm->get_url(), $this->cm->get_context_name(), array('target' => '_blank'));
-        $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
+        $htmlmail .= $this->write_table_row(get_string('contenttypecourse', 'local_reminders'), $this->course->fullname);
+
+        $activitylink = html_writer::link($this->cm->get_url(), $this->cm->get_context_name(), array('target' => '_blank'));
+        $htmlmail .= $this->write_table_row(get_string('contenttypeactivity', 'local_reminders'), $activitylink);
 
         if (!empty($this->modname) && !empty($this->activityobj)) {
             $clsname = $this->modname.'_formatter';
             if (class_exists($clsname)) {
                 $formattercls = new $clsname;
-                $formattercls->append_info($htmlmail, $this->modname, $this->activityobj, $user, $this->event);
+                $formattercls->append_info($htmlmail, $this->modname, $this->activityobj, $user, $this->event, $this);
             }
         }
 
         $htmlmail .= $this->get_html_footer();
-        $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
-                html_writer::end_tag('html');
-
-        return $htmlmail;
+        return $htmlmail.html_writer::end_tag('table').
+            html_writer::end_tag('div').
+            html_writer::end_tag('body').
+            html_writer::end_tag('html');
     }
 
     public function get_message_plaintext($user=null) {
