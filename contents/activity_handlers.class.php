@@ -43,7 +43,7 @@ abstract class local_reminder_activity_handler {
     /**
      * formats given date and time based on given user's timezone
      */
-    protected function format_datetime($datetime, $user) {
+    protected function format_datetime($datetime, $user, $reminder) {
         $tzone = 99;
         if (isset($user) && !empty($user)) {
             $tzone = core_date::get_user_timezone($user);
@@ -51,7 +51,10 @@ abstract class local_reminder_activity_handler {
 
         $daytimeformat = get_string('strftimedaydate', 'langconfig');
         $utimeformat = get_correct_timeformat_user($user);
-        return userdate($datetime, $daytimeformat, $tzone).' '.userdate($datetime, $utimeformat, $tzone);
+        return userdate($datetime, $daytimeformat, $tzone).
+            ' '.userdate($datetime, $utimeformat, $tzone).
+            ' &nbsp;&nbsp;<span style="'.$reminder->tzshowstyle.'">'.
+            local_reminders_tz_info::get_human_readable_tz($tzone).'</span>';
     }
 
 }
@@ -75,7 +78,7 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
         if (isset($activity->cutoffdate) && $activity->cutoffdate > 0) {
             $htmlmail .= $reminder->write_table_row(
                 get_string('cutoffdate', 'assign'),
-                $this->format_datetime($activity->cutoffdate, $user));
+                $this->format_datetime($activity->cutoffdate, $user, $reminder));
         }
     }
 
