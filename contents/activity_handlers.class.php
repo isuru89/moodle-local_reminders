@@ -31,7 +31,14 @@ abstract class local_reminder_activity_handler {
      * based on constraints in that activity instance
      *
      */
-    public abstract function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null);
+    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null) {
+        // Do nothing.
+    }
+
+    /**
+     * Returns associated description of the given activity.
+     */
+    public abstract function get_description($activity, $event);
 
     /**
      * formats given date and time based on given user's timezone
@@ -51,34 +58,35 @@ abstract class local_reminder_activity_handler {
 
 class local_reminder_quiz_handler extends local_reminder_activity_handler {
 
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function get_description($activity, $event) {
         if (isset($activity->timeopen)) {
             $utime = time();
             if ($utime > $activity->timeopen) {
-                $htmlmail .= $reminder->write_table_row(
-                    get_string('contentdescription', 'local_reminders'),
-                    $activity->intro);
+                return $activity->intro;
             }
         }
+        return null;
     }
 }
 
 class local_reminder_assign_handler extends local_reminder_activity_handler {
 
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
-        if (isset($activity->alwaysshowdescription)) {
-            $utime = time();
-            if ($activity->alwaysshowdescription > 0 || $utime > $activity->allowsubmissionsfromdate) {
-                $htmlmail .= $reminder->write_table_row(
-                    get_string('contentdescription', 'local_reminders'),
-                    $event->description);
-            }
-        }
         if (isset($activity->cutoffdate) && $activity->cutoffdate > 0) {
             $htmlmail .= $reminder->write_table_row(
                 get_string('cutoffdate', 'assign'),
                 $this->format_datetime($activity->cutoffdate, $user));
         }
+    }
+
+    public function get_description($activity, $event) {
+        if (isset($activity->alwaysshowdescription)) {
+            $utime = time();
+            if ($activity->alwaysshowdescription > 0 || $utime > $activity->allowsubmissionsfromdate) {
+                return $event->description;
+            }
+        }
+        return null;
     }
 }
 

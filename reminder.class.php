@@ -47,7 +47,7 @@ abstract class local_reminder {
         'border-width:1px 2px 2px 1px;'.
         'border:1px solid #ccc;'.
         'font-size:13px';
-    protected $titlestyle = 'padding:0 0 6px 0;'.
+    protected $titlestyle = 'padding:10px 0 10px 0;'.
         'margin:0;'.
         'font-family:Arial,Sans-serif;'.
         'font-size:16px;'.
@@ -57,8 +57,13 @@ abstract class local_reminder {
         'color:#888;'.
         'border-top:1px solid #ccc;'.
         'font-family:Arial,Sans-serif;'.
-        'font-size:11px';
-    protected $defheaderstyle = 'padding: 0 5px; color: #888';
+        'font-size:11px;'.
+        'padding: 20px 10px;';
+    protected $descstyle = 'border-top:1px solid #eee;'.
+        'font-family:Arial,Sans-serif;'.
+        'font-size:13px;'.
+        'padding: 2px 15px;';
+    protected $defheaderstyle = 'padding: 0 15px; color: #888; width: 150px;';
 
     /**
      *
@@ -97,6 +102,34 @@ abstract class local_reminder {
     }
 
     /**
+     * Write location to the email if exists.
+     *
+     * @param object $event event instance.
+     */
+    protected function write_location_info($event) {
+        if (isset($event->location) && !empty($event->location)) {
+            return self::write_table_row(get_string('contenttypelocation', 'local_reminders'), $event->location);
+        }
+    }
+
+    /**
+     * Writes the description to the email.
+     *
+     * @param string $description event description.
+     * @param object $event event instance.
+     */
+    protected function write_description($description, $event) {
+        $htmltext = html_writer::start_tag('tr');
+        $columndescstyle = array('style' => $this->descstyle, 'colspan' => 2);
+        if (isemptystring($description)) {
+            $htmltext .= html_writer::tag('td', "<p>$event->name</p>", $columndescstyle);
+        } else {
+            $htmltext .= html_writer::tag('td', $description, $columndescstyle);
+        }
+        return $htmltext.html_writer::end_tag('tr');
+    }
+
+    /**
      * Gets the header content of the e-mail message.
      */
     protected function get_html_header() {
@@ -109,10 +142,11 @@ abstract class local_reminder {
     protected function get_html_footer() {
         global $CFG;
 
-        $footer  = html_writer::start_tag('tr');
+        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', 'Moodle Calendar', array('target' => '_blank'));
+        $footer = html_writer::start_tag('tr');
         $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
         $footer .= get_string('reminderfrom', 'local_reminders').' ';
-        $footer .= html_writer::link($CFG->wwwroot.'/calendar/index.php', 'Moodle Calendar', array('target' => '_blank'));
+        $footer .= $calendarlink;
         $footer .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
         return $footer;

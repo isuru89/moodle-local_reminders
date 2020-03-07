@@ -31,6 +31,7 @@ $string['contenttypecourse'] = 'Course';
 $string['contenttypeactivity'] = 'Activity';
 $string['contenttypegroup'] = 'Group';
 $string['contenttypeuser'] = 'User';
+$string['contenttypelocation'] = 'Where';
 $string['contentwhen'] = 'When';
 $string['courseheading'] = 'Course Event Reminders';
 $string['days7'] = '7 Days';
