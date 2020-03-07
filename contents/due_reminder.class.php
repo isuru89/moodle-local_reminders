@@ -70,6 +70,7 @@ class due_reminder extends course_reminder {
         $activitylink = html_writer::link($this->cm->get_url(), $this->cm->get_context_name(), array('target' => '_blank'));
         $htmlmail .= $this->write_table_row(get_string('contenttypeactivity', 'local_reminders'), $activitylink);
 
+        $formattercls = null;
         if (!empty($this->modname) && !empty($this->activityobj)) {
             $clsname = 'local_reminder_'.$this->modname.'_handler';
             if (class_exists($clsname)) {
@@ -77,6 +78,9 @@ class due_reminder extends course_reminder {
                 $formattercls->append_info($htmlmail, $this->modname, $this->activityobj, $user, $this->event, $this);
             }
         }
+
+        $description = isset($formattercls) ? $formattercls->get_description($this->activityobj, $this->event) : '';
+        $htmlmail .= $this->write_description($description, $this->event);
 
         $htmlmail .= $this->get_html_footer();
         return $htmlmail.html_writer::end_tag('table').

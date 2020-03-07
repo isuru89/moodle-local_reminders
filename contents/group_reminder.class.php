@@ -98,6 +98,7 @@ class group_reminder extends local_reminder {
             $htmlmail .= $this->write_table_row(get_string('contenttypegroup', 'local_reminders'), $this->group->name);
         }
 
+        $formattercls = null;
         if (!empty($this->modname) && !empty($this->activityobj)) {
             $clsname = 'local_reminder_'.$this->modname.'_handler';
             if (class_exists($clsname)) {
@@ -105,6 +106,9 @@ class group_reminder extends local_reminder {
                 $formattercls->append_info($htmlmail, $this->modname, $this->activityobj, $user, $this->event);
             }
         }
+
+        $description = isset($formattercls) ? $formattercls->get_description($this->activityobj, $this->event) : '';
+        $htmlmail .= $this->write_description($description, $this->event);
 
         $htmlmail .= $this->get_html_footer();
         $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
