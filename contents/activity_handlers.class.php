@@ -24,7 +24,7 @@ defined('MOODLE_INTERNAL') || die;
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class activity_formatter {
+abstract class local_reminder_activity_handler {
 
     /**
      * This function will format/append reminder messages with necessary info
@@ -43,32 +43,13 @@ abstract class activity_formatter {
         }
 
         $daytimeformat = get_string('strftimedaydate', 'langconfig');
-        $utimeformat = self::get_correct_timeformat_user($user);
+        $utimeformat = get_correct_timeformat_user($user);
         return userdate($datetime, $daytimeformat, $tzone).' '.userdate($datetime, $utimeformat, $tzone);
-    }
-
-    /**
-     * This function would return time formats relevent for the given user.
-     * Sometimes a user might have changed time display format in his/her preferences.
-     *
-     */
-    private function get_correct_timeformat_user($user) {
-        static $langtimeformat = null;
-        if ($langtimeformat === null) {
-            $langtimeformat = get_string('strftimetime', 'langconfig');
-        }
-
-        // We get user time formattings... if such exist, will return non-empty value.
-        $utimeformat = get_user_preferences('calendar_timeformat', '', $user);
-        if (empty($utimeformat)) {
-            $utimeformat = get_config(null, 'calendar_site_timeformat');
-        }
-        return empty($utimeformat) ? $langtimeformat : $utimeformat;
     }
 
 }
 
-class quiz_formatter extends activity_formatter {
+class local_reminder_quiz_handler extends local_reminder_activity_handler {
 
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         if (isset($activity->timeopen)) {
@@ -82,7 +63,7 @@ class quiz_formatter extends activity_formatter {
     }
 }
 
-class assign_formatter extends activity_formatter {
+class local_reminder_assign_handler extends local_reminder_activity_handler {
 
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         if (isset($activity->alwaysshowdescription)) {

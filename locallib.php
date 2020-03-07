@@ -22,6 +22,8 @@
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+defined('MOODLE_INTERNAL') || die;
+
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/site_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/user_reminder.class.php');
@@ -67,7 +69,7 @@ function process_activity_event($event, $aheadday, $activityroleids = null) {
             $sendusers = get_active_role_users($activityroleids, $context);
 
             // Filter user list,
-            // see: https://docs.moodle.org/dev/Availability_API#Display_a_list_of_users_who_may_be_able_to_access_the_current_activity.
+            // see: https://docs.moodle.org/dev/Availability_API.
             $info = new \core_availability\info_module($cm);
             $sendusers = $info->filter_user_list($sendusers);
         }
@@ -180,6 +182,75 @@ function process_site_event($event, $aheadday) {
         FROM {user}
         WHERE id > 1 AND deleted=0 AND suspended=0 AND confirmed=1;");
     return new reminder_ref($reminder, $sendusers);
+}
+
+/**
+ * This function formats the due time of the event appropiately. If this event
+ * has a duration then formatted time will be [starttime]-[endtime].
+ *
+ * @param object $user user object
+ * @param object $event event instance
+ * @return string formatted time string
+ */
+function format_event_time_duration($user, $event) {
+    $followedtimeformat = get_string('strftimedaydate', 'langconfig');
+    $usertimeformat = get_correct_timeformat_user($user);
+
+    $tzone = 99;
+    if (isset($user) && !empty($user)) {
+        $tzone = core_date::get_user_timezone($user);
+    }
+
+    $addflag = false;
+    $formattedtimeprefix = userdate($event->timestart, $followedtimeformat, $tzone);
+    $formattedtime = userdate($event->timestart, $usertimeformat, $tzone);
+    $sdate = usergetdate($event->timestart, $tzone);
+    if ($event->timeduration > 0) {
+        $etime = $event->timestart + $event->timeduration;
+        $ddate = usergetdate($etime, $tzone);
+
+        // Falls in the same day.
+        if ($sdate['year'] == $ddate['year'] && $sdate['mon'] == $ddate['mon'] && $sdate['mday'] == $ddate['mday']) {
+            // Bug fix for not correctly displaying times in incorrect formats.
+            // Issue report: https://tracker.moodle.org/browse/CONTRIB-3647?focusedCommentId=408657.
+            $formattedtime .= ' - '.userdate($etime, $usertimeformat, $tzone);
+            $addflag = true;
+        } else {
+            $formattedtime .= ' - '.
+                userdate($etime, $followedtimeformat, $tzone)." ".
+                userdate($etime, $usertimeformat, $tzone);
+        }
+
+        if ($addflag) {
+            $formattedtime = $formattedtimeprefix.'  ['.$formattedtime.']';
+        } else {
+            $formattedtime = $formattedtimeprefix.' '.$formattedtime;
+        }
+
+    } else {
+        $formattedtime = $formattedtimeprefix.' '.$formattedtime;
+    }
+
+    return $formattedtime;
+}
+
+/**
+ * This function would return time formats relevent for the given user.
+ * Sometimes a user might have changed time display format in his/her preferences.
+ *
+ */
+function get_correct_timeformat_user($user) {
+    static $langtimeformat = null;
+    if ($langtimeformat === null) {
+        $langtimeformat = get_string('strftimetime', 'langconfig');
+    }
+
+    // We get user time formattings... if such exist, will return non-empty value.
+    $utimeformat = get_user_preferences('calendar_timeformat', '', $user);
+    if (empty($utimeformat)) {
+        $utimeformat = get_config(null, 'calendar_site_timeformat');
+    }
+    return empty($utimeformat) ? $langtimeformat : $utimeformat;
 }
 
 /**

@@ -81,7 +81,7 @@ class group_reminder extends local_reminder {
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
         $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
-            $this->format_event_time_duration($user),
+            format_event_time_duration($user, $this->event),
             array('width' => '25%'), false);
 
         if (!empty($this->course)) {
@@ -99,7 +99,7 @@ class group_reminder extends local_reminder {
         }
 
         if (!empty($this->modname) && !empty($this->activityobj)) {
-            $clsname = $this->modname.'_formatter';
+            $clsname = 'local_reminder_'.$this->modname.'_handler';
             if (class_exists($clsname)) {
                 $formattercls = new $clsname;
                 $formattercls->append_info($htmlmail, $this->modname, $this->activityobj, $user, $this->event);
@@ -115,7 +115,7 @@ class group_reminder extends local_reminder {
 
     public function get_message_plaintext($user=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
-        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user)."\n";
+        $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
         if (!empty($this->course)) {
             $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname."\n";
         }
