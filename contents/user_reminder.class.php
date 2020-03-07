@@ -52,6 +52,7 @@ class user_reminder extends local_reminder {
 
         $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
             format_event_time_duration($user, $this->event));
+        $htmlmail .= $this->write_location_info($this->event);
 
         $htmlmail .= $this->write_table_row(get_string('contenttypeuser', 'local_reminders'), fullname($this->user));
 

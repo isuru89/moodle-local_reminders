@@ -81,8 +81,8 @@ class group_reminder extends local_reminder {
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
         $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
-            format_event_time_duration($user, $this->event),
-            array('width' => '25%'), false);
+            format_event_time_duration($user, $this->event));
+        $htmlmail .= $this->write_location_info($this->event);
 
         if (!empty($this->course)) {
             $htmlmail .= $this->write_table_row(get_string('contenttypecourse', 'local_reminders'), $this->course->fullname);

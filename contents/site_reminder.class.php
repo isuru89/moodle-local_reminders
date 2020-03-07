@@ -45,6 +45,7 @@ class site_reminder extends local_reminder {
 
         $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
             format_event_time_duration($user, $this->event));
+        $htmlmail .= $this->write_location_info($this->event);
 
         $description = $this->event->description;
         $htmlmail .= $this->write_description($description, $this->event);

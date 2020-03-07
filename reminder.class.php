@@ -102,7 +102,21 @@ abstract class local_reminder {
     }
 
     /**
+     * Write location to the email if exists.
+     *
+     * @param object $event event instance.
+     */
+    protected function write_location_info($event) {
+        if (isset($event->location) && !empty($event->location)) {
+            return self::write_table_row(get_string('contenttypelocation', 'local_reminders'), $event->location);
+        }
+    }
+
+    /**
      * Writes the description to the email.
+     *
+     * @param string $description event description.
+     * @param object $event event instance.
      */
     protected function write_description($description, $event) {
         $htmltext = html_writer::start_tag('tr');

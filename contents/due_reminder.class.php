@@ -64,6 +64,7 @@ class due_reminder extends course_reminder {
 
         $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
             format_event_time_duration($user, $this->event));
+        $htmlmail .= $this->write_location_info($this->event);
 
         $htmlmail .= $this->write_table_row(get_string('contenttypecourse', 'local_reminders'), $this->course->fullname);
 
