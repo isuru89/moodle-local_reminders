@@ -50,31 +50,23 @@ class course_reminder extends local_reminder {
                 array('style' => 'text-decoration: none'));
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
-        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration($user));
-        $htmlmail .= html_writer::end_tag('tr');
+        $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
+            format_event_time_duration($user, $this->event),
+            array('width' => '25%'), false);
 
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contenttypecourse', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', $this->course->fullname);
-        $htmlmail .= html_writer::end_tag('tr');
-
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', $this->event->description);
-        $htmlmail .= html_writer::end_tag('tr');
+        $htmlmail .= $this->write_table_row(get_string('contenttypecourse', 'local_reminders'), $this->course->fullname);
+        $htmlmail .= $this->write_table_row(get_string('contentdescription', 'local_reminders'), $this->event->description);
 
         $htmlmail .= $this->get_html_footer();
-        $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
-                html_writer::end_tag('html');
-
-        return $htmlmail;
+        return $htmlmail.html_writer::end_tag('table').
+            html_writer::end_tag('div').
+            html_writer::end_tag('body').
+            html_writer::end_tag('html');
     }
 
     public function get_message_plaintext($user=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
-        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user)."\n";
+        $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
         $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname."\n";
         $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description."\n";
 

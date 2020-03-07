@@ -112,7 +112,7 @@ interface because of trying to send too many reminders at once.
 All following folders/files must be put in to the local directory of Moodle root folder to work properly.
 
     /reminders/classes/task/send_reminders.php
-    /reminders/contents/activity_formatter.class.php
+    /reminders/contents/activity_handlers.class.php
     /reminders/contents/course_reminder.class.php
     /reminders/contents/due_reminder.class.php
     /reminders/contents/group_reminder.class.php

@@ -42,9 +42,23 @@ abstract class local_reminder {
      */
     protected $event;
 
-    protected $tbodycssstyle = 'width:100%;font-family:Tahoma,Arial,Sans-serif;border-width:1px 2px 2px 1px;border:1px Solid #ccc';
-    protected $titlestyle = 'padding:0 0 6px 0;margin:0;font-family:Arial,Sans-serif;font-size:16px;font-weight:bold;color:#222';
-    protected $footerstyle = 'background-color:#f6f6f6;color:#888;border-top:1px Solid #ccc;font-family:Arial,Sans-serif;font-size:11px';
+    protected $tbodycssstyle = 'width:100%;'.
+        'font-family:Tahoma,Arial,Sans-serif;'.
+        'border-width:1px 2px 2px 1px;'.
+        'border:1px solid #ccc;'.
+        'font-size:13px';
+    protected $titlestyle = 'padding:0 0 6px 0;'.
+        'margin:0;'.
+        'font-family:Arial,Sans-serif;'.
+        'font-size:16px;'.
+        'font-weight:bold;'.
+        'color:#222';
+    protected $footerstyle = 'background-color:#f6f6f6;'.
+        'color:#888;'.
+        'border-top:1px solid #ccc;'.
+        'font-family:Arial,Sans-serif;'.
+        'font-size:11px';
+    protected $defheaderstyle = 'padding: 0 5px; color: #888';
 
     /**
      *
@@ -55,6 +69,31 @@ abstract class local_reminder {
     public function __construct($event, $aheaddays = 1) {
         $this->event = $event;
         $this->aheaddays = $aheaddays;
+    }
+
+    /**
+     * Writes an email row including header and its value.
+     *
+     * @param $headervalue string the content for header
+     * @param $value string value to show
+     * @param $customizedstyle array of style values.
+     * @param $overridestyle boolean to override or not the specified styles if given.
+     * @return string generated html row.
+     */
+    public function write_table_row($headervalue, $value, $customizedstyle=null, $overridestyle=true) {
+        $htmltext = html_writer::start_tag('tr');
+        $defheadercss = array('style' => $this->defheaderstyle);
+        if (isset($customizedstyle)) {
+            $finalstyles = $customizedstyle;
+            if (!$overridestyle) {
+                $finalstyles = array_merge($defheadercss, $customizedstyle);
+            }
+            $htmltext .= html_writer::tag('td', $headervalue, $finalstyles);
+        } else {
+            $htmltext .= html_writer::tag('td', $headervalue, $defheadercss);
+        }
+        $htmltext .= html_writer::tag('td', $value);
+        return $htmltext.html_writer::end_tag('tr');
     }
 
     /**
@@ -91,74 +130,6 @@ abstract class local_reminder {
         $calurl->set_anchor('event_'.$this->event->id);
 
         return $calurl->out(false);
-    }
-
-    /**
-     * This function formats the due time of the event appropiately. If this event
-     * has a duration then formatted time will be [starttime]-[endtime].
-     *
-     * @param object $user user object
-     * @return string formatted time string
-     */
-    protected function format_event_time_duration($user) {
-        $followedtimeformat = get_string('strftimedaydate', 'langconfig');
-        $usertimeformat = self::get_correct_timeformat_user($user);
-
-        $tzone = 99;
-        if (isset($user) && !empty($user)) {
-            $tzone = core_date::get_user_timezone($user);
-        }
-
-        $addflag = false;
-        $formattedtimeprefix = userdate($this->event->timestart, $followedtimeformat, $tzone);
-        $formattedtime = userdate($this->event->timestart, $usertimeformat, $tzone);
-        $sdate = usergetdate($this->event->timestart, $tzone);
-        if ($this->event->timeduration > 0) {
-            $etime = $this->event->timestart + $this->event->timeduration;
-            $ddate = usergetdate($etime, $tzone);
-
-            // Falls in the same day.
-            if ($sdate['year'] == $ddate['year'] && $sdate['mon'] == $ddate['mon'] && $sdate['mday'] == $ddate['mday']) {
-                 // Bug fix for not correctly displaying times in incorrect formats.
-                 // Issue report: https://tracker.moodle.org/browse/CONTRIB-3647?focusedCommentId=408657.
-                $formattedtime .= ' - '.userdate($etime, $usertimeformat, $tzone);
-                $addflag = true;
-            } else {
-                $formattedtime .= ' - '.
-                    userdate($etime, $followedtimeformat, $tzone)." ".
-                    userdate($etime, $usertimeformat, $tzone);
-            }
-
-            if ($addflag) {
-                $formattedtime = $formattedtimeprefix.'  ['.$formattedtime.']';
-            } else {
-                $formattedtime = $formattedtimeprefix.' '.$formattedtime;
-            }
-
-        } else {
-            $formattedtime = $formattedtimeprefix.' '.$formattedtime;
-        }
-
-        return $formattedtime;
-    }
-
-    /**
-     * This function would return time formats relevent for the given user.
-     * Sometimes a user might have changed time display format in his/her preferences.
-     *
-     */
-    protected function get_correct_timeformat_user($user) {
-        static $langtimeformat = null;
-        if ($langtimeformat === null) {
-            $langtimeformat = get_string('strftimetime', 'langconfig');
-        }
-
-        // We get user time formattings... if such exist, will return non-empty value.
-        $utimeformat = get_user_preferences('calendar_timeformat', '', $user);
-        if (empty($utimeformat)) {
-            $utimeformat = get_config(null, 'calendar_site_timeformat');
-        }
-        return empty($utimeformat) ? $langtimeformat : $utimeformat;
     }
 
     /**
@@ -266,12 +237,15 @@ abstract class local_reminder {
      *
      * @return event object
      */
-    public function set_sendto_user($user, $refreshcontent=true) {
+    public function set_sendto_user($user, $refreshcontent=true, $fromuser = null) {
         if (!isset($this->eventobject) || empty($this->eventobject)) {
             $this->create_reminder_message_object();
         }
 
         $this->eventobject->userto = $user;
+        if (isset($fromuser)) {
+            $this->eventobject->userfrom = $fromuser;
+        }
 
         if ($refreshcontent) {
             $contenthtml = $this->get_message_html($user);
@@ -283,6 +257,10 @@ abstract class local_reminder {
         }
 
         return $this->eventobject;
+    }
+
+    public function get_sending_event($fromuser, $touser) {
+        return $this->set_sendto_user($touser, true, $fromuser);
     }
 
 }
