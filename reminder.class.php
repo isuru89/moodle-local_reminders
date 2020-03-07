@@ -64,6 +64,7 @@ abstract class local_reminder {
         'font-size:13px;'.
         'padding: 2px 15px;';
     protected $defheaderstyle = 'padding: 0 15px; color: #888; width: 150px;';
+    public $tzshowstyle = 'font-size:13px;color: #888;';
 
     /**
      *

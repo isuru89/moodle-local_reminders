@@ -190,9 +190,10 @@ function process_site_event($event, $aheadday) {
  *
  * @param object $user user object
  * @param object $event event instance
+ * @param array $tzstyle css style string for tz
  * @return string formatted time string
  */
-function format_event_time_duration($user, $event) {
+function format_event_time_duration($user, $event, $tzstyle=null) {
     $followedtimeformat = get_string('strftimedaydate', 'langconfig');
     $usertimeformat = get_correct_timeformat_user($user);
 
@@ -231,7 +232,13 @@ function format_event_time_duration($user, $event) {
         $formattedtime = $formattedtimeprefix.' '.$formattedtime;
     }
 
-    return $formattedtime;
+    $tzstr = local_reminders_tz_info::get_human_readable_tz($tzone);
+    if (!isemptystring($tzstyle)) {
+        $tzstr = '<span style="'.$tzstyle.'">'.$tzstr.'</span>';
+    } else {
+        $tzstr = '<span style="font-size:13px;color: #888;">'.$tzstr.'</span>';
+    }
+    return $formattedtime.' &nbsp;&nbsp;'.$tzstr;
 }
 
 /**
@@ -346,7 +353,39 @@ function fetch_module_instance($modulename, $instance, $courseid=0) {
 }
 
 /**
- *
+ * Reminder specific timezone data holder.
+ * Note: you must have at least Moodle 3.5 or higher.
+ */
+class local_reminders_tz_info extends \core_date {
+    protected static $mapping;
+
+    public static function get_human_readable_tz($tz) {
+        if (!isset(self::$mapping)) {
+            static::load_tz_info();
+        }
+
+        if (is_numeric($tz)) {
+            return static::get_localised_timezone($tz);
+        }
+        $result = self::$mapping[$tz];
+        if (isset($result)) {
+            return $result;
+        }
+        return static::get_localised_timezone($tz);
+    }
+
+    private static function load_tz_info() {
+        self::$mapping = array();
+        foreach (static::$badzones as $detailname => $abbr) {
+            if (!is_numeric($detailname)) {
+                self::$mapping[$abbr] = $detailname;
+            }
+        }
+    }
+}
+
+/**
+ * Reminder reference class.
  */
 class reminder_ref {
     protected $reminder;
