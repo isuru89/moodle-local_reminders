@@ -159,6 +159,7 @@ function local_reminders_cron() {
         $event = new calendar_event($event);
 
         $aheadday = 0;
+        $diffinseconds = $event->timestart - $timewindowend;
         $fromcustom = false;
 
         if ($event->timestart - REMINDERS_1DAYBEFORE_INSECONDS >= $timewindowstart &&
@@ -184,7 +185,7 @@ function local_reminders_cron() {
         }
 
         mtrace("   [Local Reminder] Processing event in ahead of $aheadday days.");
-        if ($aheadday == 0) {
+        if ($diffinseconds < 0) {
             mtrace('   [Local Reminder] Skipping event because it might have expired.');
             continue;
         }
