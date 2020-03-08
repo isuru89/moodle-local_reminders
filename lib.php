@@ -339,6 +339,26 @@ function add_flag_record_db($timewindowend, $crontype = '') {
 }
 
 /**
+ * Returns false if and only if it is permitted as specified in the settings.
+ * Otherwise returns true.
+ *
+ * @param string $changetype event change type.
+ * @return boolean true if now allowed.
+ */
+function has_denied_for_events($changetype) {
+    global $CFG;
+
+    if ($changetype == REMINDERS_CALENDAR_EVENT_UPDATED) {
+        return !isset($CFG->local_reminders_enable_whenchanged) || !$CFG->local_reminders_enable_whenchanged;
+    } else if ($changetype == REMINDERS_CALENDAR_EVENT_ADDED) {
+        return !isset($CFG->local_reminders_enable_whenadded) || !$CFG->local_reminders_enable_whenadded;
+    } else if ($changetype == REMINDERS_CALENDAR_EVENT_REMOVED) {
+        return !isset($CFG->local_reminders_enable_whenremoved) || !$CFG->local_reminders_enable_whenremoved;
+    }
+    return false;
+}
+
+/**
  * Calls when calendar event created/updated/deleted.
  *
  * @param object $event calendar event instance.
@@ -348,13 +368,21 @@ function add_flag_record_db($timewindowend, $crontype = '') {
 function when_calendar_event_updated($updateevent, $changetype) {
     global $CFG;
 
-    // TODO check enabled.
+    // Not allowed to continue.
+    if (has_denied_for_events($changetype)) {
+        return;
+    }
 
     $event = null;
     if ($changetype == REMINDERS_CALENDAR_EVENT_REMOVED) {
         $event = $updateevent->get_record_snapshot($updateevent->objecttable, $updateevent->objectid);
     } else {
         $event = calendar_event::load($updateevent->objectid);
+    }
+
+    $enabledoptionskey = 'local_reminders_enable_'.strtolower($event->eventtype).'forcalevents';
+    if (!isset($CFG->$enabledoptionskey) || !$CFG->$enabledoptionskey) {
+        return;
     }
 
     $currtime = time();

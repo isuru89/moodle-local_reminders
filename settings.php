@@ -48,10 +48,6 @@ if ($hassiteconfig) {
             get_string('enabled', 'local_reminders'),
             get_string('enableddescription', 'local_reminders'), 1));
 
-    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_whenchanged',
-            get_string('enabledchangedevents', 'local_reminders'),
-            get_string('enabledchangedeventsdescription', 'local_reminders'), 0));
-
     $settings->add(new admin_setting_configtext('local_reminders_messagetitleprefix',
             get_string('messagetitleprefix', 'local_reminders'),
             get_string('messagetitleprefixdescription', 'local_reminders'), 'Moodle-Reminder'));
@@ -87,6 +83,23 @@ if ($hassiteconfig) {
     $defaultgroup = array('days7' => 0, 'days3' => 1, 'days1' => 0);
     $defaultdue = array('days7' => 0, 'days3' => 1, 'days1' => 0);
 
+    // CALENDAR EVENT CHANGED EVENTS.
+
+    $settings->add(new admin_setting_heading('local_reminders_heading_caleventchanged',
+            get_string('caleventchangedheading', 'local_reminders'),
+            get_string('caleventchangedheadingdetails', 'local_reminders')));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_whenadded',
+            get_string('enabledaddedevents', 'local_reminders'),
+            get_string('enabledaddedeventsdescription', 'local_reminders'), 0));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_whenchanged',
+            get_string('enabledchangedevents', 'local_reminders'),
+            get_string('enabledchangedeventsdescription', 'local_reminders'), 0));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_whenremoved',
+            get_string('enabledremovedevents', 'local_reminders'),
+            get_string('enabledremovedeventsdescription', 'local_reminders'), 0));
 
     // SITE EVENT SETTINGS.
 
@@ -105,6 +118,10 @@ if ($hassiteconfig) {
             get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
             0));
 
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_siteforcalevents',
+            get_string('enabledforcalevents', 'local_reminders'),
+            get_string('enabledforcaleventsdescription', 'local_reminders'), 0));
+
     // USER EVENT SETTINGS.
 
     // Add days selection for user related events.
@@ -121,6 +138,10 @@ if ($hassiteconfig) {
             get_string('reminderdaysaheadcustom', 'local_reminders'),
             get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
             0));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_userforcalevents',
+            get_string('enabledforcalevents', 'local_reminders'),
+            get_string('enabledforcaleventsdescription', 'local_reminders'), 0));
 
     // COURSE EVENT SETTINGS.
 
@@ -144,6 +165,9 @@ if ($hassiteconfig) {
             get_string('explainrolesallowedfor', 'local_reminders'),
             $defaultrolesforcourse, $rolesarray));
 
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_courseforcalevents',
+            get_string('enabledforcalevents', 'local_reminders'),
+            get_string('enabledforcaleventsdescription', 'local_reminders'), 0));
 
     // DUE EVENT SETTINGS.
 
@@ -176,6 +200,10 @@ if ($hassiteconfig) {
             get_string('explainrolesallowedfor', 'local_reminders'),
             $defaultrolesforactivity, $rolesarray));
 
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_dueforcalevents',
+            get_string('enabledforcalevents', 'local_reminders'),
+            get_string('enabledforcaleventsdescription', 'local_reminders'), 0));
+
     // GROUP EVENT SETTINGS.
 
     // Add group related events.
@@ -196,5 +224,9 @@ if ($hassiteconfig) {
         get_string('reminderdaysaheadcustom', 'local_reminders'),
         get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
         0));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_groupforcalevents',
+        get_string('enabledforcalevents', 'local_reminders'),
+        get_string('enabledforcaleventsdescription', 'local_reminders'), 0));
 
 }
