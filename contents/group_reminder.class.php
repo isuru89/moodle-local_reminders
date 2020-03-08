@@ -45,6 +45,17 @@ class group_reminder extends local_reminder {
     }
 
     /**
+     * Cleanup this reminder instance.
+     */
+    public function cleanup() {
+        parent::cleanup();
+
+        if (isset($this->activityobj)) {
+            unset($this->activityobj);
+        }
+    }
+
+    /**
      * Set activity instance if there is any
      * @param type $activity activity instance
      */
@@ -65,7 +76,7 @@ class group_reminder extends local_reminder {
         }
     }
 
-    public function get_message_html($user=null) {
+    public function get_message_html($user=null, $changetype=null) {
         global $CFG;
 
         $htmlmail = $this->get_html_header();
@@ -73,10 +84,15 @@ class group_reminder extends local_reminder {
         $htmlmail .= html_writer::start_tag('div');
         $htmlmail .= html_writer::start_tag('table',
                 array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+
+        $contenttitle = $this->get_message_title();
+        if (!isemptystring($changetype)) {
+            $contenttitle = "[$changetype]: $contenttitle";
+        }
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
         $htmlmail .= html_writer::link($this->generate_event_link(),
-                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)),
+                html_writer::tag('h3', $contenttitle, array('style' => $this->titlestyle)),
                 array('style' => 'text-decoration: none'));
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
@@ -117,7 +133,7 @@ class group_reminder extends local_reminder {
         return $htmlmail;
     }
 
-    public function get_message_plaintext($user=null) {
+    public function get_message_plaintext($user=null, $changetype=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
         $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
         if (!empty($this->course)) {
@@ -136,7 +152,7 @@ class group_reminder extends local_reminder {
         return 'reminders_group';
     }
 
-    public function get_message_title() {
+    public function get_message_title($type=null) {
         $title = '';
         if (!empty($this->course)) {
             $title .= '('.$this->course->shortname;

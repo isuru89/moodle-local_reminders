@@ -78,6 +78,15 @@ abstract class local_reminder {
     }
 
     /**
+     * Clean up this instance.
+     */
+    public function cleanup() {
+        if (isset($this->eventobject)) {
+            unset($this->eventobject);
+        }
+    }
+
+    /**
      * Writes an email row including header and its value.
      *
      * @param $headervalue string the content for header
@@ -179,24 +188,27 @@ abstract class local_reminder {
      * Generates a message content as a HTML. Suitable for email messages.
      *
      * @param object $event The event object
+     * @param object $changetype change type (add/update/removed)
      * @return string Message content as HTML text.
      */
-    public abstract function get_message_html($user=null);
+    public abstract function get_message_html($user=null, $changetype=null);
 
     /**
      * Generates a message content as a plain-text. Suitable for popup messages.
      *
      * @param object $event The event object
+     * @param object $changetype change type (add/update/removed)
      * @return string Message content as plain-text.
      */
-    public abstract function get_message_plaintext($user=null);
+    public abstract function get_message_plaintext($user=null, $changetype=null);
 
     /**
      * Generates a message title for the reminder. Used for all message types.
      *
+     * @param string $type type of message to be send (null=reminder cron)
      * @return string Message title as a plain-text.
      */
-    public abstract function get_message_title();
+    public abstract function get_message_title($type=null);
 
     /**
      * Gets an array of custom headers for the reminder message, specially
@@ -211,8 +223,6 @@ abstract class local_reminder {
 
         $urlinfo = parse_url($CFG->wwwroot);
         $hostname = $urlinfo['host'];
-
-        mtrace(" [Local Reminders] host [ $hostname ]");
 
         return array('Message-ID: <moodlereminder'.$this->event->id.'@'.$hostname.'>');
     }
@@ -296,6 +306,44 @@ abstract class local_reminder {
 
     public function get_sending_event($fromuser, $touser) {
         return $this->set_sendto_user($touser, true, $fromuser);
+    }
+
+    public function get_updating_event_message($changetype, $admin=null, $touser=null) {
+        global $CFG;
+
+        $fromuser = $admin;
+        if ($fromuser == null) {
+            $fromuser = get_admin();
+        }
+
+        $contenthtml = $this->get_message_html($touser, $changetype);
+        $titleprefixlangstr = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
+        $titlehtml = $this->get_message_title($changetype);
+        $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
+        if (isset($CFG->local_reminders_messagetitleprefix) && !empty($CFG->local_reminders_messagetitleprefix)) {
+            $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+        }
+
+        $cheaders = $this->get_custom_headers();
+        if (!empty($cheaders)) {
+            $fromuser->customheaders = $cheaders;
+        }
+
+         // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
+        $eventdata = new \core\message\message();
+
+        $eventdata->component           = 'local_reminders';
+        $eventdata->name                = $this->get_message_provider();
+        $eventdata->userfrom            = $fromuser;
+        $eventdata->userto              = $touser;
+        $eventdata->subject             = '['.$subjectprefix.'] '.$titleprefixlangstr.': '.$titlehtml;
+        $eventdata->fullmessage         = $this->get_message_plaintext($touser, $changetype);
+        $eventdata->fullmessageformat   = FORMAT_PLAIN;
+        $eventdata->fullmessagehtml     = $contenthtml;
+        $eventdata->smallmessage        = $titlehtml . ' - ' . $contenthtml;
+        $eventdata->notification        = $this->notification;
+
+        return $eventdata;
     }
 
 }
