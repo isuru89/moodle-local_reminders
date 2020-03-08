@@ -65,6 +65,10 @@ define('REMINDERS_ACTIVITY_ONLY_CLOSINGS', 62);
 define('REMINDERS_SEND_AS_NO_REPLY', 70);
 define('REMINDERS_SEND_AS_ADMIN', 71);
 
+define('REMINDERS_CALENDAR_EVENT_ADDED', 'CREATED');
+define('REMINDERS_CALENDAR_EVENT_UPDATED', 'UPDATED');
+define('REMINDERS_CALENDAR_EVENT_REMOVED', 'REMOVED');
+
 /**
  * ======== FUNCTIONS =========================================
  */
@@ -86,23 +90,7 @@ function local_reminders_cron() {
     $eventtypearray = array('site', 'user', 'course', 'due', 'group');
 
     // Loading roles allowed to receive reminder messages from configuration.
-    $allroles = get_all_roles();
-    $courseroleids = array();
-    $activityroleids = array();
-    if (!empty($allroles)) {
-        $flag = 0;
-        foreach ($allroles as $arole) {
-            $roleoptionactivity = $CFG->local_reminders_activityroles;
-            if (isset($roleoptionactivity[$flag]) && $roleoptionactivity[$flag] == '1') {
-                $activityroleids[] = $arole->id;
-            }
-            $roleoption = $CFG->local_reminders_courseroles;
-            if (isset($roleoption[$flag]) && $roleoption[$flag] == '1') {
-                $courseroleids[] = $arole->id;
-            }
-            $flag++;
-        }
-    }
+    [$courseroleids, $activityroleids] = get_roles_for_reminders();
 
     // We need only last record only, so we limit the returning number of rows at most by one.
     $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
@@ -164,14 +152,7 @@ function local_reminders_cron() {
 
     mtrace("   [Local Reminder] Found ".count($upcomingevents)." upcoming events. Continuing...");
 
-    $fromuser = core_user::get_noreply_user();
-    if (isset($CFG->local_reminders_sendasname) && !empty($CFG->local_reminders_sendasname)) {
-        $fromuser->firstname = $CFG->local_reminders_sendasname;
-    }
-    if (isset($CFG->local_reminders_sendas) && $CFG->local_reminders_sendas == REMINDERS_SEND_AS_ADMIN) {
-        mtrace("  [Local Reminder] Sending all reminders as Admin User...");
-        $fromuser = get_admin();
-    }
+    $fromuser = get_from_user();
 
     $allemailfailed = true;
     foreach ($upcomingevents as $event) {
@@ -197,13 +178,14 @@ function local_reminders_cron() {
                 if ($event->timestart - $customsecs >= $timewindowstart &&
                     $event->timestart - $customsecs <= $timewindowend) {
                     $aheadday = $customsecs / (REMINDERS_DAYIN_SECONDS * 1.0);
-                    mtrace($aheadday);
                     $fromcustom = true;
                 }
             }
         }
 
+        mtrace("   [Local Reminder] Processing event in ahead of $aheadday days.");
         if ($aheadday == 0) {
+            mtrace('   [Local Reminder] Skipping event because it might have expired.');
             continue;
         }
         mtrace("   [Local Reminder] Processing event#$event->id [Type: $event->eventtype, inaheadof=$aheadday days]...");
@@ -354,6 +336,106 @@ function add_flag_record_db($timewindowend, $crontype = '') {
     $newrecord->time = $timewindowend;
     $newrecord->type = $crontype;
     $DB->insert_record("local_reminders", $newrecord);
+}
+
+/**
+ * Calls when calendar event created/updated/deleted.
+ *
+ * @param object $event calendar event instance.
+ * @param object $changetype change type (added/updated/removed).
+ * @return void.
+ */
+function when_calendar_event_updated($updateevent, $changetype) {
+    global $CFG;
+
+    // TODO check enabled.
+
+    $event = null;
+    if ($changetype == REMINDERS_CALENDAR_EVENT_REMOVED) {
+        $event = $updateevent->get_record_snapshot($updateevent->objecttable, $updateevent->objectid);
+    } else {
+        $event = calendar_event::load($updateevent->objectid);
+    }
+
+    $currtime = time();
+    $diffsecondsuntil = $event->timestart - $currtime;
+    if ($diffsecondsuntil < 0) {
+        return;
+    }
+    $aheadday = floor($diffsecondsuntil / (REMINDERS_DAYIN_SECONDS * 1.0));
+
+    $reminderref = null;
+
+    $allroles = get_all_roles();
+    $courseroleids = array();
+    $activityroleids = array();
+    if (!empty($allroles)) {
+        $flag = 0;
+        foreach ($allroles as $arole) {
+            $roleoptionactivity = $CFG->local_reminders_activityroles;
+            if (isset($roleoptionactivity[$flag]) && $roleoptionactivity[$flag] == '1') {
+                $activityroleids[] = $arole->id;
+            }
+            $roleoption = $CFG->local_reminders_courseroles;
+            if (isset($roleoption[$flag]) && $roleoption[$flag] == '1') {
+                $courseroleids[] = $arole->id;
+            }
+            $flag++;
+        }
+    }
+
+    $fromuser = get_from_user();
+
+    switch ($event->eventtype) {
+        case 'site':
+            $reminderref = process_site_event($event, $aheadday);
+            break;
+
+        case 'user':
+            $reminderref = process_user_event($event, $aheadday);
+            break;
+
+        case 'course':
+            $reminderref = process_course_event($event, $aheadday, $courseroleids, false);
+            break;
+
+        case 'open':
+            // If we dont want to send reminders for activity openings.
+            if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_CLOSINGS) {
+                break;
+            }
+        case 'close':
+            // If we dont want to send reminders for activity closings.
+            if (isset($CFG->local_reminders_duesend) && $CFG->local_reminders_duesend == REMINDERS_ACTIVITY_ONLY_OPENINGS) {
+                break;
+            }
+        case 'due':
+            $reminderref = process_activity_event($event, $aheadday, $activityroleids, false);
+            break;
+
+        case 'group':
+            $reminderref = process_group_event($event, $aheadday, false);
+            break;
+
+        default:
+            $reminderref = process_unknown_event($event, $aheadday, $activityroleids, false);
+    }
+
+    if ($reminderref == null) {
+        return;
+    }
+
+    $sendusers = $reminderref->get_sending_users();
+    if ($reminderref->get_total_users_to_send() == 0) {
+        return;
+    }
+
+    foreach ($sendusers as $touser) {
+        $eventdata = $reminderref->get_updating_send_event($changetype, $fromuser, $touser);
+
+        $mailresult = message_send($eventdata);
+    }
+
 }
 
 function local_reminders_extend_settings_navigation($settingsnav, $context) {

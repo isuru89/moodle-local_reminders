@@ -48,6 +48,10 @@ if ($hassiteconfig) {
             get_string('enabled', 'local_reminders'),
             get_string('enableddescription', 'local_reminders'), 1));
 
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_whenchanged',
+            get_string('enabledchangedevents', 'local_reminders'),
+            get_string('enabledchangedeventsdescription', 'local_reminders'), 0));
+
     $settings->add(new admin_setting_configtext('local_reminders_messagetitleprefix',
             get_string('messagetitleprefix', 'local_reminders'),
             get_string('messagetitleprefixdescription', 'local_reminders'), 'Moodle-Reminder'));

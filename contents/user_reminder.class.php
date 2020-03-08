@@ -37,16 +37,21 @@ class user_reminder extends local_reminder {
         $this->user = $user;
     }
 
-    public function get_message_html($user=null) {
+    public function get_message_html($user=null, $changetype=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
         $htmlmail .= html_writer::start_tag('div');
         $htmlmail .= html_writer::start_tag('table',
                 array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+
+        $contenttitle = $this->get_message_title();
+        if (!isemptystring($changetype)) {
+            $contenttitle = "[$changetype]: $contenttitle";
+        }
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
         $htmlmail .= html_writer::link($this->generate_event_link(),
-                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)),
+                html_writer::tag('h3', $contenttitle, array('style' => $this->titlestyle)),
                 array('style' => 'text-decoration: none'));
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
@@ -66,10 +71,10 @@ class user_reminder extends local_reminder {
         return $htmlmail;
     }
 
-    public function get_message_plaintext($user=null) {
+    public function get_message_plaintext($user=null, $changetype=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
         $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
-        $text .= get_string('contenttypeuser', 'local_reminders').': '.$this->course->fullname."\n";
+        $text .= get_string('contenttypeuser', 'local_reminders').': '.fullname($this->user)."\n";
         $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description."\n";
 
         return $text;
@@ -79,7 +84,7 @@ class user_reminder extends local_reminder {
         return 'reminders_user';
     }
 
-    public function get_message_title() {
+    public function get_message_title($type=null) {
         return '('.fullname($this->user) . ') ' . $this->event->name;
     }
 
