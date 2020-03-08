@@ -37,6 +37,17 @@ class user_reminder extends local_reminder {
         $this->user = $user;
     }
 
+    /**
+     * Cleanup this reminder instance.
+     */
+    public function cleanup() {
+        parent::cleanup();
+
+        if (isset($this->user)) {
+            unset($this->user);
+        }
+    }
+
     public function get_message_html($user=null, $changetype=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));

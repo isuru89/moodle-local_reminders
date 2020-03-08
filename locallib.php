@@ -461,5 +461,8 @@ class reminder_ref {
 
     public function cleanup() {
         unset($this->sendusers);
+        if (isset($this->reminder)) {
+            $this->reminder->cleanup();
+        }
     }
 }

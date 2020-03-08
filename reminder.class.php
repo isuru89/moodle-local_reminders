@@ -78,6 +78,15 @@ abstract class local_reminder {
     }
 
     /**
+     * Clean up this instance.
+     */
+    public function cleanup() {
+        if (isset($this->eventobject)) {
+            unset($this->eventobject);
+        }
+    }
+
+    /**
      * Writes an email row including header and its value.
      *
      * @param $headervalue string the content for header

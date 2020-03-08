@@ -49,6 +49,17 @@ class due_reminder extends course_reminder {
         $this->modname = $modulename;
     }
 
+    /**
+     * Cleanup this reminder instance.
+     */
+    public function cleanup() {
+        parent::cleanup();
+
+        if (isset($this->activityobj)) {
+            unset($this->activityobj);
+        }
+    }
+
     public function get_message_html($user=null, $changetype=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));

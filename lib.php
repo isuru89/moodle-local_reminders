@@ -464,7 +464,7 @@ function when_calendar_event_updated($updateevent, $changetype) {
 
         $mailresult = message_send($eventdata);
     }
-
+    $reminderref->cleanup();
 }
 
 function local_reminders_extend_settings_navigation($settingsnav, $context) {

@@ -45,6 +45,17 @@ class group_reminder extends local_reminder {
     }
 
     /**
+     * Cleanup this reminder instance.
+     */
+    public function cleanup() {
+        parent::cleanup();
+
+        if (isset($this->activityobj)) {
+            unset($this->activityobj);
+        }
+    }
+
+    /**
      * Set activity instance if there is any
      * @param type $activity activity instance
      */
