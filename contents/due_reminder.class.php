@@ -80,7 +80,8 @@ class due_reminder extends course_reminder {
             $clsname = 'local_reminder_'.$this->modname.'_handler';
             if (class_exists($clsname)) {
                 $handlercls = new $clsname;
-                return $handlercls->filter_incompleted_users($users, $this->course, $this->coursemodule, $this->cm);
+                return $handlercls->filter_incompleted_users($users, $this->activityobj,
+                    $this->course, $this->coursemodule, $this->cm);
             }
         }
         return $users;
