@@ -175,6 +175,11 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_heading('local_reminders_due_heading',
             get_string('dueheading', 'local_reminders'), ''));
 
+    // Settings regarding activity completion reminders.
+    $settings->add(new admin_setting_configcheckbox('local_reminders_noremindersforcompleted',
+            get_string('activityignoreincompletes', 'local_reminders'),
+            get_string('activityignoreincompletesdetails', 'local_reminders'), 1));
+
     $activitychoices = array(REMINDERS_ACTIVITY_BOTH => get_string('activityremindersboth', 'local_reminders'),
                              REMINDERS_ACTIVITY_ONLY_OPENINGS => get_string('activityremindersonlyopenings', 'local_reminders'),
                              REMINDERS_ACTIVITY_ONLY_CLOSINGS => get_string('activityremindersonlyclosings', 'local_reminders'));

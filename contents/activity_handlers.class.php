@@ -41,6 +41,20 @@ abstract class local_reminder_activity_handler {
     public abstract function get_description($activity, $event);
 
     /**
+     * Filter out users who still does not have completed this activity.
+     *
+     * @param array $users user array to check.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_incompleted_users($users, $activity, $course, $coursemodule, $coursemodulecontext) {
+        return $users;
+    }
+
+    /**
      * formats given date and time based on given user's timezone
      */
     protected function format_datetime($datetime, $user, $reminder) {
@@ -70,9 +84,58 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
         }
         return null;
     }
+
+    /**
+     * Filter out users who still does not have finished the quiz.
+     *
+     * @param array $users user array to check.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_incompleted_users($users, $activity, $course, $coursemodule, $coursemodulecontext) {
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/quiz/lib.php');
+
+        $filteredusers = array();
+        foreach ($users as $auser) {
+            $attempts = quiz_get_user_attempts($activity->id, $auser->id);
+            if (!isset($attempts) || empty($attempts)) {
+                $filteredusers[] = $auser;
+            }
+        }
+        return $filteredusers;
+    }
 }
 
 class local_reminder_assign_handler extends local_reminder_activity_handler {
+
+    /**
+     * Filter out users who still does not have submitted assignment.
+     *
+     * @param array $users user array to check.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_incompleted_users($users, $activity, $course, $coursemodule, $coursemodulecontext) {
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/assign/lib.php');
+
+        $filteredusers = array();
+        foreach ($users as $auser) {
+            $status = assign_get_completion_state($course, $coursemodule, $auser->id, false) ? 1 : 0;
+            if (!$status) {
+                $filteredusers[] = $auser;
+            }
+        }
+        return $filteredusers;
+    }
+
 
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         if (isset($activity->cutoffdate) && $activity->cutoffdate > 0) {

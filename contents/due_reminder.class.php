@@ -31,13 +31,15 @@ require_once($CFG->dirroot . '/local/reminders/contents/activity_handlers.class.
  */
 class due_reminder extends course_reminder {
 
+    private $coursemodule;
     private $cm;
     private $activityobj;
     private $modname;
 
-    public function __construct($event, $course, $cm, $aheaddays = 1) {
+    public function __construct($event, $course, $cm, $coursemodule, $aheaddays = 1) {
         parent::__construct($event, $course, $aheaddays);
         $this->cm = $cm;
+        $this->coursemodule = $coursemodule;
     }
 
     /**
@@ -58,6 +60,31 @@ class due_reminder extends course_reminder {
         if (isset($this->activityobj)) {
             unset($this->activityobj);
         }
+    }
+
+    /**
+     * Filter out users who still does not have completed this activity.
+     *
+     * @param array $users user array to check.
+     * @return array array of filtered users.
+     */
+    public function filter_incompleted_users($users) {
+        global $CFG;
+
+        if (isset($CFG->local_reminders_noremindersforcompleted)
+            && !$CFG->local_reminders_noremindersforcompleted) {
+                return $users;
+        }
+
+        if (!empty($this->modname) && !empty($this->activityobj)) {
+            $clsname = 'local_reminder_'.$this->modname.'_handler';
+            if (class_exists($clsname)) {
+                $handlercls = new $clsname;
+                return $handlercls->filter_incompleted_users($users, $this->activityobj,
+                    $this->course, $this->coursemodule, $this->cm);
+            }
+        }
+        return $users;
     }
 
     public function get_message_html($user=null, $changetype=null) {

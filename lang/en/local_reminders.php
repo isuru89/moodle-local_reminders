@@ -25,6 +25,8 @@
 $string['activityremindersboth'] = 'For both openings and closings';
 $string['activityremindersonlyopenings'] = 'Only for activity openings';
 $string['activityremindersonlyclosings'] = 'Only for activity closings';
+$string['activityignoreincompletes'] = 'No reminders once completed:';
+$string['activityignoreincompletesdetails'] = 'If checked, then no reminders will be sent if the activity is already completed by user, <strong>before</strong> the activity ends.';
 $string['admintreelabel'] = 'Reminders';
 $string['calendareventupdatedprefix'] = 'UPDATED';
 $string['calendareventremovedprefix'] = 'REMOVED';
