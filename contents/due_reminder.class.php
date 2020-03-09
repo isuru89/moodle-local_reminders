@@ -69,6 +69,13 @@ class due_reminder extends course_reminder {
      * @return array array of filtered users.
      */
     public function filter_incompleted_users($users) {
+        global $CFG;
+
+        if (isset($CFG->local_reminders_noremindersforcompleted)
+            && !$CFG->local_reminders_noremindersforcompleted) {
+                return $users;
+        }
+
         if (!empty($this->modname) && !empty($this->activityobj)) {
             $clsname = 'local_reminder_'.$this->modname.'_handler';
             if (class_exists($clsname)) {
