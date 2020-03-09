@@ -51,7 +51,7 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
         $context = context_module::instance($cm->id);
         $PAGE->set_context($context);
         $sendusers = array();
-        $reminder = new due_reminder($event, $course, $context, $aheadday);
+        $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
 
         if ($event->courseid <= 0 && $event->userid > 0) {
             // A user overridden activity.
@@ -75,7 +75,8 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
         }
 
         $reminder->set_activity($event->modulename, $activityobj);
-        return new reminder_ref($reminder, $sendusers);
+        $filteredusers = $reminder->filter_incompleted_users($sendusers);
+        return new reminder_ref($reminder, $filteredusers);
     }
     return null;
 }

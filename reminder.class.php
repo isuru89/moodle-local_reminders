@@ -87,6 +87,16 @@ abstract class local_reminder {
     }
 
     /**
+     * Filter out users who still does not have completed this activity.
+     *
+     * @param array $users user array to check.
+     * @return array array of filtered users.
+     */
+    public function filter_incompleted_users($users) {
+        return $users;
+    }
+
+    /**
      * Writes an email row including header and its value.
      *
      * @param $headervalue string the content for header
