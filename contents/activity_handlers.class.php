@@ -100,7 +100,6 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
         require_once($CFG->dirroot . '/mod/quiz/lib.php');
 
         $filteredusers = array();
-
         foreach ($users as $auser) {
             $attempts = quiz_get_user_attempts($activity->id, $auser->id);
             if (!isset($attempts) || empty($attempts)) {
@@ -128,7 +127,6 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
         require_once($CFG->dirroot . '/mod/assign/lib.php');
 
         $filteredusers = array();
-
         foreach ($users as $auser) {
             $status = assign_get_completion_state($course, $coursemodule, $auser->id, false) ? 1 : 0;
             if (!$status) {
