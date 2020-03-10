@@ -31,7 +31,7 @@ require_once($CFG->dirroot . '/local/reminders/contents/course_reminder.class.ph
 require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php');
 
-function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true) {
+function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
     global $DB, $PAGE;
     if (isemptystring($event->modulename)) {
         return null;
@@ -75,7 +75,7 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
         }
 
         $reminder->set_activity($event->modulename, $activityobj);
-        $filteredusers = $reminder->filter_incompleted_users($sendusers);
+        $filteredusers = $reminder->filter_authorized_users($sendusers, $calltype);
         return new reminder_ref($reminder, $filteredusers);
     }
     return null;
@@ -106,7 +106,7 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
             }
             $sendusers = $filteredusers;
         }
-        $reminder = new due_reminder($event, $course, $context, $aheadday);
+        $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
         $reminder->set_activity($event->modulename, $activityobj);
         return new reminder_ref($reminder, $sendusers);
     }

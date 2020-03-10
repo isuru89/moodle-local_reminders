@@ -69,6 +69,9 @@ define('REMINDERS_CALENDAR_EVENT_ADDED', 'CREATED');
 define('REMINDERS_CALENDAR_EVENT_UPDATED', 'UPDATED');
 define('REMINDERS_CALENDAR_EVENT_REMOVED', 'REMOVED');
 
+define('REMINDERS_CALL_TYPE_PRE', 'PRE');
+define('REMINDERS_CALL_TYPE_POST', 'POST');
+
 /**
  * ======== FUNCTIONS =========================================
  */
@@ -252,7 +255,7 @@ function local_reminders_cron() {
                         break;
                     }
                 case 'due':
-                    $reminderref = process_activity_event($event, $aheadday, $activityroleids);
+                    $reminderref = process_activity_event($event, $aheadday, $activityroleids, REMINDERS_CALL_TYPE_PRE);
                     break;
 
                 case 'group':
