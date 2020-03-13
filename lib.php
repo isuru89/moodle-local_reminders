@@ -322,6 +322,9 @@ function local_reminders_cron() {
     } else {
         mtrace('  [Local Reminder] Failed to send any email to any user! Will retry again next time.');
     }
+
+    // send reminders for post activities
+    send_post_activity_reminders($timewindowend, $activityroleids, $fromuser);
 }
 
 /**

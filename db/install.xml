@@ -14,6 +14,17 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for each local reminders cron cycle."/>
       </KEYS>
     </TABLE>
+    <TABLE NAME="local_reminders_post_activity" COMMENT="Used to track send status of post activity reminders.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="sendtime" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="eventid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for each post activity track record."/>
+        <KEY NAME="relatedevent" TYPE="foreign-unique" FIELDS="eventid" REFTABLE="event" REFFIELDS="id"/>
+      </KEYS>
+    </TABLE>
     <TABLE NAME="local_reminders_course" COMMENT="Course specific settings whether or not send reminders.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
