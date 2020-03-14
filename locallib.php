@@ -52,6 +52,46 @@ function get_upcoming_events_for_course($courseid, $currtime) {
 }
 
 /**
+ * Returns all settings associated with given course and event which
+ * was set in course reminder settings.
+ *
+ * @param int $courseid course id.
+ * @param int $eventid event id.
+ * @return array all settings related to this course event.
+ */
+function fetch_course_activity_settings($courseid, $eventid) {
+    global $DB;
+
+    $records = $DB->get_records_sql("SELECT settingkey, settingvalue
+        FROM {local_reminders_activityconf}
+        WHERE courseid = :courseid AND eventid = :eventid",
+        array('courseid' => $courseid, 'eventid' => $eventid));
+    $pairs = array();
+    if (!empty($records)) {
+        foreach ($records as $record) {
+            $pairs[$record->settingkey] = $record->settingvalue;
+        }
+    }
+    return $pairs;
+}
+
+/**
+ * Returns true if no reminders to send has been scheduled in course settings
+ * page for the provided activity.
+ *
+ * @param int $courseid course id.
+ * @param int $eventid event id.
+ * @return bool return true if reminders disabled for activity.
+ */
+function has_disabled_reminders_for_activity($courseid, $eventid) {
+    $activitysettings = fetch_course_activity_settings($courseid, $eventid);
+    if (array_key_exists('enabled', $activitysettings) && !$activitysettings['enabled']) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * This method will filter out all the activity events finished recently
  * and send reminders for users who still have not yet completed that activity.
  * Only once user will receive emails.
@@ -123,6 +163,11 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
         return null;
     }
 
+    if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+        $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
+        return null;
+    }
+
     try {
         // When a calendar event added, this is being called and moodle throws invalid module ID: ${a},
         // Due to it tries to get from a cache, but yet not exist.
@@ -184,6 +229,11 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
     $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
 
     if (!empty($course) && !empty($cm)) {
+        if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+            $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
+            return null;
+        }
+
         $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid, $showtrace);
         $context = context_module::instance($cm->id);
         $PAGE->set_context($context);
