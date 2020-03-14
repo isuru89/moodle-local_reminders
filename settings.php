@@ -180,9 +180,9 @@ if ($hassiteconfig) {
             get_string('activityignoreincompletes', 'local_reminders'),
             get_string('activityignoreincompletesdetails', 'local_reminders'), 1));
 
-    $settings->add(new admin_setting_configcheckbox('local_reminders_enablepostactivityreminders',
-            get_string('postactivityreminders', 'local_reminders'),
-            get_string('postactivityremindersdescription', 'local_reminders'), 1));
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enableoverdueactivityreminders',
+            get_string('overdueactivityreminders', 'local_reminders'),
+            get_string('overdueactivityremindersdescription', 'local_reminders'), 1));
 
     $activitychoices = array(REMINDERS_ACTIVITY_BOTH => get_string('activityremindersboth', 'local_reminders'),
                              REMINDERS_ACTIVITY_ONLY_OPENINGS => get_string('activityremindersonlyopenings', 'local_reminders'),

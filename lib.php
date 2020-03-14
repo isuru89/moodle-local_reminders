@@ -70,7 +70,7 @@ define('REMINDERS_CALENDAR_EVENT_UPDATED', 'UPDATED');
 define('REMINDERS_CALENDAR_EVENT_REMOVED', 'REMOVED');
 
 define('REMINDERS_CALL_TYPE_PRE', 'PRE');
-define('REMINDERS_CALL_TYPE_POST', 'POST');
+define('REMINDERS_CALL_TYPE_OVERDUE', 'OVERDUE');
 
 /**
  * ======== FUNCTIONS =========================================
@@ -89,6 +89,16 @@ function local_reminders_cron() {
         return;
     }
 
+    $currtime = time();
+    local_reminders_cron_pre($currtime);
+
+    // Send reminders for overdue activities.
+    local_reminders_cron_overdue_activity($currtime);
+}
+
+function local_reminders_cron_pre($currtime) {
+    global $CFG, $DB, $PAGE;
+
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     $eventtypearray = array('site', 'user', 'course', 'due', 'group');
 
@@ -98,7 +108,7 @@ function local_reminders_cron() {
     // We need only last record only, so we limit the returning number of rows at most by one.
     $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
 
-    $timewindowstart = time();
+    $timewindowstart = $currtime;
     if (!$logrows) {  // This is the first cron cycle, after plugin is just installed.
         mtrace("   [Local Reminder] This is the first cron cycle");
         $timewindowstart = $timewindowstart - REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
@@ -109,7 +119,7 @@ function local_reminders_cron() {
     }
 
     // End of the time window will be set as current.
-    $timewindowend = time();
+    $timewindowend = $currtime;
 
     // Now lets filter appropiate events to send reminders.
     $secondsaheads = array(REMINDERS_7DAYSBEFORE_INSECONDS,
@@ -322,9 +332,13 @@ function local_reminders_cron() {
     } else {
         mtrace('  [Local Reminder] Failed to send any email to any user! Will retry again next time.');
     }
+}
 
-    // send reminders for post activities
-    send_post_activity_reminders($timewindowend, $activityroleids, $fromuser);
+function local_reminders_cron_overdue_activity($currtime) {
+    // Loading roles allowed to receive reminder messages from configuration.
+    [, $activityroleids] = get_roles_for_reminders();
+    $fromuser = get_from_user();
+    send_overdue_activity_reminders($currtime, $activityroleids, $fromuser);
 }
 
 /**

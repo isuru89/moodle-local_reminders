@@ -106,6 +106,14 @@ class due_reminder extends course_reminder {
                 array('style' => 'text-decoration: none'));
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
+        if (!isemptystring($changetype) && $changetype == REMINDERS_CALL_TYPE_OVERDUE) {
+            $htmlmail .= html_writer::start_tag('tr');
+            $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
+            $htmlmail .= html_writer::tag('h4', get_string('overduemessage', 'local_reminders'),
+                array('style' => $this->overduestyle));
+            $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
+        }
+
         $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
             format_event_time_duration($user, $this->event));
         $htmlmail .= $this->write_location_info($this->event);

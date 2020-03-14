@@ -92,7 +92,7 @@ function xmldb_local_reminders_upgrade($oldversion) {
  */
 function create_local_reminders_post_activity_table($dbman) {
     // Define table local_reminders_post_activity to be created.
-    $table = new xmldb_table('local_reminders_post_activity');
+    $table = new xmldb_table('local_reminders_post_act');
 
     // Adding fields to table local_reminders_post_activity.
     $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);

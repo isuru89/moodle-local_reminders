@@ -14,7 +14,7 @@
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for each local reminders cron cycle."/>
       </KEYS>
     </TABLE>
-    <TABLE NAME="local_reminders_post_activity" COMMENT="Used to track send status of post activity reminders.">
+    <TABLE NAME="local_reminders_post_act" COMMENT="Used to track send status of post activity reminders.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="sendtime" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>

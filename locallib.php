@@ -38,20 +38,20 @@ require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php')
  *
  * @param $curtime current time to check for cutoff
  */
-function send_post_activity_reminders($curtime, $activityroleids, $fromuser) {
+function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) {
     global $DB, $CFG;
 
-    mtrace('[LOCAL REMINDERS] Post Activity Reminder Cron Started @ '.$curtime);
+    mtrace('[LOCAL REMINDERS] Overdue Activity Reminder Cron Started @ '.$curtime);
 
-    if (isset($CFG->local_reminders_enablepostactivityreminders) && !$CFG->local_reminders_enablepostactivityreminders) {
-        mtrace('[LOCAL REMINDERS] Post Activity reminders are not enabled from settings! Skipped.');
+    if (isset($CFG->local_reminders_enableoverdueactivityreminders) && !$CFG->local_reminders_enableoverdueactivityreminders) {
+        mtrace('[LOCAL REMINDERS] Overdue Activity reminders are not enabled from settings! Skipped.');
         return;
     }
 
     $rangestart = $curtime - REMINDERS_DAYIN_SECONDS;
     $querysql = "SELECT e.*
         FROM {event} e
-            LEFT JOIN {local_reminders_post_activity} lrpa ON e.id = lrpa.eventid
+            LEFT JOIN {local_reminders_post_act} lrpa ON e.id = lrpa.eventid
         WHERE
             timestart >= $rangestart AND timestart < $curtime
             AND e.eventtype = 'due'
@@ -67,7 +67,7 @@ function send_post_activity_reminders($curtime, $activityroleids, $fromuser) {
     foreach ($allexpiredevents as $event) {
         $event = new calendar_event($event);
 
-        $reminderref = process_activity_event($event, -1, $activityroleids, true, REMINDERS_CALL_TYPE_POST);
+        $reminderref = process_activity_event($event, -1, $activityroleids, true, REMINDERS_CALL_TYPE_OVERDUE);
         if (!isset($reminderref)) {
             mtrace('[LOCAL REMINDERS] Skipped post-activity event for '.$event->id);
             continue;
@@ -76,7 +76,7 @@ function send_post_activity_reminders($curtime, $activityroleids, $fromuser) {
 
         $sendusers = $reminderref->get_sending_users();
         foreach ($sendusers as $touser) {
-            $eventdata = $reminderref->get_event_to_send($fromuser, $touser);
+            $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser);
 
             try {
                 $mailresult = message_send($eventdata);
@@ -93,7 +93,7 @@ function send_post_activity_reminders($curtime, $activityroleids, $fromuser) {
         $activityrecord = new stdClass();
         $activityrecord->sendtime = $curtime;
         $activityrecord->eventid = $event->id;
-        $DB->insert_record('local_reminders_post_activity', $activityrecord, false);
+        $DB->insert_record('local_reminders_post_act', $activityrecord, false);
     }
 }
 
