@@ -32,6 +32,26 @@ require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php
 require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php');
 
 /**
+ * Returns a list of upcoming activities for the given course,
+ *
+ * @param int $courseid course id.
+ * @param int $currtime epoch time to compare.
+ * @return array list of event records.
+ */
+function get_upcoming_events_for_course($courseid, $currtime) {
+    global $DB;
+
+    return $DB->get_records_sql("SELECT *
+        FROM {event}
+        WHERE courseid = :courseid
+            AND timestart > :cutofftime
+            AND eventtype = 'due'
+            AND visible = 1
+        ORDER BY timestart",
+        array('courseid' => $courseid, 'cutofftime' => $currtime));
+}
+
+/**
  * This method will filter out all the activity events finished recently
  * and send reminders for users who still have not yet completed that activity.
  * Only once user will receive emails.
@@ -301,7 +321,7 @@ function get_roles_for_reminders() {
  * @param array $tzstyle css style string for tz
  * @return string formatted time string
  */
-function format_event_time_duration($user, $event, $tzstyle=null) {
+function format_event_time_duration($user, $event, $tzstyle=null, $includetz=true) {
     $followedtimeformat = get_string('strftimedaydate', 'langconfig');
     $usertimeformat = get_correct_timeformat_user($user);
 
@@ -338,6 +358,10 @@ function format_event_time_duration($user, $event, $tzstyle=null) {
 
     } else {
         $formattedtime = $formattedtimeprefix.' '.$formattedtime;
+    }
+
+    if (!$includetz) {
+        return $formattedtime;
     }
 
     $tzstr = local_reminders_tz_info::get_human_readable_tz($tzone);

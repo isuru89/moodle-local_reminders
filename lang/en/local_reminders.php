@@ -22,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['activityconfupcomingactivities'] = 'Upcoming Activities';
+$string['activityconfupcomingactivitiesdesc'] = 'Reminders will not be sent for unchecked activities.';
 $string['activityremindersboth'] = 'For both openings and closings';
 $string['activityremindersonlyopenings'] = 'Only for activity openings';
 $string['activityremindersonlyclosings'] = 'Only for activity closings';

@@ -23,10 +23,13 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/formslib.php');
+require_once($CFG->dirroot.'/local/reminders/locallib.php');
 
 class local_reminders_coursesettings_edit_form extends moodleform {
 
     public function definition() {
+        global $USER;
+
         $mform = $this->_form;
         list($coursesettings) = $this->_customdata;
 
@@ -47,6 +50,30 @@ class local_reminders_coursesettings_edit_form extends moodleform {
 
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
+
+        $currtime = time();
+        $upcomingactivities = get_upcoming_events_for_course($coursesettings->courseid, $currtime);
+        if (!empty($upcomingactivities)) {
+            $mform->addElement('header', 'description',
+                get_string('activityconfupcomingactivities', 'local_reminders'));
+            $mform->addElement('static', 'descriptionsub', '',
+                get_string('activityconfupcomingactivitiesdesc', 'local_reminders'));
+            foreach ($upcomingactivities as $activity) {
+                $modinfo = fetch_module_instance($activity->modulename, $activity->instance, $coursesettings->courseid);
+                $timeduration = format_event_time_duration($USER, $activity, null, false);
+                $key = "activity_".$activity->id.'_enabled';
+                $refkey = 'refactivity_'.$activity->id;
+                if (isset($coursesettings->$refkey)) {
+                    $mform->addElement('hidden', $refkey);
+                    $mform->setType($refkey, PARAM_INT);
+                    $mform->setDefault($refkey, $coursesettings->$refkey);
+                }
+                $mform->addElement('advcheckbox', $key,
+                    strtoupper($activity->modulename).': '.(isset($modinfo->name) ? $modinfo->name : $activity->name),
+                    $timeduration);
+                $mform->setDefault($key, 1);
+            }
+        }
 
         $this->add_action_buttons(true);
 

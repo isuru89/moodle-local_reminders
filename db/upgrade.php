@@ -75,14 +75,45 @@ function xmldb_local_reminders_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2014121301, 'local', 'reminders');
     }
 
-    if ($oldversion < 2020040100) {
+    if ($oldversion < 2020040200) {
         create_local_reminders_post_activity_table($dbman);
 
+        create_local_reminders_activity_config_table($dbman);
+
         // Reminders savepoint reached.
-        upgrade_plugin_savepoint(true, 2020040100, 'local', 'reminders');
+        upgrade_plugin_savepoint(true, 2020040200, 'local', 'reminders');
     }
 
     return true;
+}
+
+/**
+ * Create local_reminders_activityconf table required for moodle plugin v2.
+ *
+ * @param object $dbman db manager class.
+ */
+function create_local_reminders_activity_config_table($dbman) {
+    // Define table local_reminders_post_activity to be created.
+    $table = new xmldb_table('local_reminders_activityconf');
+
+    // Adding fields to table local_reminders_post_activity.
+    $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+    $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('eventid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('settingkey', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('settingvalue', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+    // Adding keys to table local_reminders_post_activity.
+    $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+    $table->add_key('relatedevent', XMLDB_KEY_FOREIGN, array('eventid'), 'event', array('id'));
+
+    // Adding indexes for faster access.
+    $table->add_index('localremindercourses', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+
+    // Conditionally launch create table for local_reminders_post_activity.
+    if (!$dbman->table_exists($table)) {
+        $dbman->create_table($table);
+    }
 }
 
 /**
