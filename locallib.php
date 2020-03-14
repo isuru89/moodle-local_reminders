@@ -31,13 +31,19 @@ require_once($CFG->dirroot . '/local/reminders/contents/course_reminder.class.ph
 require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php');
 
-function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true) {
+function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
     global $DB, $PAGE;
     if (isemptystring($event->modulename)) {
         return null;
     }
 
-    $courseandcm = get_course_and_cm_from_instance($event->instance, $event->modulename, $event->courseid);
+    try {
+        // When a calendar event added, this is being called and moodle throws invalid module ID: ${a},
+        // Due to it tries to get from a cache, but yet not exist.
+        $courseandcm = get_course_and_cm_from_instance($event->instance, $event->modulename, $event->courseid);
+    } catch (Exception $ex) {
+        return null;
+    }
     $course = $courseandcm[0];
     $cm = $courseandcm[1];
     $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
@@ -75,7 +81,7 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
         }
 
         $reminder->set_activity($event->modulename, $activityobj);
-        $filteredusers = $reminder->filter_incompleted_users($sendusers);
+        $filteredusers = $reminder->filter_authorized_users($sendusers, $calltype);
         return new reminder_ref($reminder, $filteredusers);
     }
     return null;
@@ -106,7 +112,7 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
             }
             $sendusers = $filteredusers;
         }
-        $reminder = new due_reminder($event, $course, $context, $aheadday);
+        $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
         $reminder->set_activity($event->modulename, $activityobj);
         return new reminder_ref($reminder, $sendusers);
     }
@@ -140,10 +146,13 @@ function process_course_event($event, $aheadday, $courseroleids=null, $showtrace
 }
 
 function process_group_event($event, $aheadday, $showtrace=true) {
-    global $DB;
+    global $DB, $PAGE;
 
     $group = $DB->get_record('groups', array('id' => $event->groupid));
     if (!empty($group)) {
+        if (isset($group->courseid) && !empty($group->courseid)) {
+            $PAGE->set_context(context_course::instance($group->courseid));
+        }
         $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $group->courseid));
         if (isset($coursesettings->status_group) && $coursesettings->status_group == 0) {
             $showtrace && mtrace("  [Local Reminder] Reminders for group events has been restricted in the configs.");
@@ -163,7 +172,7 @@ function process_group_event($event, $aheadday, $showtrace=true) {
 }
 
 function process_user_event($event, $aheadday) {
-    global $DB;
+    global $DB, $PAGE;
 
     $user = $DB->get_record('user', array('id' => $event->userid));
 
@@ -176,12 +185,13 @@ function process_user_event($event, $aheadday) {
 }
 
 function process_site_event($event, $aheadday) {
-    global $DB;
+    global $DB, $PAGE;
 
     $reminder = new site_reminder($event, $aheadday);
     $sendusers = $DB->get_records_sql("SELECT *
         FROM {user}
         WHERE id > 1 AND deleted=0 AND suspended=0 AND confirmed=1;");
+    $PAGE->set_context(context_system::instance());
     return new reminder_ref($reminder, $sendusers);
 }
 
