@@ -37,6 +37,10 @@ abstract class local_reminder_activity_handler {
 
     /**
      * Returns associated description of the given activity.
+     *
+     * @param object $activity activity instance
+     * @param object $event event instance
+     * @return string description related to this activity.
      */
     public abstract function get_description($activity, $event);
 
@@ -74,6 +78,9 @@ abstract class local_reminder_activity_handler {
 
 }
 
+/**
+ * Supports quiz related information.
+ */
 class local_reminder_quiz_handler extends local_reminder_activity_handler {
 
     public function get_description($activity, $event) {
@@ -114,8 +121,23 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
         }
         return $filteredusers;
     }
+
+    /**
+     * Appends quiz time limit into the email.
+     *
+     */
+    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+        if (isset($activity->timelimit) && $activity->timelimit > 0) {
+            $htmlmail .= $reminder->write_table_row(
+                get_string('timelimit', 'quiz'),
+                format_time($activity->timelimit));
+        }
+    }
 }
 
+/**
+ * Supports assignment related information.
+ */
 class local_reminder_assign_handler extends local_reminder_activity_handler {
 
     /**
@@ -167,3 +189,210 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
     }
 }
 
+/**
+ * Supports choice related information.
+ */
+class local_reminder_choice_handler extends local_reminder_activity_handler {
+
+    /**
+     * Filter out users who still does not have submitted choice.
+     *
+     * @param array $users user array to check.
+     * @param string $type reminder call type PRE|POST.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/choice/lib.php');
+
+        $filteredusers = array();
+        foreach ($users as $auser) {
+            $cansubmit = has_capability('mod/choice:choose', $coursemodulecontext, $auser);
+            if (!$cansubmit) {
+                continue;
+            }
+            $status = choice_get_completion_state($course, $coursemodule, $auser->id, false);
+            if (!$status) {
+                $filteredusers[] = $auser;
+            }
+        }
+        return $filteredusers;
+    }
+
+    /**
+     * Return choice intro field as description.
+     *
+     * @param object $activity activity instance
+     * @param object $event event instance
+     * @return string description related to this activity.
+     */
+    public function get_description($activity, $event) {
+        if (isset($activity->intro)) {
+            return $activity->intro;
+        }
+        return null;
+    }
+}
+
+/**
+ * Supports feedback related information.
+ */
+class local_reminder_feedback_handler extends local_reminder_activity_handler {
+
+    /**
+     * Filter out users who still does not have submitted feedback.
+     *
+     * @param array $users user array to check.
+     * @param string $type reminder call type PRE|POST.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/feedback/lib.php');
+
+        $filteredusers = array();
+        foreach ($users as $auser) {
+            $cansubmit = has_capability('mod/feedback:complete', $coursemodulecontext, $auser);
+            if (!$cansubmit) {
+                continue;
+            }
+            $status = choice_get_completion_state($course, $coursemodule, $auser->id, false);
+            if (!$status) {
+                $filteredusers[] = $auser;
+            }
+        }
+        return $filteredusers;
+    }
+
+    /**
+     * Return feedback intro field as description.
+     *
+     * @param object $activity activity instance
+     * @param object $event event instance
+     * @return string description related to this activity.
+     */
+    public function get_description($activity, $event) {
+        if (isset($activity->intro)) {
+            return $activity->intro;
+        }
+        return null;
+    }
+}
+
+/**
+ * Supports Lesson module related information.
+ */
+class local_reminder_lesson_handler extends local_reminder_activity_handler {
+
+    /**
+     * Filter out users who still does not have completed lesson activity.
+     *
+     * @param array $users user array to check.
+     * @param string $type reminder call type PRE|POST.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/lesson/lib.php');
+
+        $filteredusers = array();
+        foreach ($users as $auser) {
+            $cansubmit = has_capability('mod/lesson:view', $coursemodulecontext, $auser);
+            if (!$cansubmit) {
+                continue;
+            }
+            $status = lesson_get_completion_state($course, $coursemodule, $auser->id, false);
+            if (!$status) {
+                $filteredusers[] = $auser;
+            }
+        }
+        return $filteredusers;
+    }
+
+    /**
+     * Appends time limit into the email.
+     *
+     */
+    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+        if (isset($activity->timelimit) && $activity->timelimit > 0) {
+            $htmlmail .= $reminder->write_table_row(
+                get_string('timelimit', 'lesson'),
+                format_time($activity->timelimit));
+        }
+    }
+
+    /**
+     * Return feedback intro field as description.
+     *
+     * @param object $activity activity instance
+     * @param object $event event instance
+     * @return string description related to this activity.
+     */
+    public function get_description($activity, $event) {
+        if (isset($activity->intro)) {
+            return $activity->intro;
+        }
+        return null;
+    }
+}
+
+/**
+ * Supports survey related information.
+ */
+class local_reminder_survey_handler extends local_reminder_activity_handler {
+
+    /**
+     * Filter out users who still does not have submitted survey.
+     *
+     * @param array $users user array to check.
+     * @param string $type reminder call type PRE|POST.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/survey/lib.php');
+
+        $filteredusers = array();
+        foreach ($users as $auser) {
+            $cansubmit = has_capability('mod/survey:participate', $coursemodulecontext, $auser);
+            if (!$cansubmit) {
+                continue;
+            }
+            $status = survey_get_completion_state($course, $coursemodule, $auser->id, false);
+            if (!$status) {
+                $filteredusers[] = $auser;
+            }
+        }
+        return $filteredusers;
+    }
+
+    /**
+     * Return survey intro field as description.
+     *
+     * @param object $activity activity instance
+     * @param object $event event instance
+     * @return string description related to this activity.
+     */
+    public function get_description($activity, $event) {
+        if (isset($activity->intro)) {
+            return $activity->intro;
+        }
+        return null;
+    }
+}

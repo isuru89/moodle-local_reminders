@@ -152,7 +152,11 @@ abstract class local_reminder {
         if (isemptystring($description)) {
             $htmltext .= html_writer::tag('td', "<p>$event->name</p>", $columndescstyle);
         } else {
-            $htmltext .= html_writer::tag('td', $description, $columndescstyle);
+            if (substr($description, strlen('<p>')) == '<p>') {
+                $htmltext .= html_writer::tag('td', $description, $columndescstyle);
+            } else {
+                $htmltext .= html_writer::tag('td', "<p>$description</p>", $columndescstyle);
+            }
         }
         return $htmltext.html_writer::end_tag('tr');
     }
