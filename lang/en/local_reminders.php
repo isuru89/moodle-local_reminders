@@ -24,6 +24,7 @@
 
 $string['activityconfupcomingactivities'] = 'Upcoming Activities';
 $string['activityconfupcomingactivitiesdesc'] = 'Reminders will not be sent for unchecked activities.';
+$string['activityconfnoupcomingactivities'] = 'No upcoming activities for this course.';
 $string['activityremindersboth'] = 'For both openings and closings';
 $string['activityremindersonlyopenings'] = 'Only for activity openings';
 $string['activityremindersonlyclosings'] = 'Only for activity closings';
@@ -48,7 +49,8 @@ $string['days7'] = '7 Days';
 $string['days3'] = '3 Days';
 $string['days1'] = '1 Day';
 $string['dueheading'] = 'Activity Event Reminders';
-$string['enabled'] = 'Enabled:';
+$string['enabled'] = 'Enabled';
+$string['enabledoverdue'] = 'Overdue Enabled';
 $string['enableddescription'] = 'Enable/disable reminder plugin';
 $string['enabledchangedevents'] = 'Send when Event Updated:';
 $string['enabledremovedevents'] = 'Send when Event Removed:';

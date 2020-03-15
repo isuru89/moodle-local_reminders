@@ -81,11 +81,12 @@ function fetch_course_activity_settings($courseid, $eventid) {
  *
  * @param int $courseid course id.
  * @param int $eventid event id.
+ * @param string $keytocheck key to check for.
  * @return bool return true if reminders disabled for activity.
  */
-function has_disabled_reminders_for_activity($courseid, $eventid) {
+function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck='enabled') {
     $activitysettings = fetch_course_activity_settings($courseid, $eventid);
-    if (array_key_exists('enabled', $activitysettings) && !$activitysettings['enabled']) {
+    if (array_key_exists($keytocheck, $activitysettings) && !$activitysettings[$keytocheck]) {
         return true;
     }
     return false;
@@ -127,6 +128,11 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
     foreach ($allexpiredevents as $event) {
         $event = new calendar_event($event);
 
+        if (has_disabled_reminders_for_activity($event->courseid, $event->id, 'enabledoverdue')) {
+            mtrace("[LOCAL REMINDERS] Activity event $event->id overdue reminders disabled in the course settings");
+            continue;
+        }
+
         $reminderref = process_activity_event($event, -1, $activityroleids, true, REMINDERS_CALL_TYPE_OVERDUE);
         if (!isset($reminderref)) {
             mtrace('[LOCAL REMINDERS] Skipped post-activity event for '.$event->id);
@@ -160,11 +166,6 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
 function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
     global $DB, $PAGE;
     if (isemptystring($event->modulename)) {
-        return null;
-    }
-
-    if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
-        $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
         return null;
     }
 

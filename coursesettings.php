@@ -42,9 +42,7 @@ if (!$activitysettings) {
     $activitysettings = array();
 } else {
     foreach ($activitysettings as $asetting) {
-        $refkey = 'refactivity_'.$asetting->eventid;
         $actkey = 'activity_'.$asetting->eventid.'_'.$asetting->settingkey;
-        $coursesettings->$refkey = $asetting->id;
         $coursesettings->$actkey = $asetting->settingvalue;
     }
 }
@@ -57,7 +55,7 @@ $PAGE->set_url('/local/reminders/coursesettings.php', array('courseid' => $cours
 $PAGE->set_title(get_string('admintreelabel', 'local_reminders'));
 $PAGE->set_heading($course->fullname);
 
-$mform = new local_reminders_coursesettings_edit_form(null, array($coursesettings, $activitysettings));
+$mform = new local_reminders_coursesettings_edit_form(null, array($coursesettings));
 
 if ($mform->is_cancelled()) {
     redirect($return);
@@ -73,18 +71,25 @@ if ($mform->is_cancelled()) {
     foreach ($dataarray as $key => $value) {
         if (substr($key, 0, strlen($activityprefix)) == $activityprefix) {
             $keyparts = explode('_', $key);
-            $status = array_key_exists('refactivity_'.$keyparts[1], $dataarray);
+            if (count($keyparts) < 3) {
+                continue;
+            }
+            $eventid = (int)$keyparts[1];
+            $status = $DB->get_record_sql("SELECT id
+                FROM {local_reminders_activityconf}
+                WHERE courseid = :courseid AND eventid = :eventid AND settingkey = :settingkey",
+                array('courseid' => $data->courseid, 'eventid' => $eventid, 'settingkey' => $keyparts[2]));
 
             $actdata = new stdClass();
             $actdata->courseid = $data->courseid;
-            $actdata->eventid = (int)$keyparts[1];
+            $actdata->eventid = $eventid;
             $actdata->settingkey = $keyparts[2];
             $actdata->settingvalue = $value;
-            if ($status) {
-                $actdata->id = $dataarray['refactivity_'.$keyparts[1]];
-                $DB->update_record('local_reminders_activityconf', $actdata);
-            } else {
+            if (!$status) {
                 $DB->insert_record('local_reminders_activityconf', $actdata);
+            } else {
+                $actdata->id = $status->id;
+                $DB->update_record('local_reminders_activityconf', $actdata);
             }
         }
     }
