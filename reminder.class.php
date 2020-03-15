@@ -53,6 +53,13 @@ abstract class local_reminder {
         'font-size:16px;'.
         'font-weight:bold;'.
         'color:#222';
+    protected $overduestyle = 'padding:10px 0 10px 10px;'.
+        'background-color: #f3e3e3;'.
+        'margin:0;'.
+        'font-family:Arial,Sans-serif;'.
+        'font-size:16px;'.
+        'font-weight:bold;'.
+        'color:#ec4040';
     protected $footerstyle = 'background-color:#f6f6f6;'.
         'color:#888;'.
         'border-top:1px solid #ccc;'.

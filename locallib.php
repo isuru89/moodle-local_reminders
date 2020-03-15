@@ -31,6 +31,72 @@ require_once($CFG->dirroot . '/local/reminders/contents/course_reminder.class.ph
 require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php');
 
+/**
+ * This method will filter out all the activity events finished recently
+ * and send reminders for users who still have not yet completed that activity.
+ * Only once user will receive emails.
+ *
+ * @param $curtime current time to check for cutoff
+ */
+function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) {
+    global $DB, $CFG;
+
+    mtrace('[LOCAL REMINDERS] Overdue Activity Reminder Cron Started @ '.$curtime);
+
+    if (isset($CFG->local_reminders_enableoverdueactivityreminders) && !$CFG->local_reminders_enableoverdueactivityreminders) {
+        mtrace('[LOCAL REMINDERS] Overdue Activity reminders are not enabled from settings! Skipped.');
+        return;
+    }
+
+    $rangestart = $curtime - REMINDERS_DAYIN_SECONDS;
+    $querysql = "SELECT e.*
+        FROM {event} e
+            LEFT JOIN {local_reminders_post_act} lrpa ON e.id = lrpa.eventid
+        WHERE
+            timestart >= $rangestart AND timestart < $curtime
+            AND e.eventtype = 'due'
+            AND lrpa.eventid IS NULL
+            AND e.visible = 1";
+    $allexpiredevents = $DB->get_records_sql($querysql);
+    if (!$allexpiredevents || count($allexpiredevents) == 0) {
+        mtrace('[LOCAL REMINDERS] No expired events found for this cron cycle! Skipped.');
+        return;
+    }
+
+    mtrace('[LOCAL REMINDERS] Number of expired events found for this cron cycle: '.count($allexpiredevents));
+    foreach ($allexpiredevents as $event) {
+        $event = new calendar_event($event);
+
+        $reminderref = process_activity_event($event, -1, $activityroleids, true, REMINDERS_CALL_TYPE_OVERDUE);
+        if (!isset($reminderref)) {
+            mtrace('[LOCAL REMINDERS] Skipped post-activity event for '.$event->id);
+            continue;
+        }
+        mtrace('[LOCAL REMINDERS] Processing post-activity event for '.$event->id);
+
+        $sendusers = $reminderref->get_sending_users();
+        foreach ($sendusers as $touser) {
+            $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser);
+
+            try {
+                $mailresult = message_send($eventdata);
+                mtrace('[LOCAL_REMINDERS] Post Activity Mail Result: '.$mailresult);
+
+                if (!$mailresult) {
+                    throw new coding_exception("Could not send out message for event#$event->id to user $eventdata->userto");
+                }
+            } catch (moodle_exception $mex) {
+                mtrace('Error: local/reminders/locallib.php send_post_activity_reminders(): '.$mex->getMessage());
+            }
+        }
+
+        $activityrecord = new stdClass();
+        $activityrecord->sendtime = $curtime;
+        $activityrecord->eventid = $event->id;
+        $DB->insert_record('local_reminders_post_act', $activityrecord, false);
+    }
+}
+
 function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
     global $DB, $PAGE;
     if (isemptystring($event->modulename)) {
