@@ -58,7 +58,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                 get_string('activityconfupcomingactivities', 'local_reminders'));
 
         if (!empty($upcomingactivities)) {
-            // group activities by start time
+            // Group activities by start time.
             $allactivities = array();
             foreach ($upcomingactivities as $activity) {
                 $starttime = $activity->timestart - ($activity->timestart % (24 * 3600));
