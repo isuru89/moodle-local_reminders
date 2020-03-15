@@ -105,7 +105,6 @@ function create_local_reminders_activity_config_table($dbman) {
 
     // Adding keys to table local_reminders_post_activity.
     $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-    $table->add_key('relatedevent', XMLDB_KEY_FOREIGN, array('eventid'), 'event', array('id'));
 
     // Adding indexes for faster access.
     $table->add_index('localremindercourses', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
@@ -132,7 +131,6 @@ function create_local_reminders_post_activity_table($dbman) {
 
     // Adding keys to table local_reminders_post_activity.
     $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-    $table->add_key('relatedevent', XMLDB_KEY_FOREIGN_UNIQUE, array('eventid'), 'event', array('id'));
 
     // Conditionally launch create table for local_reminders_post_activity.
     if (!$dbman->table_exists($table)) {

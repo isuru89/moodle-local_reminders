@@ -22,7 +22,6 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for each post activity track record."/>
-        <KEY NAME="relatedevent" TYPE="foreign-unique" FIELDS="eventid" REFTABLE="event" REFFIELDS="id"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="local_reminders_activityconf" COMMENT="Used to store activity specific configs.">
@@ -35,7 +34,6 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id" COMMENT="The unique id for each activity config."/>
-        <KEY NAME="relatedevent" TYPE="foreign" FIELDS="eventid" REFTABLE="event" REFFIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="localremindercourses" UNIQUE="false" FIELDS="courseid"/>
