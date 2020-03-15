@@ -49,7 +49,7 @@ require_once($CFG->dirroot . '/local/reminders/locallib.php');
 
 define('REMINDERS_DAYIN_SECONDS', 24 * 3600);
 
-define('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 5);
+define('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 1);
 
 define('REMINDERS_7DAYSBEFORE_INSECONDS', 7 * 24 * 3600);
 define('REMINDERS_3DAYSBEFORE_INSECONDS', 3 * 24 * 3600);
@@ -265,6 +265,10 @@ function local_reminders_cron_pre($currtime) {
                         break;
                     }
                 case 'due':
+                    if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+                        mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
+                        break;
+                    }
                     $reminderref = process_activity_event($event, $aheadday, $activityroleids, REMINDERS_CALL_TYPE_PRE);
                     break;
 
@@ -459,6 +463,10 @@ function when_calendar_event_updated($updateevent, $changetype) {
                 break;
             }
         case 'due':
+            if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+                $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
+                break;
+            }
             $reminderref = process_activity_event($event, $aheadday, $activityroleids, false);
             break;
 

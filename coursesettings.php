@@ -23,6 +23,8 @@
 require('../../config.php');
 require_once($CFG->dirroot.'/local/reminders/coursesettings_form.php');
 
+$activityprefix = 'activity_';
+
 $courseid = required_param('courseid', PARAM_INT);
 
 $return = new moodle_url('/course/view.php', array('id' => $courseid));
@@ -34,6 +36,16 @@ if (!$coursesettings) {
 }
 $coursesettings->courseid = $courseid;
 $coursecontext = context_course::instance($course->id);
+
+$activitysettings = $DB->get_records('local_reminders_activityconf', array('courseid' => $courseid));
+if (!$activitysettings) {
+    $activitysettings = array();
+} else {
+    foreach ($activitysettings as $asetting) {
+        $actkey = 'activity_'.$asetting->eventid.'_'.$asetting->settingkey;
+        $coursesettings->$actkey = $asetting->settingvalue;
+    }
+}
 
 require_login($course);
 require_capability('moodle/course:update', $coursecontext);
@@ -48,11 +60,38 @@ $mform = new local_reminders_coursesettings_edit_form(null, array($coursesetting
 if ($mform->is_cancelled()) {
     redirect($return);
 } else if ($data = $mform->get_data()) {
+    $dataarray = get_object_vars($data);
     if (isset($coursesettings->id)) {
         $data->id = $coursesettings->id;
         $DB->update_record('local_reminders_course', $data);
     } else {
         $DB->insert_record('local_reminders_course', $data);
+    }
+
+    foreach ($dataarray as $key => $value) {
+        if (substr($key, 0, strlen($activityprefix)) == $activityprefix) {
+            $keyparts = explode('_', $key);
+            if (count($keyparts) < 3) {
+                continue;
+            }
+            $eventid = (int)$keyparts[1];
+            $status = $DB->get_record_sql("SELECT id
+                FROM {local_reminders_activityconf}
+                WHERE courseid = :courseid AND eventid = :eventid AND settingkey = :settingkey",
+                array('courseid' => $data->courseid, 'eventid' => $eventid, 'settingkey' => $keyparts[2]));
+
+            $actdata = new stdClass();
+            $actdata->courseid = $data->courseid;
+            $actdata->eventid = $eventid;
+            $actdata->settingkey = $keyparts[2];
+            $actdata->settingvalue = $value;
+            if (!$status) {
+                $DB->insert_record('local_reminders_activityconf', $actdata);
+            } else {
+                $actdata->id = $status->id;
+                $DB->update_record('local_reminders_activityconf', $actdata);
+            }
+        }
     }
 }
 

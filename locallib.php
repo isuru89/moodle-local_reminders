@@ -32,6 +32,67 @@ require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php
 require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php');
 
 /**
+ * Returns a list of upcoming activities for the given course,
+ *
+ * @param int $courseid course id.
+ * @param int $currtime epoch time to compare.
+ * @return array list of event records.
+ */
+function get_upcoming_events_for_course($courseid, $currtime) {
+    global $DB;
+
+    return $DB->get_records_sql("SELECT *
+        FROM {event}
+        WHERE courseid = :courseid
+            AND timestart > :cutofftime
+            AND eventtype = 'due'
+            AND visible = 1
+        ORDER BY timestart",
+        array('courseid' => $courseid, 'cutofftime' => $currtime));
+}
+
+/**
+ * Returns all settings associated with given course and event which
+ * was set in course reminder settings.
+ *
+ * @param int $courseid course id.
+ * @param int $eventid event id.
+ * @return array all settings related to this course event.
+ */
+function fetch_course_activity_settings($courseid, $eventid) {
+    global $DB;
+
+    $records = $DB->get_records_sql("SELECT settingkey, settingvalue
+        FROM {local_reminders_activityconf}
+        WHERE courseid = :courseid AND eventid = :eventid",
+        array('courseid' => $courseid, 'eventid' => $eventid));
+    $pairs = array();
+    if (!empty($records)) {
+        foreach ($records as $record) {
+            $pairs[$record->settingkey] = $record->settingvalue;
+        }
+    }
+    return $pairs;
+}
+
+/**
+ * Returns true if no reminders to send has been scheduled in course settings
+ * page for the provided activity.
+ *
+ * @param int $courseid course id.
+ * @param int $eventid event id.
+ * @param string $keytocheck key to check for.
+ * @return bool return true if reminders disabled for activity.
+ */
+function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck='enabled') {
+    $activitysettings = fetch_course_activity_settings($courseid, $eventid);
+    if (array_key_exists($keytocheck, $activitysettings) && !$activitysettings[$keytocheck]) {
+        return true;
+    }
+    return false;
+}
+
+/**
  * This method will filter out all the activity events finished recently
  * and send reminders for users who still have not yet completed that activity.
  * Only once user will receive emails.
@@ -66,6 +127,11 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
     mtrace('[LOCAL REMINDERS] Number of expired events found for this cron cycle: '.count($allexpiredevents));
     foreach ($allexpiredevents as $event) {
         $event = new calendar_event($event);
+
+        if (has_disabled_reminders_for_activity($event->courseid, $event->id, 'enabledoverdue')) {
+            mtrace("[LOCAL REMINDERS] Activity event $event->id overdue reminders disabled in the course settings");
+            continue;
+        }
 
         $reminderref = process_activity_event($event, -1, $activityroleids, true, REMINDERS_CALL_TYPE_OVERDUE);
         if (!isset($reminderref)) {
@@ -164,6 +230,11 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
     $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
 
     if (!empty($course) && !empty($cm)) {
+        if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+            $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
+            return null;
+        }
+
         $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid, $showtrace);
         $context = context_module::instance($cm->id);
         $PAGE->set_context($context);
@@ -301,7 +372,7 @@ function get_roles_for_reminders() {
  * @param array $tzstyle css style string for tz
  * @return string formatted time string
  */
-function format_event_time_duration($user, $event, $tzstyle=null) {
+function format_event_time_duration($user, $event, $tzstyle=null, $includetz=true) {
     $followedtimeformat = get_string('strftimedaydate', 'langconfig');
     $usertimeformat = get_correct_timeformat_user($user);
 
@@ -338,6 +409,10 @@ function format_event_time_duration($user, $event, $tzstyle=null) {
 
     } else {
         $formattedtime = $formattedtimeprefix.' '.$formattedtime;
+    }
+
+    if (!$includetz) {
+        return $formattedtime;
     }
 
     $tzstr = local_reminders_tz_info::get_human_readable_tz($tzone);
