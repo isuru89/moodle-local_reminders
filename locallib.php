@@ -45,8 +45,8 @@ function get_upcoming_events_for_course($courseid, $currtime) {
         FROM {event}
         WHERE courseid = :courseid
             AND timestart > :cutofftime
-            AND eventtype = 'due'
             AND visible = 1
+            AND (eventtype = 'due' OR eventtype = 'close')
         ORDER BY timestart",
         array('courseid' => $courseid, 'cutofftime' => $currtime));
 }
@@ -115,8 +115,8 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
             LEFT JOIN {local_reminders_post_act} lrpa ON e.id = lrpa.eventid
         WHERE
             timestart >= $rangestart AND timestart < $curtime
-            AND e.eventtype = 'due'
             AND lrpa.eventid IS NULL
+            AND (e.eventtype = 'due' OR e.eventtype = 'close')
             AND e.visible = 1";
     $allexpiredevents = $DB->get_records_sql($querysql);
     if (!$allexpiredevents || count($allexpiredevents) == 0) {
