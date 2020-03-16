@@ -38,13 +38,45 @@ require_once($CFG->libdir . '/accesslib.php');
  */
 class group_reminder extends local_reminder {
 
+    /**
+     * group reference.
+     *
+     * @var object
+     */
     private $group;
+    /**
+     * course reference.
+     *
+     * @var object
+     */
     private $course;
+    /**
+     * course module context reference.
+     *
+     * @var object
+     */
     private $cm;
 
+    /**
+     * activity reference.
+     *
+     * @var object
+     */
     private $activityobj;
+    /**
+     * module name.
+     *
+     * @var string
+     */
     private $modname;
 
+    /**
+     * Creates a new group event instance.
+     *
+     * @param object $event calendar event.
+     * @param object $group group instance.
+     * @param integer $aheaddays number of days ahead.
+     */
     public function __construct($event, $group, $aheaddays = 1) {
         parent::__construct($event, $aheaddays);
         $this->group = $group;
@@ -63,8 +95,10 @@ class group_reminder extends local_reminder {
     }
 
     /**
-     * Set activity instance if there is any
-     * @param type $activity activity instance
+     * Set activity instance if there is any.
+     *
+     * @param string $modulename module name.
+     * @param object $activity activity instance
      */
     public function set_activity($modulename, $activity) {
         $this->activityobj = $activity;
