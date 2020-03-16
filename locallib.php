@@ -356,7 +356,7 @@ function process_group_event($event, $aheadday, $showtrace=true) {
  * @return reminder_ref reminder reference instance.
  */
 function process_user_event($event, $aheadday) {
-    global $DB, $PAGE;
+    global $DB;
 
     $user = $DB->get_record('user', array('id' => $event->userid));
 

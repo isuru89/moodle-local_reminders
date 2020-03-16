@@ -47,7 +47,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return void
  */
 function xmldb_local_reminders_upgrade($oldversion) {
-    global $CFG, $DB, $OUTPUT;
+    global $DB;
 
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 

@@ -84,7 +84,7 @@ define('REMINDERS_CLEAN_TABLE', 'local_reminders');
  *
  */
 function local_reminders_cron() {
-    global $CFG, $DB, $PAGE;
+    global $CFG;
 
     if (!isset($CFG->local_reminders_enable) || !$CFG->local_reminders_enable) {
         mtrace("   [Local Reminder] This cron cycle will be skipped, because plugin is not enabled!");
@@ -105,7 +105,7 @@ function local_reminders_cron() {
  * @return void nothing.
  */
 function local_reminders_cron_pre($currtime) {
-    global $CFG, $DB, $PAGE;
+    global $CFG, $DB;
 
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     $eventtypearray = array('site', 'user', 'course', 'due', 'group');
@@ -354,9 +354,9 @@ function local_reminders_cron_pre($currtime) {
  */
 function local_reminders_cron_overdue_activity($currtime) {
     // Loading roles allowed to receive reminder messages from configuration.
-    [, $activityroleids] = get_roles_for_reminders();
+    $rolesofsystem = get_roles_for_reminders();
     $fromuser = get_from_user();
-    send_overdue_activity_reminders($currtime, $activityroleids, $fromuser);
+    send_overdue_activity_reminders($currtime, $rolesofsystem[1], $fromuser);
 }
 
 /**

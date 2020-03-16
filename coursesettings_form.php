@@ -93,7 +93,6 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                 $mform->addElement('static', 'header'.$daytime, '<h5>'.userdate($daytime, $daytimeformat, $tzone).'</h5>');
                 foreach ($dailyactivities as $activity) {
                     $modinfo = fetch_module_instance($activity->modulename, $activity->instance, $coursesettings->courseid);
-                    $timeduration = format_event_time_duration($USER, $activity, null, false);
 
                     $key = "activity_".$activity->id.'_enabled';
                     $mform->addElement('advcheckbox', $key,
