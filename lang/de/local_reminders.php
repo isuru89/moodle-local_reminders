@@ -17,8 +17,8 @@
 /**
  * Strings for plugin 'reminders', language 'en', branch 'MOODLE_22_STABLE'
  *
- * @package   page
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @package   local_reminders
+ * @copyright 2012 Isuru Madushanka Weerarathna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

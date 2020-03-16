@@ -14,13 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Contains base class for all reminder instances.
+ *
+ * @package    local_reminders
+ * @author     Isuru Weerarathna <uisurumadushanka89@gmail.com>
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 /**
  * Abstract class for reminder object.
  *
- * @package    local
- * @subpackage reminders
+ * This abstract reminder class will be used to implement behaviours of different
+ * types of event types.
+ *
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

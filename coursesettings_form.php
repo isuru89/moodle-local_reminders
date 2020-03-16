@@ -15,7 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package local_reminders
+ * This file contains the viee form of course specific reminder settings.
+ *
+ * @package    local_reminders
  * @copyright  2014 Joannes Burk
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -25,8 +27,20 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir.'/formslib.php');
 require_once($CFG->dirroot.'/local/reminders/locallib.php');
 
+/**
+ * Form class for editing course specific reminder settings.
+ *
+ * @package    local_reminders
+ * @copyright  2014 Joannes Burk
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class local_reminders_coursesettings_edit_form extends moodleform {
 
+    /**
+     * Creates the form definition using received information.
+     *
+     * @return void.
+     */
     public function definition() {
         global $USER;
 

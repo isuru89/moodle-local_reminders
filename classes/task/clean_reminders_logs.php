@@ -28,14 +28,27 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-require_once($CFG->dirroot . '/local/reminders/scripts/clean_logs.php');
+require_once($CFG->dirroot . '/local/reminders/lib.php');
 
+/**
+ * Handler class to cron task of cleaning older reminder tables.
+ */
 class clean_reminders_logs extends \core\task\scheduled_task {
 
+    /**
+     * Executes the cleaning cron task.
+     *
+     * @return void nothing.
+     */
     public function execute() {
         clean_local_reminders_logs();
     }
 
+    /**
+     * Returns clean task name as 'Clean Local Reminders Logs'.
+     *
+     * @return string cleaning task name.
+     */
     public function get_name() {
         return get_string('reminderstaskclean', 'local_reminders');
     }

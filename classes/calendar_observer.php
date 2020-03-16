@@ -17,7 +17,7 @@
 /**
  * Class to invoke corresponding method implementations.
  *
- * @package    local
+ * @package    local_reminders
  * @subpackage reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -32,6 +32,10 @@ require_once($CFG->dirroot . '/local/reminders/lib.php');
 
 /**
  * Calendar event observer class.
+ *
+ * @package local_reminders
+ * @copyright 2012 Isuru Madushanka Weerarathna
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class calendar_observer {
 

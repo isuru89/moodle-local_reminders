@@ -28,8 +28,15 @@ abstract class local_reminder_activity_handler {
 
     /**
      * This function will format/append reminder messages with necessary info
-     * based on constraints in that activity instance
+     * based on constraints in that activity instance.
      *
+     * @param string $htmlmail email content.
+     * @param string $modulename module name as 'lesson'.
+     * @param object $activity lesson instance.
+     * @param object $user user to prepare the message for.
+     * @param object $event event instance.
+     * @param object $reminder reminder reference.
+     * @return void nothing.
      */
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null) {
         // Do nothing.
@@ -60,7 +67,12 @@ abstract class local_reminder_activity_handler {
     }
 
     /**
-     * formats given date and time based on given user's timezone
+     * Formats given date and time based on given user's timezone.
+     *
+     * @param number $datetime epoch time.
+     * @param object $user user to format for.
+     * @param object $reminder reminder reference.
+     * @return string formatted date time according to give user.
      */
     protected function format_datetime($datetime, $user, $reminder) {
         $tzone = 99;
@@ -83,6 +95,13 @@ abstract class local_reminder_activity_handler {
  */
 class local_reminder_quiz_handler extends local_reminder_activity_handler {
 
+    /**
+     * Returns description of the quiz activity if only quiz has not yet started.
+     *
+     * @param object $activity quiz activity instance.
+     * @param object $event calendar event.
+     * @return string|null description of the quiz if not yet started.
+     */
     public function get_description($activity, $event) {
         if (isset($activity->timeopen)) {
             $utime = time();
@@ -125,6 +144,13 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
     /**
      * Appends quiz time limit into the email.
      *
+     * @param string $htmlmail email content.
+     * @param string $modulename module name as 'quiz'.
+     * @param object $activity quiz instance.
+     * @param object $user user to prepare the message for.
+     * @param object $event event instance.
+     * @param object $reminder reminder reference.
+     * @return void nothing.
      */
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         if (isset($activity->timelimit) && $activity->timelimit > 0) {
@@ -169,7 +195,17 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
         return $filteredusers;
     }
 
-
+    /**
+     * Appends assignment cutoff time into the email.
+     *
+     * @param string $htmlmail email content.
+     * @param string $modulename module name as 'assign'.
+     * @param object $activity assignment instance.
+     * @param object $user user to prepare the message for.
+     * @param object $event event instance.
+     * @param object $reminder reminder reference.
+     * @return void nothing.
+     */
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         if (isset($activity->cutoffdate) && $activity->cutoffdate > 0) {
             $htmlmail .= $reminder->write_table_row(
@@ -178,6 +214,13 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
         }
     }
 
+    /**
+     * Returns description of the assignment activity if only show description is allowed.
+     *
+     * @param object $activity assignment activity instance.
+     * @param object $event calendar event.
+     * @return string|null description of the assignment if allowed.
+     */
     public function get_description($activity, $event) {
         if (isset($activity->alwaysshowdescription)) {
             $utime = time();
@@ -322,8 +365,15 @@ class local_reminder_lesson_handler extends local_reminder_activity_handler {
     }
 
     /**
-     * Appends time limit into the email.
+     * Appends lesson time limit into the email.
      *
+     * @param string $htmlmail email content.
+     * @param string $modulename module name as 'lesson'.
+     * @param object $activity lesson instance.
+     * @param object $user user to prepare the message for.
+     * @param object $event event instance.
+     * @param object $reminder reminder reference.
+     * @return void nothing.
      */
     public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         if (isset($activity->timelimit) && $activity->timelimit > 0) {

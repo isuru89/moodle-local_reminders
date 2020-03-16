@@ -17,15 +17,15 @@
 /**
  * Reminder plugin version information
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
+ * @author     Isuru Weerarathna <uisurumadushanka89@gmail.com>
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020040104;
+$plugin->version   = 2020040201;
 $plugin->requires  = 2018051700;        // Require moodle 3.5 or higher.
 $plugin->release   = '2.0';
 $plugin->maturity  = MATURITY_RC;

@@ -17,8 +17,8 @@
 /**
  * Local helper functions for reminders cron function.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
+ * @author     Isuru Weerarathna <uisurumadushanka89@gmail.com>
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -97,7 +97,10 @@ function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck='e
  * and send reminders for users who still have not yet completed that activity.
  * Only once user will receive emails.
  *
- * @param $curtime current time to check for cutoff
+ * @param int $curtime current time to check for cutoff.
+ * @param array $activityroleids role ids for acitivities.
+ * @param object $fromuser from user for emails.
+ * @return void.
  */
 function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) {
     global $DB, $CFG;
@@ -163,6 +166,16 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
     }
 }
 
+/**
+ * Process activity event and creates a reminder instance wrapping it.
+ *
+ * @param object $event calendar event.
+ * @param int $aheadday number of days ahead.
+ * @param array $activityroleids role ids for activities.
+ * @param boolean $showtrace whether to print logs or not.
+ * @param string $calltype calling type PRE|OVERDUE.
+ * @return reminder_ref reminder reference instance.
+ */
 function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
     global $DB, $PAGE;
     if (isemptystring($event->modulename)) {
@@ -219,6 +232,16 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
     return null;
 }
 
+/**
+ * Process unknown event and creates a reminder instance wrapping it if unknown
+ * event is a module level activity.
+ *
+ * @param object $event calendar event.
+ * @param int $aheadday number of days ahead.
+ * @param array $activityroleids role ids for activities.
+ * @param boolean $showtrace whether to print logs or not.
+ * @return reminder_ref reminder reference instance.
+ */
 function process_unknown_event($event, $aheadday, $activityroleids=null, $showtrace=true) {
     global $DB, $PAGE;
     if (isemptystring($event->modulename)) {
@@ -256,6 +279,15 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
     return null;
 }
 
+/**
+ * Process course event and creates a reminder instance wrapping it.
+ *
+ * @param object $event calendar event.
+ * @param int $aheadday number of days ahead.
+ * @param array $activityroleids role ids for activities.
+ * @param boolean $showtrace whether to print logs or not.
+ * @return reminder_ref reminder reference instance.
+ */
 function process_course_event($event, $aheadday, $courseroleids=null, $showtrace=true) {
     global $DB, $PAGE;
 
@@ -282,6 +314,14 @@ function process_course_event($event, $aheadday, $courseroleids=null, $showtrace
     return null;
 }
 
+/**
+ * Process group event and creates a reminder instance wrapping it.
+ *
+ * @param object $event calendar event.
+ * @param int $aheadday number of days ahead.
+ * @param boolean $showtrace whether to print logs or not.
+ * @return reminder_ref reminder reference instance.
+ */
 function process_group_event($event, $aheadday, $showtrace=true) {
     global $DB, $PAGE;
 
@@ -308,6 +348,13 @@ function process_group_event($event, $aheadday, $showtrace=true) {
     }
 }
 
+/**
+ * Process user event and creates a reminder instance wrapping it.
+ *
+ * @param object $event calendar event.
+ * @param int $aheadday number of days ahead.
+ * @return reminder_ref reminder reference instance.
+ */
 function process_user_event($event, $aheadday) {
     global $DB, $PAGE;
 
@@ -321,6 +368,13 @@ function process_user_event($event, $aheadday) {
     return null;
 }
 
+/**
+ * Process site event and creates a reminder instance wrapping it.
+ *
+ * @param object $event calendar event.
+ * @param int $aheadday number of days ahead.
+ * @return reminder_ref reminder reference instance.
+ */
 function process_site_event($event, $aheadday) {
     global $DB, $PAGE;
 
@@ -370,6 +424,7 @@ function get_roles_for_reminders() {
  * @param object $user user object
  * @param object $event event instance
  * @param array $tzstyle css style string for tz
+ * @param boolean $includetz whether to include timezone or not.
  * @return string formatted time string
  */
 function format_event_time_duration($user, $event, $tzstyle=null, $includetz=true) {
@@ -428,6 +483,8 @@ function format_event_time_duration($user, $event, $tzstyle=null, $includetz=tru
  * This function would return time formats relevent for the given user.
  * Sometimes a user might have changed time display format in his/her preferences.
  *
+ * @param object $user user instance to get specific time format.
+ * @return string date time format for user.
  */
 function get_correct_timeformat_user($user) {
     static $langtimeformat = null;
@@ -447,8 +504,8 @@ function get_correct_timeformat_user($user) {
  * Returns array of users active (not suspended) in the provided contexts and
  * at the same time belongs to the given roles.
  *
- * @param $activityroleids role ids
- * @param $context context to search for users
+ * @param array $activityroleids role ids
+ * @param object $context context to search for users
  * @return array of user records
  */
 function get_active_role_users($activityroleids, $context) {
@@ -461,7 +518,7 @@ function get_active_role_users($activityroleids, $context) {
 /**
  * Returns all users belong to the given group.
  *
- * @param $group group object as received from db.
+ * @param object $group group object as received from db.
  * @return array users in an array
  */
 function get_users_in_group($group) {
@@ -483,7 +540,6 @@ function get_users_in_group($group) {
  * Returns true if input string is empty/whitespaces only, otherwise false.
  *
  * @param type $str string
- *
  * @return boolean true if string is empty or whitespace
  */
 function isemptystring($str) {
@@ -555,10 +611,25 @@ function get_from_user() {
 /**
  * Reminder specific timezone data holder.
  * Note: you must have at least Moodle 3.5 or higher.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminders_tz_info extends \core_date {
+    /**
+     * hold the timezone mappings.
+     *
+     * @var array
+     */
     protected static $mapping;
 
+    /**
+     * Returns human readable timezone name for given timezone.
+     *
+     * @param string $tz input time zone.
+     * @return string human readable tz.
+     */
     public static function get_human_readable_tz($tz) {
         if (!isset(self::$mapping)) {
             static::load_tz_info();
@@ -573,6 +644,11 @@ class local_reminders_tz_info extends \core_date {
         return static::get_localised_timezone($tz);
     }
 
+    /**
+     * Load timezone information from base class.
+     *
+     * @return void.
+     */
     private static function load_tz_info() {
         self::$mapping = array();
         foreach (static::$badzones as $detailname => $abbr) {
@@ -585,32 +661,82 @@ class local_reminders_tz_info extends \core_date {
 
 /**
  * Reminder reference class.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class reminder_ref {
+    /**
+     * created reminder reference.
+     *
+     * @var local_reminder
+     */
     protected $reminder;
+    /**
+     * Array of users to send this reminder.
+     *
+     * @var array
+     */
     protected $sendusers;
 
+    /**
+     * Creates new reminder reference.
+     *
+     * @param local_reminder $reminder created reminder.
+     * @param array $sendusers array of users.
+     */
     public function __construct($reminder, $sendusers) {
         $this->reminder = $reminder;
         $this->sendusers = $sendusers;
     }
 
+    /**
+     * Returns total number of users eligible to send this reminder.
+     *
+     * @return int total number of users.
+     */
     public function get_total_users_to_send() {
         return count($this->sendusers);
     }
 
+    /**
+     * Returns the ultimate notification event instance to send for given user.
+     *
+     * @param object $fromuser from user.
+     * @param object $touser user to send.
+     * @return object new notification instance.
+     */
     public function get_event_to_send($fromuser, $touser) {
         return $this->reminder->get_sending_event($fromuser, $touser);
     }
 
+    /**
+     * Returns the notification event instance based on change type.
+     *
+     * @param string $changetype change type PRE|OVERDUE.
+     * @param object $fromuser from user.
+     * @param object $touser user to send.
+     * @return object new notification instance.
+     */
     public function get_updating_send_event($changetype, $fromuser, $touser) {
         return $this->reminder->get_updating_event_message($changetype, $fromuser, $touser);
     }
 
+    /**
+     * Returns eligible sending users as array.
+     *
+     * @return array users eligible to receive message.
+     */
     public function get_sending_users() {
         return $this->sendusers;
     }
 
+    /**
+     * Cleanup the reminder memory.
+     *
+     * @return void nothing.
+     */
     public function cleanup() {
         unset($this->sendusers);
         if (isset($this->reminder)) {

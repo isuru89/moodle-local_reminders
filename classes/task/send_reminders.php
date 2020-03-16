@@ -30,12 +30,25 @@ global $CFG;
 
 require_once($CFG->dirroot . '/local/reminders/lib.php');
 
+/**
+ * Handler class to execute main reminder functionalities.
+ */
 class send_reminders extends \core\task\scheduled_task {
 
+    /**
+     * Execute the main send reminders cron function.
+     *
+     * @return void nothing.
+     */
     public function execute() {
         local_reminders_cron();
     }
 
+    /**
+     * Returns the name of main reminder task name as 'Local Reminders'.
+     *
+     * @return string task name.
+     */
     public function get_name() {
         return get_string('reminderstask', 'local_reminders');
     }

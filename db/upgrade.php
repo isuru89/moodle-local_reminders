@@ -37,8 +37,8 @@ defined('MOODLE_INTERNAL') || die();
  * Please do not forget to use upgrade_set_timeout()
  * before any action that may take longer time to finish.
  *
- * @package local-reminders
- * @copyright 2003 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
+ * @package   local_reminders
+ * @copyright 2012 Isuru Madushanka Weerarathna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
