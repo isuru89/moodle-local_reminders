@@ -8,7 +8,6 @@ addons:
 
 services:
   - mysql
-  - postgresql
 
 cache:
   directories:
@@ -23,7 +22,6 @@ env:
   - MOODLE_BRANCH=MOODLE_35_STABLE
  matrix:
   - DB=pgsql
-  - DB=mysqli
 
 before_install:
   - phpenv config-rm xdebug.ini
