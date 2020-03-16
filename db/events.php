@@ -17,8 +17,7 @@
 /**
  * All events consumed by local reminder plugin.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

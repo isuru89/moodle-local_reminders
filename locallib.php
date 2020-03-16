@@ -284,7 +284,7 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
  *
  * @param object $event calendar event.
  * @param int $aheadday number of days ahead.
- * @param array $activityroleids role ids for activities.
+ * @param array $courseroleids role ids for course.
  * @param boolean $showtrace whether to print logs or not.
  * @return reminder_ref reminder reference instance.
  */
@@ -539,8 +539,8 @@ function get_users_in_group($group) {
 /**
  * Returns true if input string is empty/whitespaces only, otherwise false.
  *
- * @param type $str string
- * @return boolean true if string is empty or whitespace
+ * @param string $str text to compare.
+ * @return boolean true if string is empty or whitespace.
  */
 function isemptystring($str) {
     return !isset($str) || empty($str) || trim($str) === '';
@@ -610,6 +610,7 @@ function get_from_user() {
 
 /**
  * Reminder specific timezone data holder.
+ *
  * Note: you must have at least Moodle 3.5 or higher.
  *
  * @package    local_reminders

@@ -14,13 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * File contains all avitivity specific classes required for formatting and
+ * validation of each activity type.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 /**
  * Abstract class for formatting reminder message based on activity type.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -38,7 +46,7 @@ abstract class local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
         // Do nothing.
     }
 
@@ -92,6 +100,10 @@ abstract class local_reminder_activity_handler {
 
 /**
  * Supports quiz related information.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_quiz_handler extends local_reminder_activity_handler {
 
@@ -163,6 +175,10 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
 
 /**
  * Supports assignment related information.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_assign_handler extends local_reminder_activity_handler {
 
@@ -234,6 +250,10 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
 
 /**
  * Supports choice related information.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_choice_handler extends local_reminder_activity_handler {
 
@@ -283,6 +303,10 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
 
 /**
  * Supports feedback related information.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_feedback_handler extends local_reminder_activity_handler {
 
@@ -332,6 +356,10 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
 
 /**
  * Supports Lesson module related information.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_lesson_handler extends local_reminder_activity_handler {
 
@@ -400,6 +428,10 @@ class local_reminder_lesson_handler extends local_reminder_activity_handler {
 
 /**
  * Supports survey related information.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_survey_handler extends local_reminder_activity_handler {
 

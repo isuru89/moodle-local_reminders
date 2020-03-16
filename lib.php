@@ -401,7 +401,7 @@ function has_denied_for_events($changetype) {
 /**
  * Calls when calendar event created/updated/deleted.
  *
- * @param object $event calendar event instance.
+ * @param object $updateevent calendar event instance.
  * @param object $changetype change type (added/updated/removed).
  * @return void.
  */
