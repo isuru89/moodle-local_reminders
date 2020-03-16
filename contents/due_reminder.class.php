@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Activity event reminder handler.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
@@ -24,18 +32,41 @@ require_once($CFG->dirroot . '/local/reminders/contents/activity_handlers.class.
 /**
  * Class to specify the reminder message object for due events.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class due_reminder extends course_reminder {
 
+    /**
+     * @var object
+     */
     private $coursemodule;
+    /**
+     * @var object
+     */
     private $cm;
+    /**
+     * Activity reference.
+     *
+     * @var object
+     */
     private $activityobj;
+    /**
+     * Activity name.
+     * @var string
+     */
     private $modname;
 
+    /**
+     * Creates new activity reminder instance.
+     *
+     * @param object $event calendar event.
+     * @param object $course course instance.
+     * @param object $cm coursemodulecontext instance.
+     * @param object $coursemodule course module.
+     * @param integer $aheaddays ahead days in number.
+     */
     public function __construct($event, $course, $cm, $coursemodule, $aheaddays = 1) {
         parent::__construct($event, $course, $aheaddays);
         $this->cm = $cm;
@@ -43,8 +74,10 @@ class due_reminder extends course_reminder {
     }
 
     /**
-     * Set activity instance if there is any
-     * @param type $activity activity instance
+     * Set activity instance if there is any.
+     *
+     * @param string $modulename module name.
+     * @param object $activity activity instance
      */
     public function set_activity($modulename, $activity) {
         $this->activityobj = $activity;
@@ -88,6 +121,13 @@ class due_reminder extends course_reminder {
         return $users;
     }
 
+    /**
+     * Generates a message content as a HTML for activities.
+     *
+     * @param object $user The user object
+     * @param object $changetype change type (add/update/removed/overdue)
+     * @return string Message content as HTML text.
+     */
     public function get_message_html($user=null, $changetype=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
@@ -142,6 +182,13 @@ class due_reminder extends course_reminder {
             html_writer::end_tag('html');
     }
 
+    /**
+     * Generates a message content as a plain-text for activity.
+     *
+     * @param object $user The user object
+     * @param object $changetype change type (add/update/removed)
+     * @return string Message content as plain-text.
+     */
     public function get_message_plaintext($user=null, $changetype=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
         $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
@@ -152,10 +199,21 @@ class due_reminder extends course_reminder {
         return $text;
     }
 
+    /**
+     * The name 'reminder_due'.
+     *
+     * @return string Message provider name
+     */
     protected function get_message_provider() {
         return 'reminders_due';
     }
 
+    /**
+     * Generates a message title for the activity reminder.
+     *
+     * @param string $type type of message to be send (null=reminder cron)
+     * @return string Message title as a plain-text.
+     */
     public function get_message_title($type=null) {
         $title = '('.$this->course->shortname;
         if (!empty($this->cm)) {
@@ -164,6 +222,11 @@ class due_reminder extends course_reminder {
         return $title.') '.$this->event->name;
     }
 
+    /**
+     * Adds activity id and name to header.
+     *
+     * @return array of new header.
+     */
     public function get_custom_headers() {
         $headers = parent::get_custom_headers();
 

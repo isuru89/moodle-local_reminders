@@ -14,11 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * This file keeps track of upgrades to the reminder module.
+ *
+ * @package   local_reminders
+ * @copyright 2012 Isuru Madushanka Weerarathna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * This file keeps track of upgrades to
- * the forum module
+ * Run the upgrade for the plugin.
  *
  * Sometimes, changes between versions involve
  * alterations to database structures and other
@@ -37,13 +43,11 @@ defined('MOODLE_INTERNAL') || die();
  * Please do not forget to use upgrade_set_timeout()
  * before any action that may take longer time to finish.
  *
- * @package local-reminders
- * @copyright 2003 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @param int $oldversion older version of plugin.
+ * @return void
  */
-
 function xmldb_local_reminders_upgrade($oldversion) {
-    global $CFG, $DB, $OUTPUT;
+    global $DB;
 
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 

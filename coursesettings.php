@@ -15,7 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package local_reminders
+ * This file contains course specific settings instance manipulation.
+ *
+ * @package    local_reminders
  * @copyright  2014 Joannes Burk
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

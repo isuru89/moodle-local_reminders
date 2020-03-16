@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * User event reminder handler.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
@@ -23,15 +31,26 @@ require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 /**
  * Class to specify the reminder message object for user events.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class user_reminder extends local_reminder {
 
+    /**
+     * User instance.
+     *
+     * @var object
+     */
     private $user;
 
+    /**
+     * Creates new user reminder instance.
+     *
+     * @param object $event calendar event.
+     * @param object $user user instance.
+     * @param integer $aheaddays number of days ahead.
+     */
     public function __construct($event, $user, $aheaddays = 1) {
         parent::__construct($event, $aheaddays);
         $this->user = $user;
@@ -48,6 +67,13 @@ class user_reminder extends local_reminder {
         }
     }
 
+    /**
+     * Generates a message content as a HTML for user email.
+     *
+     * @param object $user The user object
+     * @param object $changetype change type (add/update/removed)
+     * @return string Message content as HTML text.
+     */
     public function get_message_html($user=null, $changetype=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
@@ -82,6 +108,13 @@ class user_reminder extends local_reminder {
         return $htmlmail;
     }
 
+    /**
+     * Generates a message content as a plain-text for user noty.
+     *
+     * @param object $user The user object
+     * @param object $changetype change type (add/update/removed)
+     * @return string Message content as plain-text.
+     */
     public function get_message_plaintext($user=null, $changetype=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
         $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
@@ -91,14 +124,30 @@ class user_reminder extends local_reminder {
         return $text;
     }
 
+    /**
+     * Returns 'reminders_user' name.
+     *
+     * @return string Message provider name
+     */
     protected function get_message_provider() {
         return 'reminders_user';
     }
 
+    /**
+     * Generates a message title for the user reminder.
+     *
+     * @param string $type type of message to be send (null=reminder cron)
+     * @return string Message title as a plain-text.
+     */
     public function get_message_title($type=null) {
         return '('.fullname($this->user) . ') ' . $this->event->name;
     }
 
+    /**
+     * Adds user id and name to header.
+     *
+     * @return array additional headers.
+     */
     public function get_custom_headers() {
         $headers = parent::get_custom_headers();
 

@@ -17,8 +17,8 @@
 /**
  * Library function for reminders cron function.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
+ * @author     Isuru Weerarathna <uisurumadushanka89@gmail.com>
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -72,6 +72,8 @@ define('REMINDERS_CALENDAR_EVENT_REMOVED', 'REMOVED');
 define('REMINDERS_CALL_TYPE_PRE', 'PRE');
 define('REMINDERS_CALL_TYPE_OVERDUE', 'OVERDUE');
 
+define('REMINDERS_CLEAN_TABLE', 'local_reminders');
+
 /**
  * ======== FUNCTIONS =========================================
  */
@@ -82,7 +84,7 @@ define('REMINDERS_CALL_TYPE_OVERDUE', 'OVERDUE');
  *
  */
 function local_reminders_cron() {
-    global $CFG, $DB, $PAGE;
+    global $CFG;
 
     if (!isset($CFG->local_reminders_enable) || !$CFG->local_reminders_enable) {
         mtrace("   [Local Reminder] This cron cycle will be skipped, because plugin is not enabled!");
@@ -96,8 +98,14 @@ function local_reminders_cron() {
     local_reminders_cron_overdue_activity($currtime);
 }
 
+/**
+ * Runs and send reminders before an event occurred.
+ *
+ * @param int $currtime current time with epoch.
+ * @return void nothing.
+ */
 function local_reminders_cron_pre($currtime) {
-    global $CFG, $DB, $PAGE;
+    global $CFG, $DB;
 
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
     $eventtypearray = array('site', 'user', 'course', 'due', 'group');
@@ -338,11 +346,17 @@ function local_reminders_cron_pre($currtime) {
     }
 }
 
+/**
+ * Runs and sends reminders for overdue activities.
+ *
+ * @param int $currtime current time in epoch.
+ * @return void
+ */
 function local_reminders_cron_overdue_activity($currtime) {
     // Loading roles allowed to receive reminder messages from configuration.
-    [, $activityroleids] = get_roles_for_reminders();
+    $rolesofsystem = get_roles_for_reminders();
     $fromuser = get_from_user();
-    send_overdue_activity_reminders($currtime, $activityroleids, $fromuser);
+    send_overdue_activity_reminders($currtime, $rolesofsystem[1], $fromuser);
 }
 
 /**
@@ -351,8 +365,9 @@ function local_reminders_cron_overdue_activity($currtime) {
  * of end of the cron time window, so that no reminders sent
  * twice.
  *
- * @param $timewindowend string cron window time end.
+ * @param int $timewindowend cron window time end.
  * @param string $crontype type of reminders cron.
+ * @return void nothing.
  */
 function add_flag_record_db($timewindowend, $crontype = '') {
     global $DB;
@@ -386,7 +401,7 @@ function has_denied_for_events($changetype) {
 /**
  * Calls when calendar event created/updated/deleted.
  *
- * @param object $event calendar event instance.
+ * @param object $updateevent calendar event instance.
  * @param object $changetype change type (added/updated/removed).
  * @return void.
  */
@@ -495,6 +510,31 @@ function when_calendar_event_updated($updateevent, $changetype) {
     $reminderref->cleanup();
 }
 
+/**
+ * Cleans the local_reminders table by deleting older unnecessary records.
+ */
+function clean_local_reminders_logs() {
+    global $CFG, $DB, $PAGE;
+
+    $cutofftime = time() - REMINDERS_7DAYSBEFORE_INSECONDS;
+    mtrace("  [Local Reminders][CLEAN] clean cutoff time: $cutofftime");
+    $recordcount = $DB->count_records_select(REMINDERS_CLEAN_TABLE, "time >= $cutofftime");
+    if ($recordcount > 0) {
+        mtrace('  [Local Reminders][CLEAN] Cleaning can be executed now as there are newer records.');
+        $deletestatus = $DB->delete_records_select(REMINDERS_CLEAN_TABLE, "time < $cutofftime");
+        mtrace('  [Local Reminders][CLEAN] Cleaning status: '.$deletestatus);
+    } else {
+        mtrace('  [Local Reminders][CLEAN] No records allow to clean since reminders cron has not bee executed for long time!');
+    }
+}
+
+/**
+ * Function to render settings customization per course.
+ *
+ * @param object $settingsnav settings navigation.
+ * @param object $context current context.
+ * @return void.
+ */
 function local_reminders_extend_settings_navigation($settingsnav, $context) {
     global $PAGE;
 

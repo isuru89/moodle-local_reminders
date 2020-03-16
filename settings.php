@@ -15,7 +15,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package local_reminders
+ * This file contains all reminder plugin settings.
+ *
+ * @package    local_reminders
+ * @author     Isuru Weerarathna <uisurumadushanka89@gmail.com>
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
