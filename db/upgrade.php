@@ -15,8 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file keeps track of upgrades to
- * the forum module
+ * This file keeps track of upgrades to the reminder module.
+ *
+ * @package   local_reminders
+ * @copyright 2012 Isuru Madushanka Weerarathna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Run the upgrade for the plugin.
  *
  * Sometimes, changes between versions involve
  * alterations to database structures and other
@@ -34,15 +42,6 @@
  *
  * Please do not forget to use upgrade_set_timeout()
  * before any action that may take longer time to finish.
- *
- * @package   local_reminders
- * @copyright 2012 Isuru Madushanka Weerarathna
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-defined('MOODLE_INTERNAL') || die();
-
-/**
- * Run the upgrade for the plugin.
  *
  * @param int $oldversion older version of plugin.
  * @return void

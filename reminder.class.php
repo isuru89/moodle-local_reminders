@@ -48,22 +48,35 @@ abstract class local_reminder {
     protected $notification = 1;
 
     /**
-     *
      * @var object event object correspond to this reminder.
      */
     protected $event;
-
+    /**
+     * CSS styles for body content.
+     *
+     * @var string
+     */
     protected $tbodycssstyle = 'width:100%;'.
         'font-family:Tahoma,Arial,Sans-serif;'.
         'border-width:1px 2px 2px 1px;'.
         'border:1px solid #ccc;'.
         'font-size:13px';
+    /**
+     * CSS styles for title content.
+     *
+     * @var string
+     */
     protected $titlestyle = 'padding:10px 0 10px 0;'.
         'margin:0;'.
         'font-family:Arial,Sans-serif;'.
         'font-size:16px;'.
         'font-weight:bold;'.
         'color:#222';
+    /**
+     * CSS styles for overdue content.
+     *
+     * @var string
+     */
     protected $overduestyle = 'padding:10px 0 10px 10px;'.
         'background-color: #f3e3e3;'.
         'margin:0;'.
@@ -71,17 +84,37 @@ abstract class local_reminder {
         'font-size:16px;'.
         'font-weight:bold;'.
         'color:#ec4040';
+    /**
+     * CSS styles for footer content.
+     *
+     * @var string
+     */
     protected $footerstyle = 'background-color:#f6f6f6;'.
         'color:#888;'.
         'border-top:1px solid #ccc;'.
         'font-family:Arial,Sans-serif;'.
         'font-size:11px;'.
         'padding: 20px 10px;';
+    /**
+     * CSS style for description div.
+     *
+     * @var string
+     */
     protected $descstyle = 'border-top:1px solid #eee;'.
         'font-family:Arial,Sans-serif;'.
         'font-size:13px;'.
         'padding: 2px 15px;';
+    /**
+     * CSS style for title header.
+     *
+     * @var string
+     */
     protected $defheaderstyle = 'padding: 0 15px; color: #888; width: 150px;';
+    /**
+     * Style for timezone span.
+     *
+     * @var string
+     */
     public $tzshowstyle = 'font-size:13px;color: #888;';
 
     /**
@@ -90,6 +123,12 @@ abstract class local_reminder {
      */
     public $eventobject;
 
+    /**
+     * Creates a new reminder instance with event and no of days ahead value.
+     *
+     * @param object $event calendar event.
+     * @param integer $aheaddays number of days ahead.
+     */
     public function __construct($event, $aheaddays = 1) {
         $this->event = $event;
         $this->aheaddays = $aheaddays;
@@ -118,10 +157,10 @@ abstract class local_reminder {
     /**
      * Writes an email row including header and its value.
      *
-     * @param $headervalue string the content for header
-     * @param $value string value to show
-     * @param $customizedstyle array of style values.
-     * @param $overridestyle boolean to override or not the specified styles if given.
+     * @param string $headervalue string the content for header
+     * @param string $value string value to show
+     * @param array $customizedstyle array of style values.
+     * @param array $overridestyle boolean to override or not the specified styles if given.
      * @return string generated html row.
      */
     public function write_table_row($headervalue, $value, $customizedstyle=null, $overridestyle=true) {
@@ -156,6 +195,7 @@ abstract class local_reminder {
      *
      * @param string $description event description.
      * @param object $event event instance.
+     * @return string description content.
      */
     protected function write_description($description, $event) {
         $htmltext = html_writer::start_tag('tr');
@@ -174,6 +214,8 @@ abstract class local_reminder {
 
     /**
      * Gets the header content of the e-mail message.
+     *
+     * @return string return header.
      */
     protected function get_html_header() {
         return html_writer::tag('head', '');
@@ -181,6 +223,8 @@ abstract class local_reminder {
 
     /**
      * Gets the footer content of the e-mail message.
+     *
+     * @return string footer content.
      */
     protected function get_html_footer() {
         global $CFG;
@@ -220,7 +264,7 @@ abstract class local_reminder {
     /**
      * Generates a message content as a HTML. Suitable for email messages.
      *
-     * @param object $event The event object
+     * @param object $user The user object
      * @param object $changetype change type (add/update/removed)
      * @return string Message content as HTML text.
      */
@@ -229,7 +273,7 @@ abstract class local_reminder {
     /**
      * Generates a message content as a plain-text. Suitable for popup messages.
      *
-     * @param object $event The event object
+     * @param object $user The user object
      * @param object $changetype change type (add/update/removed)
      * @return string Message content as plain-text.
      */
@@ -263,7 +307,7 @@ abstract class local_reminder {
     /**
      * Creates the final reminder message object from given information.
      *
-     * @param object $name impersonated user for sending messages. This
+     * @param object $admin impersonated user for sending messages. This
      *          name will display in 'from' field in every reminder message.
      *
      * @return object a message object which will be sent to the messaging API
@@ -312,10 +356,10 @@ abstract class local_reminder {
      * @param object $user user object (id field must contain)
      * @param boolean $refreshcontent indicates whether content of message should
      * be refresh based on given user
-     *
-     * @return event object
+     * @param object $fromuser sending user.
+     * @return event object notification instance.
      */
-    public function set_sendto_user($user, $refreshcontent=true, $fromuser = null) {
+    public function set_sendto_user($user, $refreshcontent=true, $fromuser=null) {
         if (!isset($this->eventobject) || empty($this->eventobject)) {
             $this->create_reminder_message_object();
         }
@@ -337,10 +381,25 @@ abstract class local_reminder {
         return $this->eventobject;
     }
 
+    /**
+     * Returns the sending notification instance from user to user.
+     *
+     * @param object $fromuser from user.
+     * @param object $touser to user.
+     * @return object notification instance.
+     */
     public function get_sending_event($fromuser, $touser) {
         return $this->set_sendto_user($touser, true, $fromuser);
     }
 
+    /**
+     * Returns the sending notification instance from user to user with change type.
+     *
+     * @param string $changetype change type.
+     * @param object $admin admin user.
+     * @param object $touser to user.
+     * @return object notification instance.
+     */
     public function get_updating_event_message($changetype, $admin=null, $touser=null) {
         global $CFG;
 

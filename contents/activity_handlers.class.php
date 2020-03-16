@@ -15,8 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * File contains all avitivity specific classes required for formatting and
- * validation of each activity type.
+ * All avitivity specific classes required for specific handling.
  *
  * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna

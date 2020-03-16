@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Group event reminder handler.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 global $CFG;
@@ -24,8 +32,7 @@ require_once($CFG->libdir . '/accesslib.php');
 /**
  * Class to specify the reminder message object for group events.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -64,6 +71,11 @@ class group_reminder extends local_reminder {
         $this->modname = $modulename;
     }
 
+    /**
+     * Loads course reference using provided group reference.
+     *
+     * @return void.
+     */
     private function load_course_object() {
         global $DB;
 
@@ -76,6 +88,13 @@ class group_reminder extends local_reminder {
         }
     }
 
+    /**
+     * Generates a message content as a HTML for group reminder.
+     *
+     * @param object $user The user object
+     * @param object $changetype change type (add/update/removed)
+     * @return string Message content as HTML text.
+     */
     public function get_message_html($user=null, $changetype=null) {
         global $CFG;
 
@@ -133,6 +152,13 @@ class group_reminder extends local_reminder {
         return $htmlmail;
     }
 
+    /**
+     * Generates a message content as a plain-text for group reminder.
+     *
+     * @param object $user The user object
+     * @param object $changetype change type (add/update/removed)
+     * @return string Message content as plain-text.
+     */
     public function get_message_plaintext($user=null, $changetype=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
         $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
@@ -148,10 +174,21 @@ class group_reminder extends local_reminder {
         return $text;
     }
 
+    /**
+     * Returns 'reminders_group' name.
+     *
+     * @return string Message provider name
+     */
     protected function get_message_provider() {
         return 'reminders_group';
     }
 
+    /**
+     * Generates a message title for the group reminder.
+     *
+     * @param string $type type of message to be send (null=reminder cron)
+     * @return string Message title as a plain-text.
+     */
     public function get_message_title($type=null) {
         $title = '';
         if (!empty($this->course)) {
@@ -165,6 +202,11 @@ class group_reminder extends local_reminder {
         return $title;
     }
 
+    /**
+     * Adds group id and activity id (if exists) to header.
+     *
+     * @return array additional headers.
+     */
     public function get_custom_headers() {
         $headers = parent::get_custom_headers();
 
