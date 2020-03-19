@@ -93,6 +93,16 @@ In addition to above, user can control reminders for calendar event changes per 
 
 ## Changelog
 
+#### v2.0
+  * Ability to send reminders after event completed for overdue students (#3)
+  * Ability to enable/disable reminders per activity (#48)
+  * Reminder email messages when calendar event created/changed/removed (#21)
+  * Prevent sending more email reminders once a student has completed the activity
+  * Added timezone/location to the email due dates (#32)
+  * Improved email style (#31)
+  * Additional cron task to clean old reminder data (#37)
+  * Send reminders only to students who can submit assignment (#47)
+
 #### v1.7
   * Excluded suspended users from course/activity events (#27)
   * Renamed admin cron function so that conflicting with legacy (#26)
