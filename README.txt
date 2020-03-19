@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      https://medium.com/@isuru89
 Copyright: 2020 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   1.7
+Version:   2.0
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -13,7 +13,7 @@ to recall their scheduled event before the actual moment.
 
 == Requirements ==
     This plugin has been developed in Moodle >2.2 successfully tested on a simple local server.
-    This plugin should be working any Moodle version greater than or equal to v2.0.
+    This plugin (< v2.0) should be working any Moodle version greater than or equal to v2.
     Moodle logging must be enabled to operate properly. (Only if you are using a version 2.6 or below)
 
 == Installation ==
@@ -30,6 +30,15 @@ to recall their scheduled event before the actual moment.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v2.0 (Only works in Moodle 3.5 or above)
+    + Ability to send reminders after event completed for overdue students (#3)
+    + Ability to enable/disable reminders per activity (#48)
+    + Reminder email messages when calendar event created/changed/removed (#21)
+    + Prevent sending more email reminders once a student has completed the activity
+    + Added timezone/location to the email due dates (#32)
+    + Improved email style (#31)
+    + Additional cron task to clean old reminder data (#37)
+    + Send reminders only to students who can submit assignment (#47)
 v1.7
     + Excluded suspended users from course/activity events (#27)
     + Renamed admin cron function so that conflicting with legacy (#26)
