@@ -79,13 +79,13 @@ function xmldb_local_reminders_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2014121301, 'local', 'reminders');
     }
 
-    if ($oldversion < 2020032300) {
+    if ($oldversion < 2020032000) {
         create_local_reminders_post_activity_table($dbman);
 
         create_local_reminders_activity_config_table($dbman);
 
         // Reminders savepoint reached.
-        upgrade_plugin_savepoint(true, 2020032300, 'local', 'reminders');
+        upgrade_plugin_savepoint(true, 2020032000, 'local', 'reminders');
     }
 
     return true;
