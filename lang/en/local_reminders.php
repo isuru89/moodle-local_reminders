@@ -17,28 +17,49 @@
 /**
  * Strings for plugin 'reminders', language 'en', branch 'MOODLE_22_STABLE'
  *
- * @package   page
- * @copyright 1999 onwards Martin Dougiamas  {@link http://moodle.com}
+ * @package   local_reminders
+ * @copyright 2012 Isuru Madushanka Weerarathna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['activityconfupcomingactivities'] = 'Upcoming Activities';
+$string['activityconfupcomingactivitiesdesc'] = 'Reminders will not be sent for unchecked activities.';
+$string['activityconfnoupcomingactivities'] = 'No upcoming activities for this course.';
 $string['activityremindersboth'] = 'For both openings and closings';
 $string['activityremindersonlyopenings'] = 'Only for activity openings';
 $string['activityremindersonlyclosings'] = 'Only for activity closings';
+$string['activityignoreincompletes'] = 'No reminders once completed:';
+$string['activityignoreincompletesdetails'] = 'If checked, then no reminders will be sent if the activity is already completed by user, <strong>before</strong> the activity ends.';
 $string['admintreelabel'] = 'Reminders';
+$string['calendareventupdatedprefix'] = 'UPDATED';
+$string['calendareventremovedprefix'] = 'REMOVED';
+$string['calendareventcreatedprefix'] = 'ADDED';
+$string['calendareventoverdueprefix'] = 'OVERDUE';
+$string['caleventchangedheading'] = 'Calendar Events Change Reminders';
+$string['caleventchangedheadingdetails'] = 'These settings will be checked <strong>before</strong> considering the individual event type.';
 $string['contentdescription'] = 'Description';
 $string['contenttypecourse'] = 'Course';
 $string['contenttypeactivity'] = 'Activity';
 $string['contenttypegroup'] = 'Group';
 $string['contenttypeuser'] = 'User';
+$string['contenttypelocation'] = 'Where';
 $string['contentwhen'] = 'When';
 $string['courseheading'] = 'Course Event Reminders';
 $string['days7'] = '7 Days';
 $string['days3'] = '3 Days';
 $string['days1'] = '1 Day';
 $string['dueheading'] = 'Activity Event Reminders';
-$string['enabled'] = 'Enabled:';
+$string['enabled'] = 'Enabled';
+$string['enabledoverdue'] = 'Overdue Enabled';
 $string['enableddescription'] = 'Enable/disable reminder plugin';
+$string['enabledchangedevents'] = 'Send when Event Updated:';
+$string['enabledremovedevents'] = 'Send when Event Removed:';
+$string['enabledaddedevents'] = 'Send when Event Created:';
+$string['enabledchangedeventsdescription'] = 'Indicates whether to send reminders when a calendar event is being updated.';
+$string['enabledremovedeventsdescription'] = 'Indicates whether to send reminders when a calendar event is being removed.';
+$string['enabledaddedeventsdescription'] = 'Indicates whether to send reminders when a calendar event is being created.';
+$string['enabledforcalevents'] = 'Enable for Calendar Change Events:';
+$string['enabledforcaleventsdescription'] = 'Enable sending reminders for this type when a calendar event created, deleted, or updated.';
 $string['explaincourseheading'] = 'Reminder settings for course events. These events are coming from a course.';
 $string['explaindueheading'] = 'Reminder settings for activity events. These events are coming from activities/modules within a course.';
 $string['explaingroupheading'] = 'Reminder settings for group events. These events are based only for a specific group.';
@@ -61,12 +82,16 @@ $string['messageprovider:reminders_site'] = 'Reminder notifications for Site eve
 $string['messageprovider:reminders_user'] = 'Reminder notifications for User events';
 $string['messagetitleprefix'] = 'Message Title Prefix:';
 $string['messagetitleprefixdescription'] = 'This text will be inserted as a prefix (within square brackets) to the title of every reminder message is being sent.';
+$string['overduemessage'] = 'This activity is overdue!';
 $string['pluginname'] = 'Event Reminders';
+$string['overdueactivityreminders'] = 'Activity Overdue Reminders:';
+$string['overdueactivityremindersdescription'] = 'If checked, then reminders will be sent to users who are overdue the activity.';
 $string['reminderdaysahead'] = 'Send before:';
 $string['reminderdaysaheadcustom'] = 'Custom schedule:';
 $string['reminderdaysaheadcustomdetails'] = 'Additionally specify desired schedule to send reminders in ahead of time for an event.';
 $string['reminderfrom'] = 'Reminder from';
 $string['reminderstask'] = 'Local Reminders';
+$string['reminderstaskclean'] = 'Clean Local Reminders Logs';
 $string['rolesallowedfor'] = 'Allowed Roles:';
 $string['sendactivityreminders'] = 'Activity reminders:';
 $string['sendas'] = 'Send As:';

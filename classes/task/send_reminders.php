@@ -24,19 +24,35 @@
 
 namespace local_reminders\task;
 
-
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
 require_once($CFG->dirroot . '/local/reminders/lib.php');
 
+/**
+ * Handler class to execute main reminder functionalities.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class send_reminders extends \core\task\scheduled_task {
 
+    /**
+     * Execute the main send reminders cron function.
+     *
+     * @return void nothing.
+     */
     public function execute() {
         local_reminders_cron();
     }
 
+    /**
+     * Returns the name of main reminder task name as 'Local Reminders'.
+     *
+     * @return string task name.
+     */
     public function get_name() {
         return get_string('reminderstask', 'local_reminders');
     }

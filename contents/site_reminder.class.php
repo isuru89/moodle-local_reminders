@@ -14,6 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Site event reminder handler.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die;
+
 global $CFG;
 
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
@@ -21,59 +31,82 @@ require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 /**
  * Class to specify the reminder message object for site (global) events.
  *
- * @package    local
- * @subpackage reminders
+ * @package    local_reminders
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class site_reminder extends local_reminder {
-    
-    public function __construct($event, $aheaddays = 1) {
-        parent::__construct($event, $aheaddays);
-    }
-    
-    public function get_message_html($user=null) {
+
+    /**
+     * Generates a message content as a HTML for site email.
+     *
+     * @param object $user The user object
+     * @param object $changetype change type (add/update/removed)
+     * @return string Message content as HTML text.
+     */
+    public function get_message_html($user=null, $changetype=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
         $htmlmail .= html_writer::start_tag('div');
-        $htmlmail .= html_writer::start_tag('table', array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+        $htmlmail .= html_writer::start_tag('table',
+                array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+
+        $contenttitle = $this->get_message_title();
+        if (!isemptystring($changetype)) {
+            $contenttitle = "[$changetype]: $contenttitle";
+        }
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
-        $htmlmail .= html_writer::link($this->generate_event_link(), 
-                html_writer::tag('h3', $this->get_message_title(), array('style' => $this->titlestyle)), 
+        $htmlmail .= html_writer::link($this->generate_event_link(),
+                html_writer::tag('h3', $contenttitle, array('style' => $this->titlestyle)),
                 array('style' => 'text-decoration: none'));
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
-        
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentwhen', 'local_reminders'), array('width' => '25%'));
-        $htmlmail .= html_writer::tag('td', $this->format_event_time_duration($user));
-        $htmlmail .= html_writer::end_tag('tr');
 
-        $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::tag('td', get_string('contentdescription', 'local_reminders'));
-        $htmlmail .= html_writer::tag('td', $this->event->description);
-        $htmlmail .= html_writer::end_tag('tr');
-        
+        $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
+            format_event_time_duration($user, $this->event));
+        $htmlmail .= $this->write_location_info($this->event);
+
+        $description = $this->event->description;
+        $htmlmail .= $this->write_description($description, $this->event);
+
         $htmlmail .= $this->get_html_footer();
         $htmlmail .= html_writer::end_tag('table').html_writer::end_tag('div').html_writer::end_tag('body').
                 html_writer::end_tag('html');
-        
+
         return $htmlmail;
     }
-    
-    public function get_message_plaintext($user=null) {
+
+    /**
+     * Generates a message content as a plain-text for site wide noty.
+     *
+     * @param object $user The user object
+     * @param object $changetype change type (add/update/removed)
+     * @return string Message content as plain-text.
+     */
+    public function get_message_plaintext($user=null, $changetype=null) {
         $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
-        $text .= get_string('contentwhen', 'local_reminders').': '.$this->format_event_time_duration($user)."\n";
+        $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
         $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description."\n";
-        
+
         return $text;
     }
 
+    /**
+     * Returns 'reminders_site' name.
+     *
+     * @return string Message provider name
+     */
     protected function get_message_provider() {
         return 'reminders_site';
     }
 
-    public function get_message_title() {
+    /**
+     * Generates a message title for the site reminder.
+     *
+     * @param string $type type of message to be send (null=reminder cron)
+     * @return string Message title as a plain-text.
+     */
+    public function get_message_title($type=null) {
         return $this->event->name;
     }
 }

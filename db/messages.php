@@ -17,34 +17,33 @@
 /**
  * Defines message providers for the reminder plugin.
  *
- * @package    local
- * @subpackage reminders
- * @copyright  2012 Isuru Madushanka Weerarathna
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   local_reminders
+ * @copyright 2012 Isuru Madushanka Weerarathna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $messageproviders = array (
-    
-    // reminders for site events
+
+    // Reminders for site events.
     'reminders_site' => array (
     ),
-    
-    // reminders for user events
+
+    // Reminders for user events.
     'reminders_user' => array (
     ),
-    
-    // reminders for course events
+
+    // Reminders for course events.
     'reminders_course' => array (
     ),
-    
-    // reminders for group events
+
+    // Reminders for group events.
     'reminders_group' => array (
     ),
-    
-    // reminders for due events
+
+    // Reminders for due events.
     'reminders_due' => array (
     )
-        
+
 );

@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = array (
-  
+
     /*
     // Ability to recieve reminder notifications
     'local/reminders:notifications' => array(
@@ -38,6 +38,6 @@ $capabilities = array (
             'manager' => CAP_ALLOW,
         )
     )
-     * 
+     *
      */
 );

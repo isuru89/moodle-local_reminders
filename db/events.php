@@ -15,18 +15,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Reminder plugin version information
+ * All events consumed by local reminder plugin.
  *
  * @package    local_reminders
- * @author     Isuru Weerarathna <uisurumadushanka89@gmail.com>
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020032000;
-$plugin->requires  = 2018051700;        // Require moodle 3.5 or higher.
-$plugin->release   = '2.0';
-$plugin->maturity  = MATURITY_RC;
-$plugin->component = 'local_reminders';
+$observers = array(
+
+    array(
+        'eventname' => '\core\event\calendar_event_updated',
+        'callback' => '\local_reminders\calendar_observer::calendar_event_updated',
+    ),
+    array(
+        'eventname' => '\core\event\calendar_event_created',
+        'callback' => '\local_reminders\calendar_observer::calendar_event_added'
+    ),
+    array(
+        'eventname' => '\core\event\calendar_event_deleted',
+        'callback' => '\local_reminders\calendar_observer::calendar_event_removed'
+    )
+);

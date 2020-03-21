@@ -15,18 +15,46 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Reminder plugin version information
+ * Capability definition(s) for the reminder plugin.
  *
  * @package    local_reminders
- * @author     Isuru Weerarathna <uisurumadushanka89@gmail.com>
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_reminders\task;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020032000;
-$plugin->requires  = 2018051700;        // Require moodle 3.5 or higher.
-$plugin->release   = '2.0';
-$plugin->maturity  = MATURITY_RC;
-$plugin->component = 'local_reminders';
+global $CFG;
+
+require_once($CFG->dirroot . '/local/reminders/lib.php');
+
+/**
+ * Handler class to cron task of cleaning older reminder tables.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class clean_reminders_logs extends \core\task\scheduled_task {
+
+    /**
+     * Executes the cleaning cron task.
+     *
+     * @return void nothing.
+     */
+    public function execute() {
+        clean_local_reminders_logs();
+    }
+
+    /**
+     * Returns clean task name as 'Clean Local Reminders Logs'.
+     *
+     * @return string cleaning task name.
+     */
+    public function get_name() {
+        return get_string('reminderstaskclean', 'local_reminders');
+    }
+
+}

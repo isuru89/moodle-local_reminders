@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,8 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file keeps track of upgrades to
- * the forum module
+ * This file keeps track of upgrades to the reminder module.
+ *
+ * @package   local_reminders
+ * @copyright 2012 Isuru Madushanka Weerarathna
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Run the upgrade for the plugin.
  *
  * Sometimes, changes between versions involve
  * alterations to database structures and other
@@ -36,20 +43,17 @@
  * Please do not forget to use upgrade_set_timeout()
  * before any action that may take longer time to finish.
  *
- * @package local-reminders
- * @copyright 2003 onwards Eloy Lafuente (stronk7) {@link http://stronk7.com}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @param int $oldversion older version of plugin.
+ * @return void
  */
-
 function xmldb_local_reminders_upgrade($oldversion) {
-    global $CFG, $DB, $OUTPUT;
+    global $DB;
 
-    $dbman = $DB->get_manager(); // loads ddl manager and xmldb classes
+    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
+    // Moodle v2.2.0 release upgrade line.
+    // Put any upgrade step following this.
 
-    // Moodle v2.2.0 release upgrade line
-    // Put any upgrade step following this
-    
     if ($oldversion < 2014121301) {
 
         // Define table local_reminders_course to be created.
@@ -75,5 +79,65 @@ function xmldb_local_reminders_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2014121301, 'local', 'reminders');
     }
 
+    if ($oldversion < 2020032000) {
+        create_local_reminders_post_activity_table($dbman);
+
+        create_local_reminders_activity_config_table($dbman);
+
+        // Reminders savepoint reached.
+        upgrade_plugin_savepoint(true, 2020032000, 'local', 'reminders');
+    }
+
     return true;
+}
+
+/**
+ * Create local_reminders_activityconf table required for moodle plugin v2.
+ *
+ * @param object $dbman db manager class.
+ */
+function create_local_reminders_activity_config_table($dbman) {
+    // Define table local_reminders_post_activity to be created.
+    $table = new xmldb_table('local_reminders_activityconf');
+
+    // Adding fields to table local_reminders_post_activity.
+    $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+    $table->add_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('eventid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('settingkey', XMLDB_TYPE_CHAR, '255', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('settingvalue', XMLDB_TYPE_TEXT, null, null, null, null, null);
+
+    // Adding keys to table local_reminders_post_activity.
+    $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+    // Adding indexes for faster access.
+    $table->add_index('localremindercourses', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+
+    // Conditionally launch create table for local_reminders_post_activity.
+    if (!$dbman->table_exists($table)) {
+        $dbman->create_table($table);
+    }
+}
+
+/**
+ * Create local_reminders_post_activity table required for moodle plugin v2.
+ *
+ * @param object $dbman db manager class.
+ */
+function create_local_reminders_post_activity_table($dbman) {
+    // Define table local_reminders_post_activity to be created.
+    $table = new xmldb_table('local_reminders_post_act');
+
+    // Adding fields to table local_reminders_post_activity.
+    $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+    $table->add_field('sendtime', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+    $table->add_field('eventid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+
+    // Adding keys to table local_reminders_post_activity.
+    $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+
+    // Conditionally launch create table for local_reminders_post_activity.
+    if (!$dbman->table_exists($table)) {
+        $dbman->create_table($table);
+    }
 }
