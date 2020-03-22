@@ -118,6 +118,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                         $daykey = "activity_".$activity->id."_$dkey";
                         $activitydayarray[] = $mform->createElement('advcheckbox', $daykey, '', $dvalue);
                         $mform->disabledIf($daykey, $trefkey, 'eq', 0);
+                        $mform->setDefault($daykey, $coursesettings->$trefkey);
                     }
                     $groupkey = 'reminder_'.$activity->id.'_group';
                     $daysgroup = $mform->addElement('group',
