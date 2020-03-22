@@ -276,6 +276,9 @@ function local_reminders_cron_pre($currtime) {
                     if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
                         mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
                         break;
+                    } else if (has_disabled_reminders_for_activity($event->courseid, $event->id, "days$aheadday")) {
+                        mtrace("  [Local Reminder] Activity event $event->id reminders disabled for $aheadday days ahead.");
+                        break;
                     }
                     $reminderref = process_activity_event($event, $aheadday, $activityroleids, REMINDERS_CALL_TYPE_PRE);
                     break;

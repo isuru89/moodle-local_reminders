@@ -44,6 +44,10 @@ class local_reminders_coursesettings_edit_form extends moodleform {
     public function definition() {
         global $USER;
 
+        $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
+            'days3' => ' '.get_string('days3', 'local_reminders'),
+            'days1' => ' '.get_string('days1', 'local_reminders'));
+
         $mform = $this->_form;
         list($coursesettings) = $this->_customdata;
 
@@ -64,6 +68,11 @@ class local_reminders_coursesettings_edit_form extends moodleform {
 
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
+
+        foreach ($daysarray as $dkey => $dvalue) {
+            $mform->addElement('hidden', "activityglobal_$dkey");
+            $mform->setType("activityglobal_$dkey", PARAM_INT);
+        }
 
         $currtime = time() - (24 * 3600);
         $upcomingactivities = get_upcoming_events_for_course($coursesettings->courseid, $currtime);
@@ -94,16 +103,31 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                 foreach ($dailyactivities as $activity) {
                     $modinfo = fetch_module_instance($activity->modulename, $activity->instance, $coursesettings->courseid);
 
+                    $mform->addElement('static', 'header'.$daytime.$activity->modulename.$activity->instance,
+                        '',
+                        '<h5>'.get_string('pluginname', $activity->modulename).
+                        ': '.(isset($modinfo->name) ? $modinfo->name : $activity->name).'</h5>');
+
                     $key = "activity_".$activity->id.'_enabled';
-                    $mform->addElement('advcheckbox', $key,
-                        get_string('pluginname', $activity->modulename).
-                        ': '.(isset($modinfo->name) ? $modinfo->name : $activity->name),
-                        get_string('enabled', 'local_reminders'));
+                    $mform->addElement('advcheckbox', $key, get_string('enabled', 'local_reminders'), ' ');
                     $mform->setDefault($key, 1);
 
+                    $activitydayarray = array();
+                    foreach ($daysarray as $dkey => $dvalue) {
+                        $trefkey = "activityglobal_$dkey";
+                        $daykey = "activity_".$activity->id."_$dkey";
+                        $activitydayarray[] = $mform->createElement('advcheckbox', $daykey, '', $dvalue);
+                        $mform->disabledIf($daykey, $trefkey, 'eq', 0);
+                    }
+                    $groupkey = 'reminder_'.$activity->id.'_group';
+                    $daysgroup = $mform->addElement('group',
+                        $groupkey,
+                        get_string('reminderdaysaheadschedule', 'local_reminders'),
+                        $activitydayarray, null, false);
+                    $mform->disabledIf($groupkey, $key, 'unchecked');
+
                     $keyoverdue = "activity_".$activity->id.'_enabledoverdue';
-                    $mform->addElement('advcheckbox', $keyoverdue,
-                        ' ', get_string('enabledoverdue', 'local_reminders'));
+                    $mform->addElement('advcheckbox', $keyoverdue, get_string('enabledoverdue', 'local_reminders'), ' ');
                     $mform->setDefault($keyoverdue, 1);
 
                     $noactivities = false;

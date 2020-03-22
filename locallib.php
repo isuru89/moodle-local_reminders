@@ -256,6 +256,9 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
         if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
             $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
             return null;
+        } else if (has_disabled_reminders_for_activity($event->courseid, $event->id, "days$aheadday")) {
+            mtrace("  [Local Reminder] Activity event $event->id reminders disabled for $aheadday days ahead.");
+            return null;
         }
 
         $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid, $showtrace);

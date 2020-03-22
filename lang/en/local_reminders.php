@@ -88,6 +88,7 @@ $string['overdueactivityreminders'] = 'Activity Overdue Reminders:';
 $string['overdueactivityremindersdescription'] = 'If checked, then reminders will be sent to users who are overdue the activity.';
 $string['reminderdaysahead'] = 'Send before:';
 $string['reminderdaysaheadcustom'] = 'Custom schedule:';
+$string['reminderdaysaheadschedule'] = 'Schedule';
 $string['reminderdaysaheadcustomdetails'] = 'Additionally specify desired schedule to send reminders in ahead of time for an event.';
 $string['reminderfrom'] = 'Reminder from';
 $string['reminderstask'] = 'Local Reminders';
