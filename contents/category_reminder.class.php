@@ -48,7 +48,7 @@ class category_reminder extends local_reminder {
      * Creates a new course reminder instance.
      *
      * @param object $event calendar event.
-     * @param object $course course instance.
+     * @param object $coursecategory course instance.
      * @param integer $aheaddays number of days ahead.
      */
     public function __construct($event, $coursecategory, $aheaddays = 1) {
