@@ -49,6 +49,16 @@ if (!$activitysettings) {
     }
 }
 
+$globalactivityaheaddays = $CFG->local_reminders_duerdays;
+if (!isset($globalactivityaheaddays)) {
+    $globalactivityaheaddays = array(0, 0, 0);
+}
+$aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
+foreach ($aheaddaysindex as $dkey => $dvalue) {
+    $daykey = 'activityglobal_days'.$dkey;
+    $coursesettings->$daykey = $globalactivityaheaddays[$dvalue];
+}
+
 require_login($course);
 require_capability('moodle/course:update', $coursecontext);
 
