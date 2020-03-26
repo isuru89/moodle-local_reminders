@@ -95,7 +95,7 @@ In addition to above, user can control reminders for calendar event changes per 
 
 #### v2.1
   * Reminder interval customization per activity instance (#57)
-  * Support for course category events (#58)
+  * Support for course category events (#40)
 
 #### v2.0
   * Ability to send reminders after event completed for overdue students (#3)

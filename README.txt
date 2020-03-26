@@ -32,7 +32,7 @@ to recall their scheduled event before the actual moment.
 == Change Log ==
 v2.1
     + eminder interval customization per activity instance (#57)
-    + Support for course category events (#58)
+    + Support for course category events (#40)
 v2.0 (Only works in Moodle 3.5 or above)
     + Ability to send reminders after event completed for overdue students (#3)
     + Ability to enable/disable reminders per activity (#48)
