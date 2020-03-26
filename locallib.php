@@ -24,10 +24,14 @@
  */
 defined('MOODLE_INTERNAL') || die;
 
+require_once($CFG->dirroot . '/course/lib.php');
+require_once($CFG->libdir . '/coursecatlib.php');
+
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/site_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/user_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/course_reminder.class.php');
+require_once($CFG->dirroot . '/local/reminders/contents/category_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php');
 
@@ -302,19 +306,45 @@ function process_course_event($event, $aheadday, $courseroleids=null, $showtrace
     }
 
     if (!empty($course)) {
-        $context = context_course::instance($course->id);
-        $PAGE->set_context($context);
-        $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
-        $senduserids = array_map(
-        function($u) {
-            return $u->id;
-        }, $roleusers);
-        $sendusers = array_combine($senduserids, $roleusers);
+        $sendusers = array();
+        get_users_of_course($course->id, $courseroleids, $sendusers);
 
         $reminder = new course_reminder($event, $course, $aheadday);
         return new reminder_ref($reminder, $sendusers);
     }
     return null;
+}
+
+/**
+ * Process course category event and creates a reminder instance wrapping it.
+ *
+ * @param object $event calendar event.
+ * @param int $aheadday number of days ahead.
+ * @param array $courseroleids role ids for course.
+ * @param boolean $showtrace whether to print logs or not.
+ * @return reminder_ref reminder reference instance.
+ */
+function process_category_event($event, $aheadday, $courseroleids=null, $showtrace=true) {
+    global $CFG;
+
+    $catid = $event->categoryid;
+    $cat = coursecat::get($catid);
+    $showtrace && mtrace("   [LOCAL REMINDERS] Course category: $catid => $cat->name");
+    $childrencourses = $cat->get_courses(['recursive' => true]);
+    $allusers = array();
+    $currenttime = time();
+    $allcourses = isset($CFG->local_reminders_category_noforcompleted) && !$CFG->local_reminders_category_noforcompleted;
+    foreach ($childrencourses as $course) {
+        if ($allcourses || $currenttime < $course->enddate) {
+            get_users_of_course($course->id, $courseroleids, $allusers);
+        } else {
+            $showtrace && mtrace("   [LOCAL REMINDERS]   - Course skipped: $course->id => $course->fullname");
+        }
+    }
+    $showtrace && mtrace("   [LOCAL REMINDERS] Total users to send = ".count($allusers));
+
+    $reminder = new category_reminder($event, $cat, $aheadday);
+    return new reminder_ref($reminder, $allusers);
 }
 
 /**
@@ -400,6 +430,7 @@ function get_roles_for_reminders() {
     $allroles = get_all_roles();
     $courseroleids = array();
     $activityroleids = array();
+    $categoryroleids = array();
     if (!empty($allroles)) {
         $flag = 0;
         foreach ($allroles as $arole) {
@@ -411,13 +442,44 @@ function get_roles_for_reminders() {
             if (isset($roleoption[$flag]) && $roleoption[$flag] == '1') {
                 $courseroleids[] = $arole->id;
             }
+            $roleoptioncat = $CFG->local_reminders_categoryroles;
+            if (isset($roleoptioncat[$flag]) && $roleoptioncat[$flag] == '1') {
+                $categoryroleids[] = $arole->id;
+            }
             $flag++;
         }
     }
     return array(
         $courseroleids,
-        $activityroleids
+        $activityroleids,
+        $categoryroleids
     );
+}
+
+/**
+ * Appends all users in the course for the given array.
+ *
+ * @param int $courseid course id to search users for.
+ * @param array $courseroleids course role id array.
+ * @param array $arraytoappend user array to append new unique users.
+ * @return void nothing.
+ */
+function get_users_of_course($courseid, $courseroleids, &$arraytoappend) {
+    global $PAGE;
+
+    $context = context_course::instance($courseid);
+    $PAGE->set_context($context);
+    $roleusers = get_role_users($courseroleids, $context, true, 'ra.id as ra_id, u.*');
+    $senduserids = array_map(
+    function($u) {
+        return $u->id;
+    }, $roleusers);
+    $senduserrefs = array_combine($senduserids, $roleusers);
+    foreach ($senduserids as $userid) {
+        if (!array_key_exists($userid, $arraytoappend)) {
+            $arraytoappend[$userid] = $senduserrefs[$userid];
+        }
+    }
 }
 
 /**

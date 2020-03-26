@@ -38,6 +38,10 @@ $messageproviders = array (
     'reminders_course' => array (
     ),
 
+    // Reminders for course events.
+    'reminders_coursecategory' => array (
+    ),
+
     // Reminders for group events.
     'reminders_group' => array (
     ),
