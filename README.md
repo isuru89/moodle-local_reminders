@@ -1,6 +1,6 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.0-blue)
+![Version](https://img.shields.io/badge/version-v2.1-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
 [![Build Status](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events.svg?branch=master)](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events)
@@ -24,9 +24,10 @@ In addition to that, there are lot of new features introduced in v2 of the plugi
 
  * Send reminders to users who unable to complete an expired activity.
  * Send email reminders when a calendar event is created, updated or removed.
- * Ability to enable/disable reminder per activity basis.
+ * Ability to enable/disable and scheduling reminders per activity basis.
  * No reminders after a user has completed activity.
  * Added event location / timezone information to the reminder email.
+ * New category event type support
  * Improved email style
 
 And many bug fixes too.
@@ -34,7 +35,7 @@ And many bug fixes too.
 
 ## Compatibility
 
-Plugin v2 works in any Moodle versin 3.5 or above.
+Plugin v2+ works in any Moodle versin 3.5 or above.
 
 [See here for older versions](https://moodle.org/plugins/pluginversions.php?plugin=local_reminders)
 
