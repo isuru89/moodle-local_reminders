@@ -44,6 +44,7 @@ if ($hassiteconfig) {
 
     // Default settings for recieving reminders according to role.
     $defaultrolesforcourse = array('student' => 1);
+    $defaultrolesforcategory = array('editingteacher' => 1, 'teacher' => 1);
     $defaultrolesforactivity = array('student' => 1, 'editingteacher' => 1);
 
     // Adds a checkbox to enable/disable sending reminders.
@@ -83,6 +84,7 @@ if ($hassiteconfig) {
     $defaultsite = array('days7' => 0, 'days3' => 1, 'days1' => 0);
     $defaultuser = array('days7' => 0, 'days3' => 0, 'days1' => 1);
     $defaultcourse = array('days7' => 0, 'days3' => 1, 'days1' => 0);
+    $defaultcategory = array('days7' => 0, 'days3' => 1, 'days1' => 0);
     $defaultgroup = array('days7' => 0, 'days3' => 1, 'days1' => 0);
     $defaultdue = array('days7' => 0, 'days3' => 1, 'days1' => 0);
 
@@ -241,4 +243,34 @@ if ($hassiteconfig) {
         get_string('enabledforcalevents', 'local_reminders'),
         get_string('enabledforcaleventsdescription', 'local_reminders'), 0));
 
+
+    // COURSE CATEGORY EVENT SETTINGS.
+
+    // Add days selection for category related events.
+    $settings->add(new admin_setting_heading('local_reminders_category_heading',
+            get_string('categoryheading', 'local_reminders'), ''));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_category_noforcompleted',
+            get_string('categorynosendforended', 'local_reminders'),
+            get_string('categorynosendforendeddescription', 'local_reminders'), 1));
+
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_categoryrdays',
+            get_string('reminderdaysahead', 'local_reminders'),
+            get_string('explaincategoryheading', 'local_reminders'),
+            $defaultcategory, $daysarray));
+
+    // Added custom day selection for category events.
+    $settings->add(new admin_setting_configduration('local_reminders_categorycustom',
+        get_string('reminderdaysaheadcustom', 'local_reminders'),
+        get_string('reminderdaysaheadcustomdetails', 'local_reminders'),
+        0));
+
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_categoryroles',
+            get_string('rolesallowedfor', 'local_reminders'),
+            get_string('explainrolesallowedfor', 'local_reminders'),
+            $defaultrolesforcategory, $rolesarray));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_enable_categoryforcalevents',
+            get_string('enabledforcalevents', 'local_reminders'),
+            get_string('enabledforcaleventsdescription', 'local_reminders'), 0));
 }

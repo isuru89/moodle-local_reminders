@@ -29,6 +29,7 @@ require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/site_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/user_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/course_reminder.class.php');
+require_once($CFG->dirroot . '/local/reminders/contents/category_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/group_reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php');
 
@@ -111,7 +112,7 @@ function local_reminders_cron_pre($currtime) {
     $eventtypearray = array('site', 'user', 'course', 'due', 'group');
 
     // Loading roles allowed to receive reminder messages from configuration.
-    [$courseroleids, $activityroleids] = get_roles_for_reminders();
+    [$courseroleids, $activityroleids, $categoryroleids] = get_roles_for_reminders();
 
     // We need only last record only, so we limit the returning number of rows at most by one.
     $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
@@ -157,7 +158,7 @@ function local_reminders_cron_pre($currtime) {
 
     if (isset($CFG->local_reminders_filterevents)) {
         if ($CFG->local_reminders_filterevents == REMINDERS_SEND_ONLY_VISIBLE) {
-            $whereclause .= 'AND visible = 1';
+            $whereclause .= ' AND visible = 1';
         }
     }
 
@@ -256,6 +257,10 @@ function local_reminders_cron_pre($currtime) {
                     $reminderref = process_user_event($event, $aheadday);
                     break;
 
+                case 'category':
+                    $reminderref = process_category_event($event, $aheadday, $categoryroleids);
+                    break;
+
                 case 'course':
                     $reminderref = process_course_event($event, $aheadday, $courseroleids);
                     break;
@@ -275,6 +280,9 @@ function local_reminders_cron_pre($currtime) {
                 case 'due':
                     if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
                         mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
+                        break;
+                    } else if (has_disabled_reminders_for_activity($event->courseid, $event->id, "days$aheadday")) {
+                        mtrace("  [Local Reminder] Activity event $event->id reminders disabled for $aheadday days ahead.");
                         break;
                     }
                     $reminderref = process_activity_event($event, $aheadday, $activityroleids, REMINDERS_CALL_TYPE_PRE);
@@ -433,25 +441,7 @@ function when_calendar_event_updated($updateevent, $changetype) {
     $aheadday = floor($diffsecondsuntil / (REMINDERS_DAYIN_SECONDS * 1.0));
 
     $reminderref = null;
-
-    $allroles = get_all_roles();
-    $courseroleids = array();
-    $activityroleids = array();
-    if (!empty($allroles)) {
-        $flag = 0;
-        foreach ($allroles as $arole) {
-            $roleoptionactivity = $CFG->local_reminders_activityroles;
-            if (isset($roleoptionactivity[$flag]) && $roleoptionactivity[$flag] == '1') {
-                $activityroleids[] = $arole->id;
-            }
-            $roleoption = $CFG->local_reminders_courseroles;
-            if (isset($roleoption[$flag]) && $roleoption[$flag] == '1') {
-                $courseroleids[] = $arole->id;
-            }
-            $flag++;
-        }
-    }
-
+    [$courseroleids, $activityroleids, $categoryroleids] = get_roles_for_reminders();
     $fromuser = get_from_user();
 
     switch ($event->eventtype) {
@@ -461,6 +451,10 @@ function when_calendar_event_updated($updateevent, $changetype) {
 
         case 'user':
             $reminderref = process_user_event($event, $aheadday);
+            break;
+
+        case 'category':
+            $reminderref = process_category_event($event, $aheadday, $categoryroleids, false);
             break;
 
         case 'course':
