@@ -95,6 +95,22 @@ abstract class local_reminder_activity_handler {
             local_reminders_tz_info::get_human_readable_tz($tzone).'</span>';
     }
 
+    /**
+     * Returns completion status for the given course module of the user id.
+     *
+     * @param object $course course instance.
+     * @param object $coursemodule course module instance.
+     * @param int $userid user id.
+     * @return bool true if completed. false otherwise.
+     */
+    protected function check_completion_status($course, $coursemodule, $userid) {
+        $completion = new completion_info($course);
+        if ($completion->is_enabled($coursemodule)) {
+            return $completion->get_data($coursemodule, false, $userid)->completionstate;
+        }
+        return false;
+    }
+
 }
 
 /**
@@ -202,7 +218,10 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = assign_get_completion_state($course, $coursemodule, $auser->id, false);
+            $status = assign_get_completion_state($course, $coursemodule, $auser->id, null);
+            if (is_null($status)) {
+                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
+            }
             if (!$status) {
                 $filteredusers[] = $auser;
             }
@@ -277,7 +296,10 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = choice_get_completion_state($course, $coursemodule, $auser->id, false);
+            $status = choice_get_completion_state($course, $coursemodule, $auser->id, null);
+            if (is_null($status)) {
+                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
+            }
             if (!$status) {
                 $filteredusers[] = $auser;
             }
@@ -330,7 +352,10 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = choice_get_completion_state($course, $coursemodule, $auser->id, false);
+            $status = feedback_get_completion_state($course, $coursemodule, $auser->id, null);
+            if (is_null($status)) {
+                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
+            }
             if (!$status) {
                 $filteredusers[] = $auser;
             }
