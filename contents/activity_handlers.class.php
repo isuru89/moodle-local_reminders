@@ -211,6 +211,7 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
     public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/assign/lib.php');
+        require_once($CFG->dirroot . '/lib/completionlib.php');
 
         $filteredusers = array();
         foreach ($users as $auser) {
@@ -289,6 +290,7 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
     public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/choice/lib.php');
+        require_once($CFG->dirroot . '/lib/completionlib.php');
 
         $filteredusers = array();
         foreach ($users as $auser) {
@@ -345,6 +347,7 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
     public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/feedback/lib.php');
+        require_once($CFG->dirroot . '/lib/completionlib.php');
 
         $filteredusers = array();
         foreach ($users as $auser) {
