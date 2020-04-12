@@ -1,6 +1,6 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.1-blue)
+![Version](https://img.shields.io/badge/version-v2.1.1-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
 [![Build Status](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events.svg?branch=master)](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events)
@@ -93,6 +93,9 @@ In addition to above, user can control reminders for calendar event changes per 
  | Activity Overdue Reminders | enable/disable sending reminders for users who still have not completed expired events | true |
 
 ## Changelog
+
+#### v2.1.1
+  * Check for custom completion status of activities (#62)
 
 #### v2.1
   * Reminder interval customization per activity instance (#57)
