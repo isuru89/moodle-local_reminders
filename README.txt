@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      https://medium.com/@isuru89
 Copyright: 2020 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   2.0
+Version:   2.1.1
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -30,6 +30,8 @@ to recall their scheduled event before the actual moment.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v2.1.1
+    + Check for custom completion status of activities (#62)
 v2.1
     + eminder interval customization per activity instance (#57)
     + Support for course category events (#40)
