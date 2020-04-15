@@ -112,7 +112,10 @@ function local_reminders_cron_pre($currtime) {
     $eventtypearray = array('site', 'user', 'course', 'due', 'group');
 
     // Loading roles allowed to receive reminder messages from configuration.
-    [$courseroleids, $activityroleids, $categoryroleids] = get_roles_for_reminders();
+    $tmprolesreminders = get_roles_for_reminders();
+    $courseroleids = $tmprolesreminders[0];
+    $activityroleids = $tmprolesreminders[1];
+    $categoryroleids = $tmprolesreminders[2];
 
     // We need only last record only, so we limit the returning number of rows at most by one.
     $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
@@ -441,7 +444,10 @@ function when_calendar_event_updated($updateevent, $changetype) {
     $aheadday = floor($diffsecondsuntil / (REMINDERS_DAYIN_SECONDS * 1.0));
 
     $reminderref = null;
-    [$courseroleids, $activityroleids, $categoryroleids] = get_roles_for_reminders();
+    $tmprolesreminders = get_roles_for_reminders();
+    $courseroleids = $tmprolesreminders[0];
+    $activityroleids = $tmprolesreminders[1];
+    $categoryroleids = $tmprolesreminders[2];
     $fromuser = get_from_user();
 
     switch ($event->eventtype) {
