@@ -23,7 +23,7 @@
  */
 
 $string['activityconfupcomingactivities'] = 'Upcoming Activities';
-$string['activityconfupcomingactivitiesdesc'] = 'Reminders will not be sent for unchecked activities.';
+$string['activityconfupcomingactivitiesdesc'] = 'Reminders will not be sent for unchecked activities. Overdue reminders are available for activities only.';
 $string['activityconfnoupcomingactivities'] = 'No upcoming activities for this course.';
 $string['activityremindersboth'] = 'For both openings and closings';
 $string['activityremindersonlyopenings'] = 'Only for activity openings';

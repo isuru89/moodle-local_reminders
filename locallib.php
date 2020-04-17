@@ -50,7 +50,7 @@ function get_upcoming_events_for_course($courseid, $currtime) {
         WHERE courseid = :courseid
             AND timestart > :cutofftime
             AND visible = 1
-            AND (eventtype = 'due' OR eventtype = 'close')
+            AND (eventtype = 'due' OR eventtype = 'close' OR eventtype = 'course')
         ORDER BY timestart",
         array('courseid' => $courseid, 'cutofftime' => $currtime));
 }

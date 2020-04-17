@@ -265,6 +265,13 @@ function local_reminders_cron_pre($currtime) {
                     break;
 
                 case 'course':
+                    if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+                        mtrace("  [Local Reminder] Course event $event->id reminders disabled in the course settings.");
+                        break;
+                    } else if (has_disabled_reminders_for_activity($event->courseid, $event->id, "days$aheadday")) {
+                        mtrace("  [Local Reminder] Course event $event->id reminders disabled for $aheadday days ahead.");
+                        break;
+                    }
                     $reminderref = process_course_event($event, $aheadday, $courseroleids);
                     break;
 
@@ -464,6 +471,10 @@ function when_calendar_event_updated($updateevent, $changetype) {
             break;
 
         case 'course':
+            if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+                mtrace("  [Local Reminder] Course event $event->id reminders disabled in the course settings.");
+                break;
+            }
             $reminderref = process_course_event($event, $aheadday, $courseroleids, false);
             break;
 
