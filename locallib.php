@@ -45,12 +45,13 @@ require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php')
 function get_upcoming_events_for_course($courseid, $currtime) {
     global $DB;
 
+    $supportedevents = "('due', 'close', 'course', 'meeting_start')";
     return $DB->get_records_sql("SELECT *
         FROM {event}
         WHERE courseid = :courseid
             AND timestart > :cutofftime
             AND visible = 1
-            AND (eventtype = 'due' OR eventtype = 'close')
+            AND eventtype IN $supportedevents
         ORDER BY timestart",
         array('courseid' => $courseid, 'cutofftime' => $currtime));
 }
