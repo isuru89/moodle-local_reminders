@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020041500;
+$plugin->version   = 2020042100;
 $plugin->requires  = 2018051700;        // Require moodle 3.5 or higher.
-$plugin->release   = '2.1.2';
+$plugin->release   = '2.2';
 $plugin->maturity  = MATURITY_RC;
 $plugin->component = 'local_reminders';

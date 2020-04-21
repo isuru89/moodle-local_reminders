@@ -215,8 +215,11 @@ class due_reminder extends course_reminder {
      * @return string Message title as a plain-text.
      */
     public function get_message_title($type=null) {
+        global $CFG;
+
         $title = '('.$this->course->shortname;
-        if (!empty($this->cm)) {
+        if (!empty($this->cm) &&
+            (!isset($CFG->local_reminders_showmodnameintitle) || $CFG->local_reminders_showmodnameintitle > 0)) {
             $title .= '-'.get_string('modulename', $this->event->modulename);
         }
         return $title.') '.$this->event->name;
