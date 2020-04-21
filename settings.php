@@ -218,6 +218,10 @@ if ($hassiteconfig) {
             get_string('enabledforcalevents', 'local_reminders'),
             get_string('enabledforcaleventsdescription', 'local_reminders'), 0));
 
+    $settings->add(new admin_setting_configcheckbox('local_reminders_showmodnameintitle',
+            get_string('showmodnameintitle', 'local_reminders'),
+            get_string('showmodnameintitledesc', 'local_reminders'), 1));
+
     // GROUP EVENT SETTINGS.
 
     // Add group related events.
