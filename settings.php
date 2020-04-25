@@ -42,6 +42,12 @@ if ($hassiteconfig) {
         }
     }
 
+    $allmodules = $DB->get_records('modules', array('visible' => 1), 'name ASC');
+    $modnames = array();
+    foreach ($allmodules as $modref) {
+        $modnames[$modref->name] = get_string('modulename', $modref->name);
+    }
+
     // Default settings for recieving reminders according to role.
     $defaultrolesforcourse = array('student' => 1);
     $defaultrolesforcategory = array('editingteacher' => 1, 'teacher' => 1);
@@ -213,6 +219,12 @@ if ($hassiteconfig) {
             get_string('rolesallowedfor', 'local_reminders'),
             get_string('explainrolesallowedfor', 'local_reminders'),
             $defaultrolesforactivity, $rolesarray));
+
+    $settings->add(new admin_setting_configmultiselect('local_reminders_excludedmodulenames',
+        get_string('excludedmodules', 'local_reminders'),
+        get_string('excludedmodulesdesc', 'local_reminders'),
+        array(),
+        $modnames));
 
     $settings->add(new admin_setting_configcheckbox('local_reminders_enable_dueforcalevents',
             get_string('enabledforcalevents', 'local_reminders'),

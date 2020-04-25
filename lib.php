@@ -178,9 +178,20 @@ function local_reminders_cron_pre($currtime) {
     mtrace("   [Local Reminder] Found ".count($upcomingevents)." upcoming events. Continuing...");
 
     $fromuser = get_from_user();
+    $excludedmodules = array();
+    if (isset($CFG->local_reminders_excludedmodulenames)) {
+        $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
+    }
 
     $allemailfailed = true;
     foreach ($upcomingevents as $event) {
+        if (in_array($event->modulename, $excludedmodules)) {
+            mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            mtrace("  [Local Reminder]   Skipping event #$event->id in excluded module '$event->modulename'!");
+            mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            continue;
+        }
+
         $event = new calendar_event($event);
 
         $aheadday = 0;
@@ -442,6 +453,17 @@ function when_calendar_event_updated($updateevent, $changetype) {
         return;
     }
     $aheadday = floor($diffsecondsuntil / (REMINDERS_DAYIN_SECONDS * 1.0));
+
+    $excludedmodules = array();
+    if (isset($CFG->local_reminders_excludedmodulenames)) {
+        $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
+    }
+    if (in_array($event->modulename, $excludedmodules)) {
+        mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        mtrace("  [Local Reminder]   Skipping event #$event->id in excluded module '$event->modulename'!");
+        mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        return;
+    }
 
     $reminderref = null;
     $tmprolesreminders = get_roles_for_reminders();

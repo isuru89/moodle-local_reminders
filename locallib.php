@@ -132,9 +132,21 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
         return;
     }
 
+    $excludedmodules = array();
+    if (isset($CFG->local_reminders_excludedmodulenames)) {
+        $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
+    }
+
     mtrace('[LOCAL REMINDERS] Number of expired events found for this cron cycle: '.count($allexpiredevents));
     foreach ($allexpiredevents as $event) {
         $event = new calendar_event($event);
+
+        if (in_array($event->modulename, $excludedmodules)) {
+            mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            mtrace("  [Local Reminder]   Skipping event #$event->id in excluded module '$event->modulename'!");
+            mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            return;
+        }
 
         if (has_disabled_reminders_for_activity($event->courseid, $event->id, 'enabledoverdue')) {
             mtrace("[LOCAL REMINDERS] Activity event $event->id overdue reminders disabled in the course settings");
