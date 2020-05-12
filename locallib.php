@@ -182,7 +182,7 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
  * @return reminder_ref reminder reference instance.
  */
 function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
-    global $DB, $PAGE;
+    global $CFG, $DB, $PAGE;
     if (isemptystring($event->modulename)) {
         return null;
     }
@@ -196,6 +196,10 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
     }
     $course = $courseandcm[0];
     $cm = $courseandcm[1];
+    if (is_course_hidden_and_denied($course)) {
+        $showtrace && mtrace("  [Local Reminder] Course is hidden. No reminders will be sent.");
+        return null;
+    }
     $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
     if (isset($coursesettings->status_activities) && $coursesettings->status_activities == 0) {
         $showtrace && mtrace("  [Local Reminder] Reminders for activities has been restricted in the configs.");
@@ -258,7 +262,10 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
     $cm = get_coursemodule_from_instance($event->modulename, $event->instance, $event->courseid);
 
     if (!empty($course) && !empty($cm)) {
-        if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+        if (is_course_hidden_and_denied($course)) {
+            $showtrace && mtrace("  [Local Reminder] Course is hidden. No reminders will be sent.");
+            return null;
+        } else if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
             $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
             return null;
         } else if (has_disabled_reminders_for_activity($event->courseid, $event->id, "days$aheadday")) {
@@ -300,6 +307,11 @@ function process_course_event($event, $aheadday, $courseroleids=null, $showtrace
     global $DB, $PAGE;
 
     $course = $DB->get_record('course', array('id' => $event->courseid));
+    if (is_course_hidden_and_denied($course)) {
+        $showtrace && mtrace("  [Local Reminder] Course is hidden. No reminders will be sent.");
+        return null;
+    }
+
     $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
     if (isset($coursesettings->status_course) && $coursesettings->status_course == 0) {
         $showtrace && mtrace("  [Local Reminder] Reminders for course events has been restricted.");
@@ -600,6 +612,23 @@ function get_users_in_group($group) {
         }
     }
     return $sendusers;
+}
+
+/**
+ * Returns true if the activity belongs to a hidden course. And prevents sending reminders.
+ *
+ * @param object $course course instance.
+ * @return bool status of course hidden filter should apply or not.
+ */
+function is_course_hidden_and_denied($course) {
+    global $CFG;
+
+    if (isset($CFG->local_reminders_filterevents)) {
+        if ($CFG->local_reminders_filterevents == REMINDERS_SEND_ONLY_VISIBLE && $course->visible == 0) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
