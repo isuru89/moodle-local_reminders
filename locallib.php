@@ -672,6 +672,7 @@ function get_from_user() {
     if (isset($CFG->local_reminders_sendas) && $CFG->local_reminders_sendas == REMINDERS_SEND_AS_ADMIN) {
         $fromuser = get_admin();
     }
+    return $fromuser;
 }
 
 /**
