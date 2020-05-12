@@ -459,9 +459,6 @@ function when_calendar_event_updated($updateevent, $changetype) {
         $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
     }
     if (in_array($event->modulename, $excludedmodules)) {
-        mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        mtrace("  [Local Reminder]   Skipping event #$event->id in excluded module '$event->modulename'!");
-        mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         return;
     }
 
@@ -501,7 +498,6 @@ function when_calendar_event_updated($updateevent, $changetype) {
             }
         case 'due':
             if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
-                $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
                 break;
             }
             $reminderref = process_activity_event($event, $aheadday, $activityroleids, false);
