@@ -25,7 +25,6 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/course/lib.php');
-require_once($CFG->libdir . '/coursecatlib.php');
 
 require_once($CFG->dirroot . '/local/reminders/reminder.class.php');
 require_once($CFG->dirroot . '/local/reminders/contents/site_reminder.class.php');
@@ -341,7 +340,19 @@ function process_category_event($event, $aheadday, $courseroleids=null, $showtra
     global $CFG;
 
     $catid = $event->categoryid;
-    $cat = coursecat::get($catid);
+    $cat = null;
+    // From Moodle 3.6+ coursecat is deprecated.
+    if (class_exists('core_course_category')) {
+        $cat = core_course_category::get($catid, IGNORE_MISSING);
+    } else {
+        require_once($CFG->libdir . '/coursecatlib.php');
+        $cat = coursecat::get($catid, IGNORE_MISSING);
+    }
+    if (is_null($cat)) {
+        // Course category not found or not visible.
+        $showtrace && mtrace("  [LOCAL REMINDERS] Course category is not visible or exists! Skipping.");
+        return null;
+    }
     $showtrace && mtrace("   [LOCAL REMINDERS] Course category: $catid => $cat->name");
     $childrencourses = $cat->get_courses(['recursive' => true]);
     $allusers = array();
