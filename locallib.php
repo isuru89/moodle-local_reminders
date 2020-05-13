@@ -309,6 +309,9 @@ function process_course_event($event, $aheadday, $courseroleids=null, $showtrace
     if (is_course_hidden_and_denied($course)) {
         $showtrace && mtrace("  [Local Reminder] Course is hidden. No reminders will be sent.");
         return null;
+    } else if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
+        $showtrace && mtrace("  [Local Reminder] Specific course reminders are disabled. Skipping.");
+        return null;
     }
 
     $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
