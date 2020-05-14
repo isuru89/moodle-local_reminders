@@ -4,7 +4,7 @@ Author:    Isuru Madushanka Weerarathna (uisurumadushanka89@gmail.com)
 Blog:      https://medium.com/@isuru89
 Copyright: 2020 Isuru Madushanka Weerarathna
 License:   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-Version:   2.2
+Version:   2.2.1
 
 == Introduction ==
 This plugin will create a set of reminders for Moodle calendar events and will send them automatically
@@ -30,6 +30,11 @@ to recall their scheduled event before the actual moment.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v2.2.1
+    + No reminders for hidden courses (#78)
+    + Fixed coursecat deprecation warning (#76)
+    + Fixed no-reply address not correctly being in the reminder emails (#77)
+    + Fixed disabled course reminders are still sending issue (#84)
 v2.2
     + Option to show/hide activity plugin name in reminder email subject (#71)
     + Support reminder customization for course and BigBlueButton events (#69, #70)
