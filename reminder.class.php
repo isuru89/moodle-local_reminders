@@ -372,10 +372,11 @@ abstract class local_reminder {
         if ($refreshcontent) {
             $contenthtml = $this->get_message_html($user);
             $titlehtml = $this->get_message_title();
+            $smallmsg = $this->get_message_plaintext($user);
 
             $this->eventobject->fullmessagehtml = $contenthtml;
-            $this->eventobject->smallmessage = $titlehtml . ' - ' . $contenthtml;
-            $this->eventobject->fullmessage = $this->get_message_plaintext($user);
+            $this->eventobject->smallmessage = $smallmsg;
+            $this->eventobject->fullmessage = $smallmsg;
         }
 
         return $this->eventobject;
@@ -421,6 +422,8 @@ abstract class local_reminder {
             $fromuser->customheaders = $cheaders;
         }
 
+        $smallmsg = $this->get_message_plaintext($touser, $changetype);
+
          // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
         $eventdata = new \core\message\message();
 
@@ -429,10 +432,10 @@ abstract class local_reminder {
         $eventdata->userfrom            = $fromuser;
         $eventdata->userto              = $touser;
         $eventdata->subject             = '['.$subjectprefix.'] '.$titleprefixlangstr.': '.$titlehtml;
-        $eventdata->fullmessage         = $this->get_message_plaintext($touser, $changetype);
+        $eventdata->fullmessage         = $smallmsg;
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
-        $eventdata->smallmessage        = $titlehtml . ' - ' . $contenthtml;
+        $eventdata->smallmessage        = $smallmsg;
         $eventdata->notification        = $this->notification;
 
         return $eventdata;
