@@ -517,9 +517,10 @@ function get_users_of_course($courseid, $courseroleids, &$arraytoappend) {
  * @param object $event event instance
  * @param array $tzstyle css style string for tz
  * @param boolean $includetz whether to include timezone or not.
+ * @param string mode of rendering. html or plain.
  * @return string formatted time string
  */
-function format_event_time_duration($user, $event, $tzstyle=null, $includetz=true) {
+function format_event_time_duration($user, $event, $tzstyle=null, $includetz=true, $mode='html') {
     $followedtimeformat = get_string('strftimedaydate', 'langconfig');
     $usertimeformat = get_correct_timeformat_user($user);
 
@@ -563,12 +564,16 @@ function format_event_time_duration($user, $event, $tzstyle=null, $includetz=tru
     }
 
     $tzstr = local_reminders_tz_info::get_human_readable_tz($tzone);
-    if (!isemptystring($tzstyle)) {
-        $tzstr = '<span style="'.$tzstyle.'">'.$tzstr.'</span>';
+    if ($mode == 'html') {
+        if (!isemptystring($tzstyle)) {
+            $tzstr = '<span style="'.$tzstyle.'">'.$tzstr.'</span>';
+        } else {
+            $tzstr = '<span style="font-size:13px;color: #888;">'.$tzstr.'</span>';
+        }
+        return $formattedtime.' &nbsp;&nbsp;'.$tzstr;
     } else {
-        $tzstr = '<span style="font-size:13px;color: #888;">'.$tzstr.'</span>';
+        return $formattedtime.' - '.$tzstr;
     }
-    return $formattedtime.' &nbsp;&nbsp;'.$tzstr;
 }
 
 /**

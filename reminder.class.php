@@ -222,6 +222,28 @@ abstract class local_reminder {
     }
 
     /**
+     * Returns time zone info for a user in plain text format.
+     *
+     * @param object user object.
+     * @param object event reference instance.
+     * @return string timezone info as plain text.
+     */
+    protected function get_tzinfo_plain($user, $event) {
+        return format_event_time_duration($user, $event, null, true, 'plain');
+    }
+
+    /**
+     * Pluralize given text by appending 's' if number if greater than 1.
+     *
+     * @param int number to check.
+     * @param string text to append with number.
+     * @return string pluralized string if necessary.
+     */
+    protected function pluralize($number, $text) {
+        return $number.($number > 1 ? $text.'s' : $text);
+    }
+
+    /**
      * Gets the footer content of the e-mail message.
      *
      * @return string footer content.
