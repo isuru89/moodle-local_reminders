@@ -224,8 +224,8 @@ abstract class local_reminder {
     /**
      * Returns time zone info for a user in plain text format.
      *
-     * @param object user object.
-     * @param object event reference instance.
+     * @param object $user object.
+     * @param object $event reference instance.
      * @return string timezone info as plain text.
      */
     protected function get_tzinfo_plain($user, $event) {
@@ -235,8 +235,8 @@ abstract class local_reminder {
     /**
      * Pluralize given text by appending 's' if number if greater than 1.
      *
-     * @param int number to check.
-     * @param string text to append with number.
+     * @param int $number number to check.
+     * @param string $text text to append with number.
      * @return string pluralized string if necessary.
      */
     protected function pluralize($number, $text) {
