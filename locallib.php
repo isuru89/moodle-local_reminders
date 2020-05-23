@@ -517,7 +517,7 @@ function get_users_of_course($courseid, $courseroleids, &$arraytoappend) {
  * @param object $event event instance
  * @param array $tzstyle css style string for tz
  * @param boolean $includetz whether to include timezone or not.
- * @param string mode of rendering. html or plain.
+ * @param string $mode mode of rendering. html or plain.
  * @return string formatted time string
  */
 function format_event_time_duration($user, $event, $tzstyle=null, $includetz=true, $mode='html') {
