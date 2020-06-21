@@ -84,7 +84,7 @@ define('REMINDERS_CLEAN_TABLE', 'local_reminders');
  * Finds all events due for a reminder and send them out to the users.
  *
  */
-function local_reminders_cron() {
+function local_reminders_cron_task() {
     global $CFG;
 
     if (!isset($CFG->local_reminders_enable) || !$CFG->local_reminders_enable) {
