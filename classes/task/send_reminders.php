@@ -45,7 +45,7 @@ class send_reminders extends \core\task\scheduled_task {
      * @return void nothing.
      */
     public function execute() {
-        local_reminders_cron();
+        local_reminders_cron_task();
     }
 
     /**
