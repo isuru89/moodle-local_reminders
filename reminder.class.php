@@ -222,6 +222,28 @@ abstract class local_reminder {
     }
 
     /**
+     * Returns time zone info for a user in plain text format.
+     *
+     * @param object $user object.
+     * @param object $event reference instance.
+     * @return string timezone info as plain text.
+     */
+    protected function get_tzinfo_plain($user, $event) {
+        return format_event_time_duration($user, $event, null, true, 'plain');
+    }
+
+    /**
+     * Pluralize given text by appending 's' if number if greater than 1.
+     *
+     * @param int $number number to check.
+     * @param string $text text to append with number.
+     * @return string pluralized string if necessary.
+     */
+    protected function pluralize($number, $text) {
+        return $number.($number > 1 ? $text.'s' : $text);
+    }
+
+    /**
      * Gets the footer content of the e-mail message.
      *
      * @return string footer content.
@@ -372,10 +394,11 @@ abstract class local_reminder {
         if ($refreshcontent) {
             $contenthtml = $this->get_message_html($user);
             $titlehtml = $this->get_message_title();
+            $smallmsg = $this->get_message_plaintext($user);
 
             $this->eventobject->fullmessagehtml = $contenthtml;
-            $this->eventobject->smallmessage = $titlehtml . ' - ' . $contenthtml;
-            $this->eventobject->fullmessage = $this->get_message_plaintext($user);
+            $this->eventobject->smallmessage = $smallmsg;
+            $this->eventobject->fullmessage = $smallmsg;
         }
 
         return $this->eventobject;
@@ -421,6 +444,8 @@ abstract class local_reminder {
             $fromuser->customheaders = $cheaders;
         }
 
+        $smallmsg = $this->get_message_plaintext($touser, $changetype);
+
          // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
         $eventdata = new \core\message\message();
 
@@ -429,10 +454,10 @@ abstract class local_reminder {
         $eventdata->userfrom            = $fromuser;
         $eventdata->userto              = $touser;
         $eventdata->subject             = '['.$subjectprefix.'] '.$titleprefixlangstr.': '.$titlehtml;
-        $eventdata->fullmessage         = $this->get_message_plaintext($touser, $changetype);
+        $eventdata->fullmessage         = $smallmsg;
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
-        $eventdata->smallmessage        = $titlehtml . ' - ' . $contenthtml;
+        $eventdata->smallmessage        = $smallmsg;
         $eventdata->notification        = $this->notification;
 
         return $eventdata;
