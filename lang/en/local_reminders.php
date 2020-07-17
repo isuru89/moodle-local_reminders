@@ -81,6 +81,7 @@ $string['filtereventssendall'] = 'All events';
 $string['groupheading'] = 'Group Event Reminders';
 $string['groupshowname'] = 'Show group name in message:';
 $string['messageprovider:reminders_course'] = 'Reminder notifications for Course events';
+$string['messageprovider:reminders_coursecategory'] = 'Reminder notifications for Course Category events';
 $string['messageprovider:reminders_due'] = 'Reminder notifications for Activity events';
 $string['messageprovider:reminders_group'] = 'Reminder notifications for Group events';
 $string['messageprovider:reminders_site'] = 'Reminder notifications for Site events';
