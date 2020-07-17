@@ -30,6 +30,9 @@ to recall their scheduled event before the actual moment.
 6. Now you can change the plug-in specific settings via Site Administration -> Plugins -> Local Plugins -> Reminders.
 
 == Change Log ==
+v2.2.2
+    + Fixed plain text message format for notifications in mobile device (#94)
+    + Added missing language string (#94)
 v2.2.1
     + No reminders for hidden courses (#78)
     + Fixed coursecat deprecation warning (#76)

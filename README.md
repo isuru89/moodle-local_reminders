@@ -94,6 +94,10 @@ In addition to above, user can control reminders for calendar event changes per 
 
 ## Changelog
 
+#### v2.2.2
+  * Fixed plain text message format for notifications in mobile device (#94)
+  * Added missing language string (#94)
+
 #### v2.2.1
   * No reminders for hidden courses (#78)
   * Fixed coursecat deprecation warning (#76)
