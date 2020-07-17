@@ -31,7 +31,8 @@ to recall their scheduled event before the actual moment.
 
 == Change Log ==
 v2.2.2
-    + Fixed plain text message format for notifications in mobile device (#94)
+    + Fixed plain text message format for notifications in mobile device (#87)
+    + Fixed legacy cron duplication issue (#91)
     + Added missing language string (#94)
 v2.2.1
     + No reminders for hidden courses (#78)
