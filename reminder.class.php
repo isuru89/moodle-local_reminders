@@ -251,7 +251,7 @@ abstract class local_reminder {
     protected function get_html_footer() {
         global $CFG;
 
-        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', 'Moodle Calendar', array('target' => '_blank'));
+        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', 'Upskillable Calendar', array('target' => '_blank'));
         $footer = html_writer::start_tag('tr');
         $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
         $footer .= get_string('reminderfrom', 'local_reminders').' ';
