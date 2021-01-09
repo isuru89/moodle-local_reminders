@@ -57,6 +57,7 @@ $string['messageprovider:reminders_group'] = 'グループのイベントへの�
 $string['messageprovider:reminders_site'] = 'サイト全体のイベントへのリマインダー通知です';
 $string['messageprovider:reminders_user'] = 'ユーザーのイベントへのリマインダー通知です';
 $string['pluginname'] = 'イベントリマインダー';
+$string['privacy:metadata'] = 'イベントリマインダープラグインは個人データを保存しません。';
 $string['reminderdaysahead'] = '送信時期:';
 $string['reminderfrom'] = 'Reminder from';
 $string['sendactivityreminders'] = '活動へのリマインダー:';

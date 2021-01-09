@@ -57,6 +57,7 @@ $string['messageprovider:reminders_group'] = 'Benachrichtigungen f&uuml;r gruppe
 $string['messageprovider:reminders_site'] = 'Benachrichtigungen f&uuml;r Website-weite Ereignisse';
 $string['messageprovider:reminders_user'] = 'Benachrichtigungen f&uuml;r benutzerspezifische Ereignisse';
 $string['pluginname'] = 'Erinnerungen an Ereignisse';
+$string['privacy:metadata'] = 'Das Erinnerungen an Ereignisse Plugin speichert keine persönlichen Daten.';
 $string['reminderdaysahead'] = 'Vorher informieren:';
 $string['reminderfrom'] = 'Erinnerung von';
 $string['sendactivityreminders'] = 'Erinnerung an Aktivit&auml;t:';
