@@ -15,18 +15,32 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Reminder plugin version information
+ * Plugin privacy provider
  *
  * @package    local_reminders
- * @author     Isuru Weerarathna <uisurumadushanka89@gmail.com>
- * @copyright  2012 Isuru Madushanka Weerarathna
+ * @author     Scott Verbeek <scottverbeek@catalyst-au.net>
+ * @copyright  2020 Catalyst AU
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_reminders\privacy;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020122300;
-$plugin->requires  = 2018051700;        // Require moodle 3.5 or higher.
-$plugin->release   = '2.2.2';
-$plugin->maturity  = MATURITY_RC;
-$plugin->component = 'local_reminders';
+/**
+ * Privacy provider class for package local_reminders
+ */
+class provider implements
+    // This plugin does not store any personal user data.
+    \core_privacy\local\metadata\null_provider {
+
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return  string
+     */
+    public static function get_reason() : string {
+        return 'privacy:metadata';
+    }
+}
