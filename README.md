@@ -94,6 +94,9 @@ In addition to above, user can control reminders for calendar event changes per 
 
 ## Changelog
 
+### v2.2.4
+  * Bugfix: invalid comparison operator for Postgres (#104)
+
 ### v2.2.3
   * Added privacy provider for the plugin (#99)
 
