@@ -72,7 +72,8 @@ class category_reminder extends local_reminder {
 
         $contenttitle = $this->get_message_title();
         if (!isemptystring($changetype)) {
-            $contenttitle = "[$changetype]: $contenttitle";
+            $titleprefixlangstr = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
+            $contenttitle = "[$titleprefixlangstr]: $contenttitle";
         }
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));

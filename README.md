@@ -1,6 +1,6 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.2.3-blue)
+![Version](https://img.shields.io/badge/version-v2.2.4-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
 [![Build Status](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events.svg?branch=master)](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events)
@@ -94,8 +94,11 @@ In addition to above, user can control reminders for calendar event changes per 
 
 ## Changelog
 
-### v2.2.4
+### v2.2.5
   * Bugfix: invalid comparison operator for Postgres (#104)
+
+### v2.2.4
+  * Removed hardcoded strings (overdue text and moodle calendar name) #105
 
 ### v2.2.3
   * Added privacy provider for the plugin (#99)
