@@ -101,12 +101,17 @@ class local_reminders_coursesettings_edit_form extends moodleform {
             foreach ($upcomingactivities as $daytime => $dailyactivities) {
                 $mform->addElement('static', 'header'.$daytime, '<h5>'.userdate($daytime, $daytimeformat, $tzone).'</h5>');
                 foreach ($dailyactivities as $activity) {
-                    $modinfo = fetch_module_instance($activity->modulename, $activity->instance, $coursesettings->courseid);
+                    $activitytypename = "";
+                    $activityname = $activity->name;
+                    if (!isemptystring($activity->modulename)) {
+                        $modinfo = fetch_module_instance($activity->modulename, $activity->instance, $coursesettings->courseid);
+                        $activitytypename = get_string('pluginname', $activity->modulename).': ';
+                        $activityname = isset($modinfo->name) ? $modinfo->name : $activity->name;
+                    }
 
                     $mform->addElement('static', 'header'.$daytime.$activity->modulename.$activity->instance,
                         '',
-                        '<h5>'.get_string('pluginname', $activity->modulename).
-                        ': '.(isset($modinfo->name) ? $modinfo->name : $activity->name).'</h5>');
+                        '<h5>'.$activitytypename.$activityname.'</h5>');
 
                     $key = "activity_".$activity->id.'_enabled';
                     $mform->addElement('advcheckbox', $key, get_string('enabled', 'local_reminders'), ' ');
@@ -127,9 +132,12 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                         $activitydayarray, null, false);
                     $mform->disabledIf($groupkey, $key, 'unchecked');
 
-                    $keyoverdue = "activity_".$activity->id.'_enabledoverdue';
-                    $mform->addElement('advcheckbox', $keyoverdue, get_string('enabledoverdue', 'local_reminders'), ' ');
-                    $mform->setDefault($keyoverdue, 1);
+                    $overduesupports = $activity->eventtype != 'course';
+                    if ($overduesupports) {
+                        $keyoverdue = "activity_".$activity->id.'_enabledoverdue';
+                        $mform->addElement('advcheckbox', $keyoverdue, get_string('enabledoverdue', 'local_reminders'), ' ');
+                        $mform->setDefault($keyoverdue, 1);
+                    }
 
                     $noactivities = false;
                 }

@@ -57,6 +57,7 @@ $string['messageprovider:reminders_group'] = 'Notifications de rappels d\'&eacut
 $string['messageprovider:reminders_site'] = 'Notifications de rappels d\'&eacute;v&eacute;nement du Site';
 $string['messageprovider:reminders_user'] = 'Notifications de rappels d\'&eacute;v&eacute;nement Utilisateur';
 $string['pluginname'] = 'Rappels d\'&eacute;venement';
+$string['privacy:metadata'] = 'Le plugin Rappels d\'&eacute;venement ne stocke aucune donnée personnelle.';
 $string['reminderdaysahead'] = 'Envoyer avant :';
 $string['reminderfrom'] = 'Rappel de ';
 $string['sendactivityreminders'] = 'Rappels d\'activit&eacute; :';

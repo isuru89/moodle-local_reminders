@@ -84,7 +84,7 @@ define('REMINDERS_CLEAN_TABLE', 'local_reminders');
  * Finds all events due for a reminder and send them out to the users.
  *
  */
-function local_reminders_cron() {
+function local_reminders_cron_task() {
     global $CFG;
 
     if (!isset($CFG->local_reminders_enable) || !$CFG->local_reminders_enable) {
@@ -307,7 +307,7 @@ function local_reminders_cron_pre($currtime) {
                     break;
 
                 default:
-                    $reminderref = process_unknown_event($event, $aheadday, $activityroleids);
+                    $reminderref = process_unknown_event($event, $aheadday, $activityroleids, REMINDERS_CALL_TYPE_PRE);
             }
 
         } catch (Exception $ex) {
@@ -318,7 +318,7 @@ function local_reminders_cron_pre($currtime) {
         }
 
         if ($reminderref == null) {
-            mtrace("  [Local Reminder] Reminder is not available for the event $event->id [type: $event->eventtype]");
+            mtrace("  [Local Reminder] Reminder is not available for the event $event->id [type: $event->eventtype, module: $event->modulename]");
             continue;
         }
 
@@ -328,7 +328,7 @@ function local_reminders_cron_pre($currtime) {
             continue;
         }
 
-        mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype]");
+        mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype, module: $event->modulename]");
         $failedcount = 0;
 
         $sendusers = $reminderref->get_sending_users();

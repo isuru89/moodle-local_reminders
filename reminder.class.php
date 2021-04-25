@@ -222,6 +222,28 @@ abstract class local_reminder {
     }
 
     /**
+     * Returns time zone info for a user in plain text format.
+     *
+     * @param object $user object.
+     * @param object $event reference instance.
+     * @return string timezone info as plain text.
+     */
+    protected function get_tzinfo_plain($user, $event) {
+        return format_event_time_duration($user, $event, null, true, 'plain');
+    }
+
+    /**
+     * Pluralize given text by appending 's' if number if greater than 1.
+     *
+     * @param int $number number to check.
+     * @param string $text text to append with number.
+     * @return string pluralized string if necessary.
+     */
+    protected function pluralize($number, $text) {
+        return $number.($number > 1 ? $text.'s' : $text);
+    }
+
+    /**
      * Gets the footer content of the e-mail message.
      *
      * @return string footer content.
@@ -229,7 +251,8 @@ abstract class local_reminder {
     protected function get_html_footer() {
         global $CFG;
 
-        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', 'Moodle Calendar', array('target' => '_blank'));
+        $moodlecalendarname = get_string('moodlecalendarname', 'local_reminders');
+        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', $moodlecalendarname, array('target' => '_blank'));
         $footer = html_writer::start_tag('tr');
         $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
         $footer .= get_string('reminderfrom', 'local_reminders').' ';
@@ -259,7 +282,7 @@ abstract class local_reminder {
      *
      * @return string Message provider name
      */
-    protected abstract function get_message_provider();
+    abstract protected function get_message_provider();
 
     /**
      * Generates a message content as a HTML. Suitable for email messages.
@@ -268,7 +291,7 @@ abstract class local_reminder {
      * @param object $changetype change type (add/update/removed)
      * @return string Message content as HTML text.
      */
-    public abstract function get_message_html($user=null, $changetype=null);
+    abstract public function get_message_html($user=null, $changetype=null);
 
     /**
      * Generates a message content as a plain-text. Suitable for popup messages.
@@ -277,7 +300,7 @@ abstract class local_reminder {
      * @param object $changetype change type (add/update/removed)
      * @return string Message content as plain-text.
      */
-    public abstract function get_message_plaintext($user=null, $changetype=null);
+    abstract public function get_message_plaintext($user=null, $changetype=null);
 
     /**
      * Generates a message title for the reminder. Used for all message types.
@@ -285,7 +308,7 @@ abstract class local_reminder {
      * @param string $type type of message to be send (null=reminder cron)
      * @return string Message title as a plain-text.
      */
-    public abstract function get_message_title($type=null);
+    abstract public function get_message_title($type=null);
 
     /**
      * Gets an array of custom headers for the reminder message, specially
@@ -322,8 +345,17 @@ abstract class local_reminder {
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
-        if (isset($CFG->local_reminders_messagetitleprefix) && !empty($CFG->local_reminders_messagetitleprefix)) {
-            $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+        if (isset($CFG->local_reminders_messagetitleprefix)) {
+            if (!empty($CFG->local_reminders_messagetitleprefix)) {
+                $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+            } else {
+                $subjectprefix = '';
+            }
+        }
+
+        $msgtitle = '['.$subjectprefix.'] '.$titlehtml;
+        if (empty($subjectprefix)) {
+            $msgtitle = $titlehtml;
         }
 
         $cheaders = $this->get_custom_headers();
@@ -337,7 +369,7 @@ abstract class local_reminder {
         $eventdata->component           = 'local_reminders';
         $eventdata->name                = $this->get_message_provider();
         $eventdata->userfrom            = $admin;
-        $eventdata->subject             = '['.$subjectprefix.'] '.$titlehtml;
+        $eventdata->subject             = $msgtitle;
         $eventdata->fullmessage         = $this->get_message_plaintext();
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
@@ -372,10 +404,11 @@ abstract class local_reminder {
         if ($refreshcontent) {
             $contenthtml = $this->get_message_html($user);
             $titlehtml = $this->get_message_title();
+            $smallmsg = $this->get_message_plaintext($user);
 
             $this->eventobject->fullmessagehtml = $contenthtml;
-            $this->eventobject->smallmessage = $titlehtml . ' - ' . $contenthtml;
-            $this->eventobject->fullmessage = $this->get_message_plaintext($user);
+            $this->eventobject->smallmessage = $smallmsg;
+            $this->eventobject->fullmessage = $smallmsg;
         }
 
         return $this->eventobject;
@@ -412,14 +445,25 @@ abstract class local_reminder {
         $titleprefixlangstr = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
         $titlehtml = $this->get_message_title($changetype);
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
-        if (isset($CFG->local_reminders_messagetitleprefix) && !empty($CFG->local_reminders_messagetitleprefix)) {
-            $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+        if (isset($CFG->local_reminders_messagetitleprefix)) {
+            if (!empty($CFG->local_reminders_messagetitleprefix)) {
+                $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+            } else {
+                $subjectprefix = '';
+            }
+        }
+
+        $msgtitle = '['.$subjectprefix.'] '.$titleprefixlangstr.': '.$titlehtml;
+        if (empty($subjectprefix)) {
+            $msgtitle = $titleprefixlangstr.': '.$titlehtml;
         }
 
         $cheaders = $this->get_custom_headers();
         if (!empty($cheaders)) {
             $fromuser->customheaders = $cheaders;
         }
+
+        $smallmsg = $this->get_message_plaintext($touser, $changetype);
 
          // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
         $eventdata = new \core\message\message();
@@ -428,11 +472,11 @@ abstract class local_reminder {
         $eventdata->name                = $this->get_message_provider();
         $eventdata->userfrom            = $fromuser;
         $eventdata->userto              = $touser;
-        $eventdata->subject             = '['.$subjectprefix.'] '.$titleprefixlangstr.': '.$titlehtml;
-        $eventdata->fullmessage         = $this->get_message_plaintext($touser, $changetype);
+        $eventdata->subject             = $msgtitle;
+        $eventdata->fullmessage         = $smallmsg;
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
-        $eventdata->smallmessage        = $titlehtml . ' - ' . $contenthtml;
+        $eventdata->smallmessage        = $smallmsg;
         $eventdata->notification        = $this->notification;
 
         return $eventdata;

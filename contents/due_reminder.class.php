@@ -107,6 +107,7 @@ class due_reminder extends course_reminder {
 
         if (isset($CFG->local_reminders_noremindersforcompleted)
             && !$CFG->local_reminders_noremindersforcompleted) {
+                mtrace("'No reminders once completed' option is not enabled in plugin settings. So all users will recieve reminder.");
                 return $users;
         }
 
@@ -116,6 +117,20 @@ class due_reminder extends course_reminder {
                 $handlercls = new $clsname;
                 return $handlercls->filter_authorized_users($users, $type, $this->activityobj,
                     $this->course, $this->coursemodule, $this->cm);
+            } else {
+                try {
+                    mtrace("   [Local Reminders] Trying to filter users using generic activity handler...");
+                    $handlercls = new local_reminder_generic_handler;
+                    return $handlercls->filter_authorized_users($users, $type, $this->activityobj,
+                        $this->course, $this->coursemodule, $this->cm);
+                } catch (Exception $ex) {
+                    mtrace("Error occurred while processing with generic activity handler! $ex");
+                }
+                mtrace("   [WARN] *** Local reminders plugin does not support '$this->modname' activities to support sending 'No reminders once completed' option!");
+                mtrace('   [WARN] *** This might be due to this activity is coming from a third-party module, or '.
+                    'developer is not yet found a way to identify using moodle core APIs.');
+                mtrace('   [WARN] *** If you think this can be implemented using moodle core APIs, report this as a feature request to the developer in github.');
+                mtrace("   [WARN] *** Because of inability to support this feature for '$this->modname' activities now, all course module users will receive reminders.");
             }
         }
         return $users;
@@ -137,7 +152,8 @@ class due_reminder extends course_reminder {
 
         $contenttitle = $this->get_message_title();
         if (!isemptystring($changetype)) {
-            $contenttitle = "[$changetype]: $contenttitle";
+            $titleprefixlangstr = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
+            $contenttitle = "[$titleprefixlangstr]: $contenttitle";
         }
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
@@ -190,8 +206,8 @@ class due_reminder extends course_reminder {
      * @return string Message content as plain-text.
      */
     public function get_message_plaintext($user=null, $changetype=null) {
-        $text  = $this->get_message_title().' ['.$this->aheaddays.' day(s) to go]'."\n";
-        $text .= get_string('contentwhen', 'local_reminders').': '.format_event_time_duration($user, $this->event)."\n";
+        $text  = $this->get_message_title().' ['.$this->pluralize($this->aheaddays, ' day').' to go]'."\n";
+        $text .= get_string('contentwhen', 'local_reminders').': '.$this->get_tzinfo_plain($user, $this->event)."\n";
         $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname."\n";
         $text .= get_string('contenttypeactivity', 'local_reminders').': '.$this->cm->get_context_name()."\n";
         $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description."\n";
