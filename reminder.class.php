@@ -345,8 +345,17 @@ abstract class local_reminder {
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
-        if (isset($CFG->local_reminders_messagetitleprefix) && !empty($CFG->local_reminders_messagetitleprefix)) {
-            $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+        if (isset($CFG->local_reminders_messagetitleprefix)) {
+            if (!empty($CFG->local_reminders_messagetitleprefix)) {
+                $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+            } else {
+                $subjectprefix = '';
+            }
+        }
+
+        $msgtitle = '['.$subjectprefix.'] '.$titlehtml;
+        if (empty($subjectprefix)) {
+            $msgtitle = $titlehtml;
         }
 
         $cheaders = $this->get_custom_headers();
@@ -360,7 +369,7 @@ abstract class local_reminder {
         $eventdata->component           = 'local_reminders';
         $eventdata->name                = $this->get_message_provider();
         $eventdata->userfrom            = $admin;
-        $eventdata->subject             = '['.$subjectprefix.'] '.$titlehtml;
+        $eventdata->subject             = $msgtitle;
         $eventdata->fullmessage         = $this->get_message_plaintext();
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
@@ -436,8 +445,17 @@ abstract class local_reminder {
         $titleprefixlangstr = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
         $titlehtml = $this->get_message_title($changetype);
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
-        if (isset($CFG->local_reminders_messagetitleprefix) && !empty($CFG->local_reminders_messagetitleprefix)) {
-            $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+        if (isset($CFG->local_reminders_messagetitleprefix)) {
+            if (!empty($CFG->local_reminders_messagetitleprefix)) {
+                $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+            } else {
+                $subjectprefix = '';
+            }
+        }
+
+        $msgtitle = '['.$subjectprefix.'] '.$titleprefixlangstr.': '.$titlehtml;
+        if (empty($subjectprefix)) {
+            $msgtitle = $titleprefixlangstr.': '.$titlehtml;
         }
 
         $cheaders = $this->get_custom_headers();
@@ -454,7 +472,7 @@ abstract class local_reminder {
         $eventdata->name                = $this->get_message_provider();
         $eventdata->userfrom            = $fromuser;
         $eventdata->userto              = $touser;
-        $eventdata->subject             = '['.$subjectprefix.'] '.$titleprefixlangstr.': '.$titlehtml;
+        $eventdata->subject             = $msgtitle;
         $eventdata->fullmessage         = $smallmsg;
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
