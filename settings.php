@@ -76,6 +76,22 @@ if ($hassiteconfig) {
             get_string('filtereventsdescription', 'local_reminders'),
             REMINDERS_SEND_ONLY_VISIBLE, $choices));
 
+    $corepluginmanager = core_plugin_manager::instance();
+    $formatplugins = $corepluginmanager->get_plugins_of_type('mod');
+    $enabledplugins = $corepluginmanager->get_enabled_plugins('mod');
+    $excludedoptions = array();
+    foreach ($formatplugins as $key => $value) {
+        if (in_array($key, $enabledplugins)) {
+            $excludedoptions[$key] = $value->displayname;
+        }
+    }
+
+    $settings->add(new admin_setting_configmultiselect('local_reminders_excludedmodulenames',
+            get_string('excludedmodules', 'local_reminders'),
+            get_string('excludedmodulesdesc', 'local_reminders'),
+            array(),
+            $excludedoptions));
+
     $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
                        'days3' => ' '.get_string('days3', 'local_reminders'),
                        'days1' => ' '.get_string('days1', 'local_reminders'));
