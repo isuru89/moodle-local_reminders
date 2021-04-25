@@ -208,7 +208,6 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
     if (!empty($course) && !empty($cm)) {
         $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid, $showtrace);
         $context = context_module::instance($cm->id);
-        $PAGE->set_context($context);
         $sendusers = array();
         $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
 
@@ -250,7 +249,7 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
  * @param boolean $showtrace whether to print logs or not.
  * @return reminder_ref reminder reference instance.
  */
-function process_unknown_event($event, $aheadday, $activityroleids=null, $showtrace=true) {
+function process_unknown_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
     global $DB, $PAGE;
     if (isemptystring($event->modulename)) {
         $showtrace && mtrace("  [Local Reminder] Unknown event type [$event->eventtype]");
@@ -274,7 +273,6 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
 
         $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid, $showtrace);
         $context = context_module::instance($cm->id);
-        $PAGE->set_context($context);
         $sendusers = get_active_role_users($activityroleids, $context);
 
         if (strcmp($event->eventtype, 'gradingdue') == 0 && isset($context)) {
@@ -288,7 +286,8 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
         }
         $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
         $reminder->set_activity($event->modulename, $activityobj);
-        return new reminder_ref($reminder, $sendusers);
+        $filteredusers = $reminder->filter_authorized_users($sendusers, $calltype);
+        return new reminder_ref($reminder, $filteredusers);
     }
     return null;
 }
