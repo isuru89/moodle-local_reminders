@@ -430,7 +430,7 @@ function process_group_event($event, $aheadday, $showtrace=true) {
 function process_user_event($event, $aheadday) {
     global $DB;
 
-    $user = $DB->get_record('user', array('id' => $event->userid));
+    $user = $DB->get_record('user', array('id' => $event->userid, 'deleted' => 0));
 
     if (!empty($user)) {
         $reminder = new user_reminder($event, $user, $aheadday);
