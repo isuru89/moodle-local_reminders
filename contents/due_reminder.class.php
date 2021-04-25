@@ -127,8 +127,9 @@ class due_reminder extends course_reminder {
                     mtrace("Error occurred while processing with generic activity handler! $ex");
                 }
                 mtrace("   [WARN] *** Local reminders plugin does not support '$this->modname' activities to support sending 'No reminders once completed' option!");
-                mtrace("   [WARN] *** This might be due to this activity is coming from a third-party module, or developer is not yet found a way to identify using moodle core APIs.");
-                mtrace("   [WARN] *** If you think this can be implemented using moodle core APIs, report this as a feature request to the developer in github.");
+                mtrace('   [WARN] *** This might be due to this activity is coming from a third-party module, or '.
+                    'developer is not yet found a way to identify using moodle core APIs.');
+                mtrace('   [WARN] *** If you think this can be implemented using moodle core APIs, report this as a feature request to the developer in github.');
                 mtrace("   [WARN] *** Because of inability to support this feature for '$this->modname' activities now, all course module users will receive reminders.");
             }
         }

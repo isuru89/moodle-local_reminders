@@ -56,7 +56,7 @@ abstract class local_reminder_activity_handler {
      * @param object $event event instance
      * @return string description related to this activity.
      */
-    public abstract function get_description($activity, $event);
+    abstract public function get_description($activity, $event);
 
     /**
      * Filter out users who still does not have completed this activity.
@@ -115,6 +115,7 @@ abstract class local_reminder_activity_handler {
 
 /**
  * Supports generic activity completion using Moodle's completion_info API.
+ *
  * This class will be used when no specific handler being implemented for the given
  * module. And also will gracefully failed, if filtering cannot be fulfilled.
  *

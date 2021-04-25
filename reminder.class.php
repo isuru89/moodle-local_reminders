@@ -282,7 +282,7 @@ abstract class local_reminder {
      *
      * @return string Message provider name
      */
-    protected abstract function get_message_provider();
+    abstract protected function get_message_provider();
 
     /**
      * Generates a message content as a HTML. Suitable for email messages.
@@ -291,7 +291,7 @@ abstract class local_reminder {
      * @param object $changetype change type (add/update/removed)
      * @return string Message content as HTML text.
      */
-    public abstract function get_message_html($user=null, $changetype=null);
+    abstract public function get_message_html($user=null, $changetype=null);
 
     /**
      * Generates a message content as a plain-text. Suitable for popup messages.
@@ -300,7 +300,7 @@ abstract class local_reminder {
      * @param object $changetype change type (add/update/removed)
      * @return string Message content as plain-text.
      */
-    public abstract function get_message_plaintext($user=null, $changetype=null);
+    abstract public function get_message_plaintext($user=null, $changetype=null);
 
     /**
      * Generates a message title for the reminder. Used for all message types.
@@ -308,7 +308,7 @@ abstract class local_reminder {
      * @param string $type type of message to be send (null=reminder cron)
      * @return string Message title as a plain-text.
      */
-    public abstract function get_message_title($type=null);
+    abstract public function get_message_title($type=null);
 
     /**
      * Gets an array of custom headers for the reminder message, specially

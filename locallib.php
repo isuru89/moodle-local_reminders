@@ -247,6 +247,7 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
  * @param int $aheadday number of days ahead.
  * @param array $activityroleids role ids for activities.
  * @param boolean $showtrace whether to print logs or not.
+ * @param string $calltype calling type PRE|OVERDUE.
  * @return reminder_ref reminder reference instance.
  */
 function process_unknown_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
