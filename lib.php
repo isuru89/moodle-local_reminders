@@ -318,7 +318,8 @@ function local_reminders_cron_pre($currtime) {
         }
 
         if ($reminderref == null) {
-            mtrace("  [Local Reminder] Reminder is not available for the event $event->id [type: $event->eventtype, module: $event->modulename]");
+            mtrace("  [Local Reminder] Reminder is not available for the event $event->id "
+                ."[type: $event->eventtype, mod: $event->modulename]");
             continue;
         }
 
@@ -328,7 +329,7 @@ function local_reminders_cron_pre($currtime) {
             continue;
         }
 
-        mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype, module: $event->modulename]");
+        mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype, mod: $event->modulename]");
         $failedcount = 0;
 
         $sendusers = $reminderref->get_sending_users();
