@@ -42,12 +42,6 @@ if ($hassiteconfig) {
         }
     }
 
-    $allmodules = $DB->get_records('modules', array('visible' => 1), 'name ASC');
-    $modnames = array();
-    foreach ($allmodules as $modref) {
-        $modnames[$modref->name] = get_string('modulename', $modref->name);
-    }
-
     // Default settings for recieving reminders according to role.
     $defaultrolesforcourse = array('student' => 1);
     $defaultrolesforcategory = array('editingteacher' => 1, 'teacher' => 1);
@@ -81,6 +75,22 @@ if ($hassiteconfig) {
             get_string('filterevents', 'local_reminders'),
             get_string('filtereventsdescription', 'local_reminders'),
             REMINDERS_SEND_ONLY_VISIBLE, $choices));
+
+    $corepluginmanager = core_plugin_manager::instance();
+    $formatplugins = $corepluginmanager->get_plugins_of_type('mod');
+    $enabledplugins = $corepluginmanager->get_enabled_plugins('mod');
+    $excludedoptions = array();
+    foreach ($formatplugins as $key => $value) {
+        if (in_array($key, $enabledplugins)) {
+            $excludedoptions[$key] = $value->displayname;
+        }
+    }
+
+    $settings->add(new admin_setting_configmultiselect('local_reminders_excludedmodulenames',
+            get_string('excludedmodules', 'local_reminders'),
+            get_string('excludedmodulesdesc', 'local_reminders'),
+            array(),
+            $excludedoptions));
 
     $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
                        'days3' => ' '.get_string('days3', 'local_reminders'),
@@ -219,12 +229,6 @@ if ($hassiteconfig) {
             get_string('rolesallowedfor', 'local_reminders'),
             get_string('explainrolesallowedfor', 'local_reminders'),
             $defaultrolesforactivity, $rolesarray));
-
-    $settings->add(new admin_setting_configmultiselect('local_reminders_excludedmodulenames',
-        get_string('excludedmodules', 'local_reminders'),
-        get_string('excludedmodulesdesc', 'local_reminders'),
-        array(),
-        $modnames));
 
     $settings->add(new admin_setting_configcheckbox('local_reminders_enable_dueforcalevents',
             get_string('enabledforcalevents', 'local_reminders'),
