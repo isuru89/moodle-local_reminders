@@ -205,6 +205,14 @@ if ($hassiteconfig) {
             get_string('overdueactivityreminders', 'local_reminders'),
             get_string('overdueactivityremindersdescription', 'local_reminders'), 1));
 
+    $settings->add(new admin_setting_configtext('local_reminders_overduewarnprefix',
+            get_string('overduewarnprefix', 'local_reminders'),
+            get_string('overduewarnprefixdescription', 'local_reminders'), 'OVERDUE'));
+
+    $settings->add(new admin_setting_configtext('local_reminders_overduewarnmessage',
+            get_string('overduewarnmessage', 'local_reminders'),
+            get_string('overduewarnmessagedescription', 'local_reminders'), 'This activity is overdue!'));
+
     $activitychoices = array(REMINDERS_ACTIVITY_BOTH => get_string('activityremindersboth', 'local_reminders'),
                              REMINDERS_ACTIVITY_ONLY_OPENINGS => get_string('activityremindersonlyopenings', 'local_reminders'),
                              REMINDERS_ACTIVITY_ONLY_CLOSINGS => get_string('activityremindersonlyclosings', 'local_reminders'));

@@ -72,9 +72,10 @@ class user_reminder extends local_reminder {
      *
      * @param object $user The user object
      * @param object $changetype change type (add/update/removed)
+     * @param stdClass $ctxinfo additional context info needed to process.
      * @return string Message content as HTML text.
      */
-    public function get_message_html($user=null, $changetype=null) {
+    public function get_message_html($user=null, $changetype=null, $ctxinfo=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
         $htmlmail .= html_writer::start_tag('div');

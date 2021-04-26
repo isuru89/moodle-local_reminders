@@ -164,8 +164,11 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
         mtrace('[LOCAL REMINDERS] Processing post-activity event for '.$event->id);
 
         $sendusers = $reminderref->get_sending_users();
+        $ctxinfo = new \stdClass;
+        $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
+        $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
         foreach ($sendusers as $touser) {
-            $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser);
+            $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser, $ctxinfo);
 
             try {
                 $mailresult = message_send($eventdata);
@@ -849,10 +852,11 @@ class reminder_ref {
      * @param string $changetype change type PRE|OVERDUE.
      * @param object $fromuser from user.
      * @param object $touser user to send.
+     * @param stdClass $ctxinfo additional context info needed to process.
      * @return object new notification instance.
      */
-    public function get_updating_send_event($changetype, $fromuser, $touser) {
-        return $this->reminder->get_updating_event_message($changetype, $fromuser, $touser);
+    public function get_updating_send_event($changetype, $fromuser, $touser, $ctxinfo) {
+        return $this->reminder->get_updating_event_message($changetype, $fromuser, $touser, $ctxinfo);
     }
 
     /**

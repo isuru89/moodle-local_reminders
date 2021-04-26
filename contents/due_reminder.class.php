@@ -122,7 +122,7 @@ class due_reminder extends course_reminder {
                     return $handlercls->filter_authorized_users($users, $type, $this->activityobj,
                         $this->course, $this->coursemodule, $this->cm);
                 } catch (Exception $ex) {
-                    mtrace("Error occurred while processing with generic activity handler! $ex");
+                    mtrace('Error occurred while processing with generic activity handler!'.$ex->getMessage());
                 }
                 mtrace("   [WARN] *** Local reminders plugin does not support '$this->modname' activities
                     to support sending 'No reminders once completed' option! This might be due to this activity is coming
@@ -139,9 +139,10 @@ class due_reminder extends course_reminder {
      *
      * @param object $user The user object
      * @param object $changetype change type (add/update/removed/overdue)
+     * @param stdClass $ctxinfo additional context info needed to process.
      * @return string Message content as HTML text.
      */
-    public function get_message_html($user=null, $changetype=null) {
+    public function get_message_html($user=null, $changetype=null, $ctxinfo=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
         $htmlmail .= html_writer::start_tag('div');
@@ -150,8 +151,10 @@ class due_reminder extends course_reminder {
 
         $contenttitle = $this->get_message_title();
         if (!isemptystring($changetype)) {
-            $titleprefixlangstr = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
-            $contenttitle = "[$titleprefixlangstr]: $contenttitle";
+            if (!is_null($ctxinfo) && property_exists($ctxinfo, 'overduetitle') && !isemptystring($ctxinfo->overduetitle)) {
+                $titleprefixlangstr = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
+                $contenttitle = "[$ctxinfo->overduetitle]: $contenttitle";
+            }
         }
         $htmlmail .= html_writer::start_tag('tr');
         $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
@@ -160,11 +163,11 @@ class due_reminder extends course_reminder {
                 array('style' => 'text-decoration: none'));
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
-        if (!isemptystring($changetype) && $changetype == REMINDERS_CALL_TYPE_OVERDUE) {
+        if (!isemptystring($changetype) && $changetype == REMINDERS_CALL_TYPE_OVERDUE
+            && !is_null($ctxinfo) && !isemptystring($ctxinfo->overduemessage)) {
             $htmlmail .= html_writer::start_tag('tr');
             $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
-            $htmlmail .= html_writer::tag('h4', get_string('overduemessage', 'local_reminders'),
-                array('style' => $this->overduestyle));
+            $htmlmail .= html_writer::tag('h4', $ctxinfo->overduemessage, array('style' => $this->overduestyle));
             $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
         }
 
