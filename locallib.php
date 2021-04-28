@@ -104,21 +104,22 @@ function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck='e
  * Only once user will receive emails.
  *
  * @param int $curtime current time to check for cutoff.
+ * @param int $timewindowstart time window start.
  * @param array $activityroleids role ids for acitivities.
  * @param object $fromuser from user for emails.
  * @return void.
  */
-function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) {
+function send_overdue_activity_reminders($curtime, $timewindowstart, $activityroleids, $fromuser) {
     global $DB, $CFG;
 
-    mtrace('[LOCAL REMINDERS] Overdue Activity Reminder Cron Started @ '.$curtime);
+    mtrace('[LOCAL REMINDERS] Overdue Activity Reminder Cron Started. Events between @('.$timewindowstart.', '.$curtime.')');
 
     if (isset($CFG->local_reminders_enableoverdueactivityreminders) && !$CFG->local_reminders_enableoverdueactivityreminders) {
         mtrace('[LOCAL REMINDERS] Overdue Activity reminders are not enabled from settings! Skipped.');
         return;
     }
 
-    $rangestart = $curtime - REMINDERS_DAYIN_SECONDS;
+    $rangestart = $timewindowstart;
     $statuses = ['due', 'close', 'expectcompletionon', 'gradingdue'];
     list($insql, $inparams) = $DB->get_in_or_equal($statuses);
 
@@ -126,7 +127,7 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
         FROM {event} e
             LEFT JOIN {local_reminders_post_act} lrpa ON e.id = lrpa.eventid
         WHERE
-            timestart >= $rangestart AND timestart < $curtime
+            e.timestart >= $rangestart AND e.timestart < $curtime
             AND lrpa.eventid IS NULL
             AND e.eventtype $insql
             AND e.visible = 1";
@@ -163,31 +164,40 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
             mtrace('[LOCAL REMINDERS] Skipped post-activity event for '.$event->id);
             continue;
         }
-        mtrace('[LOCAL REMINDERS] Processing post-activity event for '.$event->id);
+        mtrace('[LOCAL REMINDERS] Processing post-activity event for '.$event->id.' occurred @ '.$event->timestart);
 
         $sendusers = $reminderref->get_sending_users();
         $ctxinfo = new \stdClass;
         $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
         $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
         foreach ($sendusers as $touser) {
-            $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser, $ctxinfo);
-
             try {
+                $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser, $ctxinfo);
+
                 $mailresult = message_send($eventdata);
                 mtrace('[LOCAL_REMINDERS] Post Activity Mail Result: '.$mailresult);
 
                 if (!$mailresult) {
-                    throw new coding_exception("Could not send out message for event#$event->id to user $eventdata->userto");
+                    mtrace("[LOCAL REMINDERS] Could not send out message for event#$event->id to user $eventdata->userto");
                 }
-            } catch (moodle_exception $mex) {
-                mtrace('Error: local/reminders/locallib.php send_post_activity_reminders(): '.$mex->getMessage());
+            } catch (\Exception $mex) {
+                mtrace('[LOCAL REMINDERS] Error: local/reminders/locallib.php send_post_activity_reminders(): '.$mex->getMessage());
             }
         }
 
-        $activityrecord = new stdClass();
-        $activityrecord->sendtime = $curtime;
-        $activityrecord->eventid = $event->id;
-        $DB->insert_record('local_reminders_post_act', $activityrecord, false);
+        try {
+            $activityrecord = new \stdClass();
+            $activityrecord->sendtime = $curtime;
+            $activityrecord->eventid = $event->id;
+            $DB->insert_record('local_reminders_post_act', $activityrecord, false);
+            mtrace('[LOCAL REMINDERS] Successfully marked event#'.$event->id.' as overdue sent completed in db.');
+
+        } catch (\Exception $dex) {
+            // Catastrophic failure and not sure what to do at this moment.
+            mtrace('[LOCAL REMINDERS] Error: It seems Local Reminders plugin cannot write to database!'
+                .'Please disable overdue reminders until database write access provided!'
+                .$dex->getMessage());
+        }
     }
 }
 
