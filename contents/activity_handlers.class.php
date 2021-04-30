@@ -210,8 +210,8 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
             if (!$canattempt) {
                 continue;
             }
-            $attempts = quiz_get_user_attempts($activity->id, $auser->id);
-            if (!isset($attempts) || empty($attempts)) {
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
+            if (!$status) {
                 $filteredusers[] = $auser;
             }
         }
@@ -269,10 +269,7 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = assign_get_completion_state($course, $coursemodule, $auser->id, null);
-            if (is_null($status)) {
-                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
-            }
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
                 $filteredusers[] = $auser;
             }
@@ -348,10 +345,7 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = choice_get_completion_state($course, $coursemodule, $auser->id, null);
-            if (is_null($status)) {
-                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
-            }
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
                 $filteredusers[] = $auser;
             }
@@ -405,10 +399,8 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = feedback_get_completion_state($course, $coursemodule, $auser->id, null);
-            if (is_null($status)) {
-                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
-            }
+
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
                 $filteredusers[] = $auser;
             }

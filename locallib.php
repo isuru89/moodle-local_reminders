@@ -117,15 +117,19 @@ function send_overdue_activity_reminders($curtime, $activityroleids, $fromuser) 
     }
 
     $rangestart = $curtime - REMINDERS_DAYIN_SECONDS;
+    $statuses = ['due', 'close', 'expectcompletionon', 'gradingdue'];
+    list($insql, $inparams) = $DB->get_in_or_equal($statuses);
+
     $querysql = "SELECT e.*
         FROM {event} e
             LEFT JOIN {local_reminders_post_act} lrpa ON e.id = lrpa.eventid
         WHERE
             timestart >= $rangestart AND timestart < $curtime
             AND lrpa.eventid IS NULL
-            AND (e.eventtype = 'due' OR e.eventtype = 'close')
+            AND e.eventtype $insql
             AND e.visible = 1";
-    $allexpiredevents = $DB->get_records_sql($querysql);
+
+    $allexpiredevents = $DB->get_records_sql($querysql, $inparams);
     if (!$allexpiredevents || count($allexpiredevents) == 0) {
         mtrace('[LOCAL REMINDERS] No expired events found for this cron cycle! Skipped.');
         return;
@@ -430,7 +434,7 @@ function process_group_event($event, $aheadday, $showtrace=true) {
 function process_user_event($event, $aheadday) {
     global $DB;
 
-    $user = $DB->get_record('user', array('id' => $event->userid));
+    $user = $DB->get_record('user', array('id' => $event->userid, 'deleted' => 0));
 
     if (!empty($user)) {
         $reminder = new user_reminder($event, $user, $aheadday);
