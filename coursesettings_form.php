@@ -99,7 +99,9 @@ class local_reminders_coursesettings_edit_form extends moodleform {
             $daytimeformat = get_string('strftimedaydate', 'langconfig');
             $tzone = core_date::get_user_timezone($USER);
             foreach ($upcomingactivities as $daytime => $dailyactivities) {
-                $mform->addElement('static', 'header'.$daytime, '<h5>'.userdate($daytime, $daytimeformat, $tzone).'</h5>');
+                $mform->addElement('static', 'header'.$daytime, '<h4><b>'.userdate($daytime, $daytimeformat, $tzone).'</b></h4>');
+                $isfirstone = true;
+
                 foreach ($dailyactivities as $activity) {
                     $activitytypename = "";
                     $activityname = $activity->name;
@@ -109,9 +111,21 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                         $activityname = isset($modinfo->name) ? $modinfo->name : $activity->name;
                     }
 
+                    if (!$isfirstone) {
+                        $mform->addElement('static', 'duetime'.$daytime.$activity->modulename.$activity->instance,
+                            '',
+                            '<div style="color: #ddd;">'.str_repeat('_', 70).'</div>');
+                    }
+
+                    $eventlink = $this->generate_event_link($activity);
+                    $friendlyeventtypetext = $this->load_string_safe('eventtype'.$activity->eventtype, '');
                     $mform->addElement('static', 'header'.$daytime.$activity->modulename.$activity->instance,
                         '',
-                        '<h5>'.$activitytypename.$activityname.'</h5>');
+                        '<h5><b><a href="'.$eventlink.'">'.$activitytypename.$activityname
+                        ."</a></b></h5>$friendlyeventtypetext");
+                    $mform->addElement('static', 'duetime'.$daytime.$activity->modulename.$activity->instance,
+                        'Due In',
+                        userdate($activity->timestart, get_string('strftimedatetime', 'langconfig'), $tzone));
 
                     $key = "activity_".$activity->id.'_enabled';
                     $mform->addElement('advcheckbox', $key, get_string('enabled', 'local_reminders'), ' ');
@@ -140,7 +154,10 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                     }
 
                     $noactivities = false;
+                    $isfirstone = false;
                 }
+
+                $mform->addElement('html', '<hr/>');
             }
         }
 
@@ -152,5 +169,34 @@ class local_reminders_coursesettings_edit_form extends moodleform {
         $this->add_action_buttons(true);
 
         $this->set_data($coursesettings);
+    }
+
+    /**
+     * Loads language string safely with default value if not exists.
+     *
+     * @param string $key key to load for.
+     * @param string $defaultvalue default value to load if nx.
+     * @return string loaded string.
+     */
+    private function load_string_safe($key, $defaultvalue='') {
+        $stringman = get_string_manager();
+        if ($stringman->string_exists($key, 'local_reminders')) {
+            return get_string($key, 'local_reminders');
+        }
+        return $defaultvalue;
+    }
+
+    /**
+     * Returns the correct link for the calendar event.
+     *
+     * @param object $event event instance.
+     * @return string complete url for the event
+     */
+    private function generate_event_link($event) {
+        $params = array('view' => 'day', 'time' => $event->timestart);
+        $calurl = new moodle_url('/calendar/view.php', $params);
+        $calurl->set_anchor('event_'.$event->id);
+
+        return $calurl->out(false);
     }
 }
