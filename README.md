@@ -96,9 +96,12 @@ In addition to above, user can control reminders for calendar event changes per 
 ## Changelog
 
 ### v2.3
-  * No reminders once completed settings will support all modules which integrated with Core Completion API (#113)
+  * No reminders once completed settings will support all modules which integrated with Moodle Core Completion API (#113)
   * Should honour empty prefix when title prefix is set to empty in settings (#115)
   * Ability to exclude reminders for a selected set of modules globally (#75)
+  * Ability to customize overdue texts in reminders (#118)
+  * Inconsistent code between reminders and overdue implementation fixed (#119)
+  * User reminders will be sent only to active users (#20)
 
 ### v2.2.4
   * Removed hardcoded strings (overdue text and moodle calendar name) #105
