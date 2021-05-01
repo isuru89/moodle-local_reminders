@@ -1,9 +1,9 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.2.4-blue)
+![Version](https://img.shields.io/badge/version-v2.3-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
-[![Build Status](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events.svg?branch=master)](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events)
+[![Build Status](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml/badge.svg?branch=release_2.0)](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml)
 
 This plugin will send email reminders for [Moodle](https://moodle.org/) calendar events.
 
@@ -25,6 +25,7 @@ In addition to that, there are lot of new features introduced in v2 of the plugi
  * Send reminders to users who unable to complete an expired activity.
  * Send email reminders when a calendar event is created, updated or removed.
  * Ability to enable/disable and scheduling reminders per activity basis.
+ * Ability to exclude specific set of activity types from sending reminders.
  * No reminders after a user has completed activity.
  * Added event location / timezone information to the reminder email.
  * New category event type support
@@ -93,6 +94,14 @@ In addition to above, user can control reminders for calendar event changes per 
  | Activity Overdue Reminders | enable/disable sending reminders for users who still have not completed expired events | true |
 
 ## Changelog
+
+### v2.3
+  * No reminders once completed settings will support all modules which integrated with Moodle Core Completion API (#113)
+  * Should honour empty prefix when title prefix is set to empty in settings (#115)
+  * Ability to exclude reminders for a selected set of modules globally (#75)
+  * Ability to customize overdue texts in reminders (#118)
+  * Inconsistent code between reminders and overdue implementation fixed (#119)
+  * User reminders will be sent only to active users (#20)
 
 ### v2.2.4
   * Removed hardcoded strings (overdue text and moodle calendar name) #105

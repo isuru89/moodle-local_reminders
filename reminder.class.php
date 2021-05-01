@@ -282,16 +282,17 @@ abstract class local_reminder {
      *
      * @return string Message provider name
      */
-    protected abstract function get_message_provider();
+    abstract protected function get_message_provider();
 
     /**
      * Generates a message content as a HTML. Suitable for email messages.
      *
      * @param object $user The user object
      * @param object $changetype change type (add/update/removed)
+     * @param stdClass $ctxinfo additional context info needed to process.
      * @return string Message content as HTML text.
      */
-    public abstract function get_message_html($user=null, $changetype=null);
+    abstract public function get_message_html($user=null, $changetype=null, $ctxinfo=null);
 
     /**
      * Generates a message content as a plain-text. Suitable for popup messages.
@@ -300,7 +301,7 @@ abstract class local_reminder {
      * @param object $changetype change type (add/update/removed)
      * @return string Message content as plain-text.
      */
-    public abstract function get_message_plaintext($user=null, $changetype=null);
+    abstract public function get_message_plaintext($user=null, $changetype=null);
 
     /**
      * Generates a message title for the reminder. Used for all message types.
@@ -308,7 +309,7 @@ abstract class local_reminder {
      * @param string $type type of message to be send (null=reminder cron)
      * @return string Message title as a plain-text.
      */
-    public abstract function get_message_title($type=null);
+    abstract public function get_message_title($type=null);
 
     /**
      * Gets an array of custom headers for the reminder message, specially
@@ -345,8 +346,17 @@ abstract class local_reminder {
         $contenthtml = $this->get_message_html();
         $titlehtml = $this->get_message_title();
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
-        if (isset($CFG->local_reminders_messagetitleprefix) && !empty($CFG->local_reminders_messagetitleprefix)) {
-            $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+        if (isset($CFG->local_reminders_messagetitleprefix)) {
+            if (!empty($CFG->local_reminders_messagetitleprefix)) {
+                $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+            } else {
+                $subjectprefix = '';
+            }
+        }
+
+        $msgtitle = '['.$subjectprefix.'] '.$titlehtml;
+        if (empty($subjectprefix)) {
+            $msgtitle = $titlehtml;
         }
 
         $cheaders = $this->get_custom_headers();
@@ -360,7 +370,7 @@ abstract class local_reminder {
         $eventdata->component           = 'local_reminders';
         $eventdata->name                = $this->get_message_provider();
         $eventdata->userfrom            = $admin;
-        $eventdata->subject             = '['.$subjectprefix.'] '.$titlehtml;
+        $eventdata->subject             = $msgtitle;
         $eventdata->fullmessage         = $this->get_message_plaintext();
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
@@ -417,14 +427,34 @@ abstract class local_reminder {
     }
 
     /**
+     * Returns appropiate email title prefix based on changed type.
+     *
+     * @param object $changetype change type.
+     * @param stdClass $ctxinfo additional context information.
+     * @return string prefix to be appended.
+     */
+    protected function get_relavant_title_prefix($changetype, $ctxinfo=null) {
+        $toreturn = '';
+        if ($changetype == REMINDERS_CALL_TYPE_OVERDUE) {
+            if (!is_null($ctxinfo) && property_exists($ctxinfo, 'overduetitle') && !isemptystring($ctxinfo->overduetitle)) {
+                $toreturn = $ctxinfo->overduetitle;
+            }
+        } else {
+            $toreturn = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
+        }
+        return !empty($toreturn) ? $toreturn.':' : '';
+    }
+
+    /**
      * Returns the sending notification instance from user to user with change type.
      *
      * @param string $changetype change type.
      * @param object $admin admin user.
      * @param object $touser to user.
+     * @param stdClass $ctxinfo additional context information.
      * @return object notification instance.
      */
-    public function get_updating_event_message($changetype, $admin=null, $touser=null) {
+    public function get_updating_event_message($changetype, $admin=null, $touser=null, $ctxinfo=null) {
         global $CFG;
 
         $fromuser = $admin;
@@ -432,12 +462,21 @@ abstract class local_reminder {
             $fromuser = get_admin();
         }
 
-        $contenthtml = $this->get_message_html($touser, $changetype);
-        $titleprefixlangstr = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
+        $contenthtml = $this->get_message_html($touser, $changetype, $ctxinfo);
+        $titleprefixlangstr = $this->get_relavant_title_prefix($changetype, $ctxinfo);
         $titlehtml = $this->get_message_title($changetype);
         $subjectprefix = get_string('titlesubjectprefix', 'local_reminders');
-        if (isset($CFG->local_reminders_messagetitleprefix) && !empty($CFG->local_reminders_messagetitleprefix)) {
-            $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+        if (isset($CFG->local_reminders_messagetitleprefix)) {
+            if (!empty($CFG->local_reminders_messagetitleprefix)) {
+                $subjectprefix = $CFG->local_reminders_messagetitleprefix;
+            } else {
+                $subjectprefix = '';
+            }
+        }
+
+        $msgtitle = '['.$subjectprefix.'] '.$titleprefixlangstr.' '.$titlehtml;
+        if (empty($subjectprefix)) {
+            $msgtitle = $titleprefixlangstr.' '.$titlehtml;
         }
 
         $cheaders = $this->get_custom_headers();
@@ -454,7 +493,7 @@ abstract class local_reminder {
         $eventdata->name                = $this->get_message_provider();
         $eventdata->userfrom            = $fromuser;
         $eventdata->userto              = $touser;
-        $eventdata->subject             = '['.$subjectprefix.'] '.$titleprefixlangstr.': '.$titlehtml;
+        $eventdata->subject             = trim($msgtitle);
         $eventdata->fullmessage         = $smallmsg;
         $eventdata->fullmessageformat   = FORMAT_PLAIN;
         $eventdata->fullmessagehtml     = $contenthtml;
