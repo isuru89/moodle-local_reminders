@@ -124,7 +124,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                         '<h5><b><a href="'.$eventlink.'">'.$activitytypename.$activityname
                         ."</a></b></h5>$friendlyeventtypetext");
                     $mform->addElement('static', 'duetime'.$daytime.$activity->modulename.$activity->instance,
-                        'Due In',
+                        get_string('activityconfduein', 'local_reminders'),
                         userdate($activity->timestart, get_string('strftimedatetime', 'langconfig'), $tzone));
 
                     $key = "activity_".$activity->id.'_enabled';

@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['activityconfduein'] = 'Due In';
 $string['activityconfupcomingactivities'] = 'Upcoming Activities';
 $string['activityconfupcomingactivitiesdesc'] = 'Reminders will not be sent for unchecked activities.';
 $string['activityconfnoupcomingactivities'] = 'No upcoming activities for this course.';
