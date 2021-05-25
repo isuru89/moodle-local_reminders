@@ -535,8 +535,11 @@ function when_calendar_event_updated($updateevent, $changetype) {
         return;
     }
 
+    $ctxinfo = new \stdClass;
+    $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
+    $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
     foreach ($sendusers as $touser) {
-        $eventdata = $reminderref->get_updating_send_event($changetype, $fromuser, $touser);
+        $eventdata = $reminderref->get_updating_send_event($changetype, $fromuser, $touser, $ctxinfo);
 
         $mailresult = message_send($eventdata);
     }
