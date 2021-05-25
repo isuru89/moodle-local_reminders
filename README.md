@@ -1,6 +1,6 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.3-blue)
+![Version](https://img.shields.io/badge/version-v2.3.1-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
 [![Build Status](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml/badge.svg?branch=release_2.0)](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml)
@@ -94,6 +94,10 @@ In addition to above, user can control reminders for calendar event changes per 
  | Activity Overdue Reminders | enable/disable sending reminders for users who still have not completed expired events | true |
 
 ## Changelog
+
+### v2.3.1
+  * Removed hard coded string in course settings page (#124)
+  * Fixed incorrect argument pass in calendar update events (#126)
 
 ### v2.3
   * No reminders once completed settings will support all modules which integrated with Moodle Core Completion API (#113)
