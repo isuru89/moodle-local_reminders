@@ -90,12 +90,57 @@ function fetch_course_activity_settings($courseid, $eventid) {
  * @param string $keytocheck key to check for.
  * @return bool return true if reminders disabled for activity.
  */
-function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck='enabled') {
+function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck=REMINDERS_ENABLED_KEY) {
     $activitysettings = fetch_course_activity_settings($courseid, $eventid);
     if (array_key_exists($keytocheck, $activitysettings) && !$activitysettings[$keytocheck]) {
         return true;
     }
     return false;
+}
+
+/**
+ * Returns true if reminders can be sent to the given event based on Moodle configured settings.
+ *
+ * @param object $event event instance reference.
+ * @param object $options context options.
+ * @param number $aheadday number of days ahead this activity belongs to.
+ * @return bool true if reminders can sent, otherwise false.
+ */
+function should_run_for_activity($event, $options, $aheadday=null) {
+    global $DB, $CFG;
+
+    $showtrace = $options->showtrace;
+    $aheadday = $options->aheadday;
+    $courseid = $event->courseid;
+    $eventid = $event->id;
+    $aheaddayskey = "days$aheadday";
+    $explicitenable = isset($CFG->local_reminders_explicitenable) && $CFG->local_reminders_explicitenable;
+
+    $activitysettings = fetch_course_activity_settings($courseid, $eventid);
+    if (array_key_exists(REMINDERS_ENABLED_KEY, $activitysettings) && !$activitysettings[REMINDERS_ENABLED_KEY]) {
+        $showtrace && mtrace("  [Local Reminder] Reminders for activity event#$eventid (title=$event->name) ".
+            "have been disabled in the course settings.");
+        return false;
+    } else if (array_key_exists($aheaddayskey, $activitysettings) && !$activitysettings[$aheaddayskey]) {
+        $showtrace && mtrace("  [Local Reminder] Reminders for activity event#$eventid (title=$event->name) ".
+            "have been disabled for $aheadday days ahead.");
+        return false;
+    }
+
+    if ($explicitenable) {
+        // Must be explicitly enabled the reminders to be sent.
+        if (array_key_exists(REMINDERS_ENABLED_KEY, $activitysettings)
+            && $activitysettings[REMINDERS_ENABLED_KEY]
+            && array_key_exists($aheaddayskey, $activitysettings)
+            && $activitysettings[$aheaddayskey]) {
+            return true;
+        }
+
+        $showtrace && mtrace("  [Local Reminder] Reminders for activity event#$eventid (title=$event->name) ".
+            "have explicitly not been enabled in the course settings.");
+        return false;
+    }
+    return true;
 }
 
 /**
@@ -227,11 +272,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
     if (is_course_hidden_and_denied($course)) {
         $showtrace && mtrace("  [Local Reminder] Course is hidden. No reminders will be sent.");
         return null;
-    } else if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
-        $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
-        return null;
-    } else if (has_disabled_reminders_for_activity($event->courseid, $event->id, "days$aheadday")) {
-        $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled for $aheadday days ahead.");
+    } else if (!should_run_for_activity($event, $options, $aheadday)) {
         return null;
     }
 
@@ -240,6 +281,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
     $sendusers = array();
     $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
 
+    mtrace("   [Local Reminder] Finding out users for event#".$event->id."...");
     if ($event->courseid <= 0 && $event->userid > 0) {
         // A user overridden activity.
         $showtrace && mtrace("  [Local Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");

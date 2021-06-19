@@ -23,6 +23,9 @@
  */
 
 $string['activityconfduein'] = 'Due In';
+$string['activityconfexplicitenable'] = 'Explicit Reminder Activation';
+$string['activityconfexplicitenabledesc'] = 'If checked, teachers or relevant authorities must <strong>explicitly</strong> enable reminders for each activity under course reminder settings page. Because of that, all activity reminders will be by default disabled regardless of the schedule defined in below. This configuration will not be impact to the overdue reminders anyway.';
+$string['activityconfexplicitenablehint'] = 'Site administrator(s) have disabled activity reminders by default. That means teachers must explictly enable reminders for activities which they want to sent.';
 $string['activityconfupcomingactivities'] = 'Upcoming Activities';
 $string['activityconfupcomingactivitiesdesc'] = 'Reminders will not be sent for unchecked activities.';
 $string['activityconfnoupcomingactivities'] = 'No upcoming activities for this course.';

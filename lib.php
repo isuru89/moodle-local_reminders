@@ -74,6 +74,7 @@ define('REMINDERS_CALL_TYPE_PRE', 'PRE');
 define('REMINDERS_CALL_TYPE_OVERDUE', 'OVERDUE');
 
 define('REMINDERS_CLEAN_TABLE', 'local_reminders');
+define('REMINDERS_ENABLED_KEY', 'enabled');
 
 /**
  * ======== FUNCTIONS =========================================
@@ -173,7 +174,11 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
         $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
     }
 
+    $explicitactivityenable = isset($CFG->local_reminders_explicitenable)
+        && $CFG->local_reminders_explicitenable;
+
     $allemailfailed = true;
+    $triedcount = 0;
     foreach ($upcomingevents as $event) {
         if (in_array($event->modulename, $excludedmodules)) {
             mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
@@ -237,8 +242,8 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
             }
 
             // This reminder will not be set up to send by configurations.
-            if ($options[$aheaddaysindex[$aheadday]] == '0') {
-                mtrace("   [Local Reminder] No reminder is due in ahead of $aheadday for eventtype $event->eventtype " .
+            if ($options[$aheaddaysindex[$aheadday]] == '0' && !$explicitactivityenable) {
+                mtrace("   [Local Reminder] Reminders are disabled in ahead of $aheadday days for eventtype $event->eventtype " .
                     "[event#$event->id is ignored!]...");
                 continue;
             }
@@ -249,7 +254,6 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
         }
 
         $reminderref = null;
-        mtrace("   [Local Reminder] Finding out users for event#".$event->id."...");
 
         try {
             switch ($event->eventtype) {
@@ -321,6 +325,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
 
         mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype, mod: $event->modulename]");
         $failedcount = 0;
+        $triedcount++;
 
         $sendusers = $reminderref->get_sending_users();
         foreach ($sendusers as $touser) {
@@ -351,7 +356,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
         $reminderref->cleanup();
     }
 
-    if (!$allemailfailed) {
+    if (!$allemailfailed || $triedcount == 0) {
         add_flag_record_db($timewindowend, 'sent');
         mtrace('  [Local Reminder] Marked this reminder execution as success.');
     } else {
