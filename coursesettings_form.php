@@ -52,15 +52,20 @@ class local_reminders_coursesettings_edit_form extends moodleform {
         list($coursesettings) = $this->_customdata;
         $explicitlyenable = $coursesettings->explicitenable;
 
-        $mform->addElement('advcheckbox', 'status_course',
-            get_string('courseheading', 'local_reminders'),
-            get_string('enabled', 'local_reminders'));
-        $mform->setDefault('status_course', 1);
+        if ($explicitlyenable) {
+            $mform->addElement('static', 'descriptionex2sub', '',
+                get_string('activityconfexplicitenablehint', 'local_reminders'));
+        }
 
         $mform->addElement('advcheckbox', 'status_activities',
             get_string('dueheading', 'local_reminders'),
             get_string('enabled', 'local_reminders'));
         $mform->setDefault('status_activities', 1);
+
+        $mform->addElement('advcheckbox', 'status_course',
+            get_string('courseheading', 'local_reminders'),
+            get_string('enabled', 'local_reminders'));
+        $mform->setDefault('status_course', 1);
 
         $mform->addElement('advcheckbox', 'status_group',
             get_string('groupheading', 'local_reminders'),
@@ -98,10 +103,6 @@ class local_reminders_coursesettings_edit_form extends moodleform {
             ksort($allactivities);
             $upcomingactivities = $allactivities;
 
-            if ($explicitlyenable) {
-                $mform->addElement('static', 'descriptionex2sub', '',
-                    get_string('activityconfexplicitenablehint', 'local_reminders'));
-            }
             $mform->addElement('static', 'descriptionsub', '',
                 get_string('activityconfupcomingactivitiesdesc', 'local_reminders'));
 
