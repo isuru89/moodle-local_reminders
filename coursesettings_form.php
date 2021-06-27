@@ -50,16 +50,22 @@ class local_reminders_coursesettings_edit_form extends moodleform {
 
         $mform = $this->_form;
         list($coursesettings) = $this->_customdata;
+        $explicitlyenable = $coursesettings->explicitenable;
 
-        $mform->addElement('advcheckbox', 'status_course',
-            get_string('courseheading', 'local_reminders'),
-            get_string('enabled', 'local_reminders'));
-        $mform->setDefault('status_course', 1);
+        if ($explicitlyenable) {
+            $mform->addElement('static', 'descriptionex2sub', '',
+                get_string('activityconfexplicitenablehint', 'local_reminders'));
+        }
 
         $mform->addElement('advcheckbox', 'status_activities',
             get_string('dueheading', 'local_reminders'),
             get_string('enabled', 'local_reminders'));
         $mform->setDefault('status_activities', 1);
+
+        $mform->addElement('advcheckbox', 'status_course',
+            get_string('courseheading', 'local_reminders'),
+            get_string('enabled', 'local_reminders'));
+        $mform->setDefault('status_course', 1);
 
         $mform->addElement('advcheckbox', 'status_group',
             get_string('groupheading', 'local_reminders'),
@@ -68,6 +74,9 @@ class local_reminders_coursesettings_edit_form extends moodleform {
 
         $mform->addElement('hidden', 'courseid');
         $mform->setType('courseid', PARAM_INT);
+
+        $mform->addElement('hidden', 'explicitenable');
+        $mform->setType('explicitenable', PARAM_INT);
 
         foreach ($daysarray as $dkey => $dvalue) {
             $mform->addElement('hidden', "activityglobal_$dkey");
@@ -93,6 +102,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
             }
             ksort($allactivities);
             $upcomingactivities = $allactivities;
+
             $mform->addElement('static', 'descriptionsub', '',
                 get_string('activityconfupcomingactivitiesdesc', 'local_reminders'));
 
@@ -129,14 +139,16 @@ class local_reminders_coursesettings_edit_form extends moodleform {
 
                     $key = "activity_".$activity->id.'_enabled';
                     $mform->addElement('advcheckbox', $key, get_string('enabled', 'local_reminders'), ' ');
-                    $mform->setDefault($key, 1);
+                    $mform->setDefault($key, $explicitlyenable ? 0 : 1);
 
                     $activitydayarray = array();
                     foreach ($daysarray as $dkey => $dvalue) {
                         $trefkey = "activityglobal_$dkey";
                         $daykey = "activity_".$activity->id."_$dkey";
                         $activitydayarray[] = $mform->createElement('advcheckbox', $daykey, '', $dvalue);
-                        $mform->disabledIf($daykey, $trefkey, 'eq', 0);
+                        if (!$explicitlyenable) {
+                            $mform->disabledIf($daykey, $trefkey, 'eq', 0);
+                        }
                         $mform->setDefault($daykey, $coursesettings->$trefkey);
                     }
                     $groupkey = 'reminder_'.$activity->id.'_group';
