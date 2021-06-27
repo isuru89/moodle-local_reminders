@@ -222,6 +222,10 @@ if ($hassiteconfig) {
             get_string('explainsendactivityreminders', 'local_reminders'),
             REMINDERS_ACTIVITY_BOTH, $activitychoices));
 
+    $settings->add(new admin_setting_configcheckbox('local_reminders_explicitenable',
+            get_string('activityconfexplicitenable', 'local_reminders'),
+            get_string('activityconfexplicitenabledesc', 'local_reminders'), 0));
+
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_duerdays',
             get_string('reminderdaysahead', 'local_reminders'),
             get_string('explaindueheading', 'local_reminders'),

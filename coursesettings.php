@@ -37,6 +37,7 @@ if (!$coursesettings) {
     $coursesettings = new stdClass();
 }
 $coursesettings->courseid = $courseid;
+$coursesettings->explicitenable = isset($CFG->local_reminders_explicitenable) && $CFG->local_reminders_explicitenable;
 $coursecontext = context_course::instance($course->id);
 
 $activitysettings = $DB->get_records('local_reminders_activityconf', array('courseid' => $courseid));
