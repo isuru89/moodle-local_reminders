@@ -92,6 +92,25 @@ if ($hassiteconfig) {
             array(),
             $excludedoptions));
 
+    // REMINDER EMAIL CONFIGURATIONS.
+    $settings->add(new admin_setting_heading('local_reminders_heading_emailcutomizations',
+            get_string('emailconfigsheading', 'local_reminders'), ''));
+
+    $settings->add(new admin_setting_confightmleditor('local_reminders_emailheadercustom',
+        get_string('emailheadercustomname', 'local_reminders'),
+        get_string('emailheadercustomnamedesc', 'local_reminders'), ''));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_emailfooterdefaultenabled',
+        get_string('emailfooterdefaultname', 'local_reminders'),
+        get_string('emailfooterdefaultnamedesc', 'local_reminders'), 1));
+
+    $settings->add(new admin_setting_confightmleditor('local_reminders_emailfootercustom',
+        get_string('emailfootercustomname', 'local_reminders'),
+        get_string('emailfootercustomnamedesc', 'local_reminders'), ''));
+
+    // END OF EMAIL CONFIGURATIONS.
+
+
     $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
                        'days3' => ' '.get_string('days3', 'local_reminders'),
                        'days1' => ' '.get_string('days1', 'local_reminders'));

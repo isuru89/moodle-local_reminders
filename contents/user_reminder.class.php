@@ -78,6 +78,7 @@ class user_reminder extends local_reminder {
     public function get_message_html($user=null, $changetype=null, $ctxinfo=null) {
         $htmlmail = $this->get_html_header();
         $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
+        $htmlmail .= $this->get_reminder_header();
         $htmlmail .= html_writer::start_tag('div');
         $htmlmail .= html_writer::start_tag('table',
                 array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
