@@ -690,7 +690,7 @@ function get_correct_timeformat_user($user) {
  * @return array of user records
  */
 function get_active_role_users($activityroleids, $context) {
-    return get_role_users($activityroleids, $context, true, 'ra.id, u.*',
+    return get_role_users($activityroleids, $context, true, 'ra.id as ra_id, u.*',
                     null, false, '', '', '',
                     'ue.status = :userenrolstatus',
                     array('userenrolstatus' => ENROL_USER_ACTIVE));
