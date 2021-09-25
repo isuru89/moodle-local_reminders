@@ -233,6 +233,22 @@ abstract class local_reminder {
     }
 
     /**
+     * Returns the header content of the reminder email. This part can be use to brand
+     * all of these email messages, such as with logo etc.
+     *
+     */
+    protected function get_reminder_header() {
+        global $CFG;
+
+        if (isset($CFG->local_reminders_emailheadercustom) && trim($CFG->local_reminders_emailheadercustom) !== '') {
+            $htmltext = html_writer::start_tag('div');
+            $htmltext .= text_to_html($CFG->local_reminders_emailheadercustom, false, false, true);
+            return $htmltext.html_writer::end_tag('div');
+        }
+        return '';
+    }
+
+    /**
      * Returns time zone info for a user in plain text format.
      *
      * @param object $user object.
@@ -266,14 +282,14 @@ abstract class local_reminder {
         $moodlecalendarname = get_string('moodlecalendarname', 'local_reminders');
         $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', $moodlecalendarname, array('target' => '_blank'));
 
-        if (isset($CFG->local_reminders_footerdefaultenabled) && $CFG->local_reminders_footerdefaultenabled) {
+        if (isset($CFG->local_reminders_emailfooterdefaultenabled) && $CFG->local_reminders_emailfooterdefaultenabled) {
             $footer .= html_writer::start_tag('td', array('style' => $this->footerdefstyle, 'colspan' => 2));
             $footer .= get_string('reminderfrom', 'local_reminders').' ';
             $footer .= $calendarlink;
 
-        } else if (isset($CFG->local_reminders_footercustom) && trim($CFG->local_reminders_footercustom) !== '') {
+        } else if (isset($CFG->local_reminders_emailfootercustom) && trim($CFG->local_reminders_emailfootercustom) !== '') {
             $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
-            $footer .= text_to_html($CFG->local_reminders_footercustom, false, false, true);
+            $footer .= text_to_html($CFG->local_reminders_emailfootercustom, false, false, true);
 
         } else {
             return '';
