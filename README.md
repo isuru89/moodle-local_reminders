@@ -1,8 +1,10 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.4-blue)
+![Version](https://img.shields.io/badge/version-v2.5-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
+![Maturiy](https://img.shields.io/badge/maturity-STABLE-brightgreen)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
+![Maintenance](https://img.shields.io/maintenance/yes/2022)
 [![Build Status](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml/badge.svg?branch=release_2.0)](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml)
 
 This plugin will send email reminders for [Moodle](https://moodle.org/) calendar events.
@@ -25,11 +27,12 @@ In addition to that, there are lot of new features introduced in v2 of the plugi
  * Send reminders to users who unable to complete an expired activity.
  * Send email reminders when a calendar event is created, updated or removed.
  * Ability to enable/disable and scheduling reminders per activity basis.
+ * Ability to customize email header and footer contents
  * Ability to exclude specific set of activity types from sending reminders.
  * No reminders after a user has completed activity.
  * Added event location / timezone information to the reminder email.
- * New category event type support
- * Improved email style
+ * New category event type support.
+ * Honours activity overriddes and extensions.
 
 And many bug fixes too.
 
@@ -95,6 +98,11 @@ In addition to above, user can control reminders for calendar event changes per 
  | Explicit Reminder Activation | If checked, teachers or relevant authorities must explicitly enable reminders for each activity under course reminders settings page. | false |
 
 ## Changelog
+
+### v2.5
+  * Ability to customize reminder email header and footer #137 #135
+  * Bug fix on user and group overrides and extensions #134
+  * Minor bug fixes #136
 
 ### v2.4
   * Ability to explicitly turn on reminders instead of enabling by default for all (#129, #130)
