@@ -76,6 +76,10 @@ define('REMINDERS_CALL_TYPE_OVERDUE', 'OVERDUE');
 define('REMINDERS_CLEAN_TABLE', 'local_reminders');
 define('REMINDERS_ENABLED_KEY', 'enabled');
 
+define('REMINDERS_SUPPORTED_OVERRIDES', array('assign', 'quiz'));
+define('REMINDERS_SUPPORTED_OVERRIDES_REF_IDS', array('assign' => 'assignid', 'quiz' => 'quiz'));
+
+
 /**
  * ======== FUNCTIONS =========================================
  */
