@@ -68,6 +68,15 @@ if ($hassiteconfig) {
         get_string('sendasnametitle', 'local_reminders'),
         get_string('sendasnamedescription', 'local_reminders'), 'No Reply'));
 
+    // Reminder footer configurations #137.
+    $settings->add(new admin_setting_configcheckbox('local_reminders_footerdefaultenabled',
+        get_string('footerdefaultname', 'local_reminders'),
+        get_string('footerdefaultnamedesc', 'local_reminders'), 1));
+
+    $settings->add(new admin_setting_confightmleditor('local_reminders_footercustom',
+        get_string('footercustomname', 'local_reminders'),
+        get_string('footercustomnamedesc', 'local_reminders'), ''));
+
     $choices = array(REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
                      REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'));
 
