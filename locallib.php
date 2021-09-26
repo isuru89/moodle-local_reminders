@@ -287,7 +287,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
         $showtrace && mtrace("  [Local Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");
         $user = $DB->get_record('user', array('id' => $event->userid));
         $sendusers[] = $user;
-    } else if ($event->courseid <= 0 && $event->groupid > 0) {
+    } else if ($event->groupid > 0) {
         // A group overridden activity.
         $showtrace && mtrace("  [Local Reminder] Event #".$event->id." is a group overridden ".$event->modulename." event.");
         $group = $DB->get_record('groups', array('id' => $event->groupid));
@@ -296,6 +296,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
         // Here 'ra.id field added to avoid printing debug message,
         // from get_role_users (has odd behaivior when called with an array for $roleid param'.
         $sendusers = get_active_role_users($options->activityroleids, $context);
+        $sendusers = filter_user_group_overrides($event, $sendusers, $showtrace);
 
         // Filter user list,
         // see: https://docs.moodle.org/dev/Availability_API.
@@ -689,11 +690,60 @@ function get_correct_timeformat_user($user) {
  * @return array of user records
  */
 function get_active_role_users($activityroleids, $context) {
-    return get_role_users($activityroleids, $context, true, 'ra.id, u.*',
+    return get_role_users($activityroleids, $context, true, 'ra.id as ra_id, u.*',
                     null, false, '', '', '',
                     'ue.status = :userenrolstatus',
                     array('userenrolstatus' => ENROL_USER_ACTIVE));
 }
+
+/**
+ * Filter and return eligible set of users after excluding users who belongs
+ * in overridden extensions.
+ *
+ * @param object $event source event object.
+ * @param array $sendusers all users for this activity instance.
+ * @param bool $showtrace to print logs or not.
+ * @return array filtered out users.
+ */
+function filter_user_group_overrides($event, $sendusers, $showtrace) {
+    global $DB;
+
+    if (!in_array($event->modulename, REMINDERS_SUPPORTED_OVERRIDES)) {
+        return $sendusers;
+    }
+
+    $showtrace && mtrace("  [Local Reminder] Event supports overrides for key ");
+    $idcolumn = REMINDERS_SUPPORTED_OVERRIDES_REF_IDS[$event->modulename];
+    $overridesrecords = $DB->get_records($event->modulename.'_overrides', array($idcolumn => $event->instance));
+    if (empty($overridesrecords)) {
+        $showtrace && mtrace("  [Local Reminder] No overrides for activity ".$event->instance."!");
+        return $sendusers;
+    }
+
+    $extendedusers = [];
+    foreach ($overridesrecords as $record) {
+        if ($record->userid > 0) {
+            $showtrace && mtrace("     Overrides for user id: ".$record->userid);
+            $extendedusers[] = $record->userid;
+        } else if ($record->groupid > 0) {
+            $showtrace && mtrace("     Overrides for group id: ".$record->groupid);
+            $groupmemberroles = groups_get_members_by_role($record->groupid, $event->courseid, 'u.id');
+            if (!empty($groupmemberroles)) {
+                foreach ($groupmemberroles as $roleid => $roledata) {
+                    foreach ($roledata->users as $member) {
+                        $extendedusers[] = $member->id;
+                    }
+                }
+            }
+        }
+    }
+
+    $finalarray = array_filter($sendusers, function($it) use ($extendedusers) {
+        return !in_array($it->id, $extendedusers);
+    });
+    return $finalarray;
+}
+
 
 /**
  * Returns all users belong to the given group.

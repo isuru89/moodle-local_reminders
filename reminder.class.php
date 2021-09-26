@@ -94,6 +94,17 @@ abstract class local_reminder {
         'border-top:1px solid #ccc;'.
         'font-family:Arial,Sans-serif;'.
         'font-size:11px;'.
+        'padding: 0px;';
+    /**
+     * CSS styles for default footer content.
+     *
+     * @var string
+     */
+    protected $footerdefstyle = 'background-color:#f6f6f6;'.
+        'color:#888;'.
+        'border-top:1px solid #ccc;'.
+        'font-family:Arial,Sans-serif;'.
+        'font-size:11px;'.
         'padding: 20px 10px;';
     /**
      * CSS style for description div.
@@ -222,6 +233,22 @@ abstract class local_reminder {
     }
 
     /**
+     * Returns the header content of the reminder email. This part can be use to brand
+     * all of these email messages, such as with logo etc.
+     *
+     */
+    protected function get_reminder_header() {
+        global $CFG;
+
+        if (isset($CFG->local_reminders_emailheadercustom) && trim($CFG->local_reminders_emailheadercustom) !== '') {
+            $htmltext = html_writer::start_tag('div');
+            $htmltext .= text_to_html($CFG->local_reminders_emailheadercustom, false, false, true);
+            return $htmltext.html_writer::end_tag('div');
+        }
+        return '';
+    }
+
+    /**
      * Returns time zone info for a user in plain text format.
      *
      * @param object $user object.
@@ -251,14 +278,24 @@ abstract class local_reminder {
     protected function get_html_footer() {
         global $CFG;
 
+        $footer = html_writer::start_tag('tr');
         $moodlecalendarname = get_string('moodlecalendarname', 'local_reminders');
         $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', $moodlecalendarname, array('target' => '_blank'));
-        $footer = html_writer::start_tag('tr');
-        $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
-        $footer .= get_string('reminderfrom', 'local_reminders').' ';
-        $footer .= $calendarlink;
-        $footer .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
+        if (isset($CFG->local_reminders_emailfooterdefaultenabled) && $CFG->local_reminders_emailfooterdefaultenabled) {
+            $footer .= html_writer::start_tag('td', array('style' => $this->footerdefstyle, 'colspan' => 2));
+            $footer .= get_string('reminderfrom', 'local_reminders').' ';
+            $footer .= $calendarlink;
+
+        } else if (isset($CFG->local_reminders_emailfootercustom) && trim($CFG->local_reminders_emailfootercustom) !== '') {
+            $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
+            $footer .= text_to_html($CFG->local_reminders_emailfootercustom, false, false, true);
+
+        } else {
+            return '';
+        }
+
+        $footer .= html_writer::end_tag('td').html_writer::end_tag('tr');
         return $footer;
     }
 
