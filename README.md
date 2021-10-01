@@ -1,9 +1,11 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.2.4-blue)
+![Version](https://img.shields.io/badge/version-v2.5-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
+![Maturiy](https://img.shields.io/badge/maturity-STABLE-brightgreen)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
-[![Build Status](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events.svg?branch=master)](https://travis-ci.org/isuru89/moodle-reminders-for-calendar-events)
+![Maintenance](https://img.shields.io/maintenance/yes/2022)
+[![Build Status](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml/badge.svg?branch=release_2.0)](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml)
 
 This plugin will send email reminders for [Moodle](https://moodle.org/) calendar events.
 
@@ -25,10 +27,12 @@ In addition to that, there are lot of new features introduced in v2 of the plugi
  * Send reminders to users who unable to complete an expired activity.
  * Send email reminders when a calendar event is created, updated or removed.
  * Ability to enable/disable and scheduling reminders per activity basis.
+ * Ability to customize email header and footer contents
+ * Ability to exclude specific set of activity types from sending reminders.
  * No reminders after a user has completed activity.
  * Added event location / timezone information to the reminder email.
- * New category event type support
- * Improved email style
+ * New category event type support.
+ * Honours activity overriddes and extensions.
 
 And many bug fixes too.
 
@@ -91,11 +95,29 @@ In addition to above, user can control reminders for calendar event changes per 
  |---|---|---|
  | No reminders once completed | enable/disable sending reminders if a user has completed activity. If checked, he/she won't receive reminders anymore once completed. | true |
  | Activity Overdue Reminders | enable/disable sending reminders for users who still have not completed expired events | true |
+ | Explicit Reminder Activation | If checked, teachers or relevant authorities must explicitly enable reminders for each activity under course reminders settings page. | false |
 
 ## Changelog
 
-### v2.2.5
-  * Bugfix: invalid comparison operator for Postgres (#104)
+### v2.5
+  * Ability to customize reminder email header and footer #137 #135
+  * Bug fix on user and group overrides and extensions #134
+  * Minor bug fixes #136
+
+### v2.4
+  * Ability to explicitly turn on reminders instead of enabling by default for all (#129, #130)
+
+### v2.3.1
+  * Removed hard coded string in course settings page (#124)
+  * Fixed incorrect argument pass in calendar update events (#126)
+
+### v2.3
+  * No reminders once completed settings will support all modules which integrated with Moodle Core Completion API (#113)
+  * Should honour empty prefix when title prefix is set to empty in settings (#115)
+  * Ability to exclude reminders for a selected set of modules globally (#75)
+  * Ability to customize overdue texts in reminders (#118)
+  * Inconsistent code between reminders and overdue implementation fixed (#119)
+  * User reminders will be sent only to active users (#20)
 
 ### v2.2.4
   * Removed hardcoded strings (overdue text and moodle calendar name) #105

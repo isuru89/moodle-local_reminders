@@ -74,6 +74,11 @@ define('REMINDERS_CALL_TYPE_PRE', 'PRE');
 define('REMINDERS_CALL_TYPE_OVERDUE', 'OVERDUE');
 
 define('REMINDERS_CLEAN_TABLE', 'local_reminders');
+define('REMINDERS_ENABLED_KEY', 'enabled');
+
+define('REMINDERS_SUPPORTED_OVERRIDES', array('assign', 'quiz'));
+define('REMINDERS_SUPPORTED_OVERRIDES_REF_IDS', array('assign' => 'assignid', 'quiz' => 'quiz'));
+
 
 /**
  * ======== FUNCTIONS =========================================
@@ -93,19 +98,22 @@ function local_reminders_cron_task() {
     }
 
     $currtime = time();
-    local_reminders_cron_pre($currtime);
+    $timewindowstart = get_timewindow_starttime($currtime);
+
+    local_reminders_cron_pre($currtime, $timewindowstart);
 
     // Send reminders for overdue activities.
-    local_reminders_cron_overdue_activity($currtime);
+    local_reminders_cron_overdue_activity($currtime, $timewindowstart);
 }
 
 /**
  * Runs and send reminders before an event occurred.
  *
  * @param int $currtime current time with epoch.
+ * @param int $timewindowstart start time of the window.
  * @return void nothing.
  */
-function local_reminders_cron_pre($currtime) {
+function local_reminders_cron_pre($currtime, $timewindowstart) {
     global $CFG, $DB;
 
     $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
@@ -116,19 +124,6 @@ function local_reminders_cron_pre($currtime) {
     $courseroleids = $tmprolesreminders[0];
     $activityroleids = $tmprolesreminders[1];
     $categoryroleids = $tmprolesreminders[2];
-
-    // We need only last record only, so we limit the returning number of rows at most by one.
-    $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
-
-    $timewindowstart = $currtime;
-    if (!$logrows) {  // This is the first cron cycle, after plugin is just installed.
-        mtrace("   [Local Reminder] This is the first cron cycle");
-        $timewindowstart = $timewindowstart - REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
-    } else {
-        // Info field includes that starting time of last cron cycle.
-        $firstrecord = current($logrows);
-        $timewindowstart = $firstrecord->time + 1;
-    }
 
     // End of the time window will be set as current.
     $timewindowend = $currtime;
@@ -178,9 +173,24 @@ function local_reminders_cron_pre($currtime) {
     mtrace("   [Local Reminder] Found ".count($upcomingevents)." upcoming events. Continuing...");
 
     $fromuser = get_from_user();
+    $excludedmodules = array();
+    if (isset($CFG->local_reminders_excludedmodulenames)) {
+        $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
+    }
+
+    $explicitactivityenable = isset($CFG->local_reminders_explicitenable)
+        && $CFG->local_reminders_explicitenable;
 
     $allemailfailed = true;
+    $triedcount = 0;
     foreach ($upcomingevents as $event) {
+        if (in_array($event->modulename, $excludedmodules)) {
+            mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            mtrace("  [Local Reminder]   Skipping event #$event->id in excluded module '$event->modulename'!");
+            mtrace("  [Local Reminder] xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+            continue;
+        }
+
         $event = new calendar_event($event);
 
         $aheadday = 0;
@@ -236,8 +246,8 @@ function local_reminders_cron_pre($currtime) {
             }
 
             // This reminder will not be set up to send by configurations.
-            if ($options[$aheaddaysindex[$aheadday]] == '0') {
-                mtrace("   [Local Reminder] No reminder is due in ahead of $aheadday for eventtype $event->eventtype " .
+            if ($options[$aheaddaysindex[$aheadday]] == '0' && !$explicitactivityenable) {
+                mtrace("   [Local Reminder] Reminders are disabled in ahead of $aheadday days for eventtype $event->eventtype " .
                     "[event#$event->id is ignored!]...");
                 continue;
             }
@@ -248,7 +258,6 @@ function local_reminders_cron_pre($currtime) {
         }
 
         $reminderref = null;
-        mtrace("   [Local Reminder] Finding out users for event#".$event->id."...");
 
         try {
             switch ($event->eventtype) {
@@ -296,7 +305,7 @@ function local_reminders_cron_pre($currtime) {
                     break;
 
                 default:
-                    $reminderref = process_unknown_event($event, $aheadday, $activityroleids);
+                    $reminderref = process_unknown_event($event, $aheadday, $activityroleids, REMINDERS_CALL_TYPE_PRE);
             }
 
         } catch (Exception $ex) {
@@ -307,7 +316,8 @@ function local_reminders_cron_pre($currtime) {
         }
 
         if ($reminderref == null) {
-            mtrace("  [Local Reminder] Reminder is not available for the event $event->id [type: $event->eventtype]");
+            mtrace("  [Local Reminder] Reminder is not available for the event $event->id "
+                ."[type: $event->eventtype, mod: $event->modulename]");
             continue;
         }
 
@@ -317,21 +327,22 @@ function local_reminders_cron_pre($currtime) {
             continue;
         }
 
-        mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype]");
+        mtrace("  [Local Reminder] Starting sending reminders for $event->id [type: $event->eventtype, mod: $event->modulename]");
         $failedcount = 0;
+        $triedcount++;
 
         $sendusers = $reminderref->get_sending_users();
         foreach ($sendusers as $touser) {
-            $eventdata = $reminderref->get_event_to_send($fromuser, $touser);
-
             try {
+                $eventdata = $reminderref->get_event_to_send($fromuser, $touser);
+
                 $mailresult = message_send($eventdata);
                 mtrace('[LOCAL_REMINDERS] Mail Result: '.$mailresult);
 
                 if (!$mailresult) {
-                    throw new coding_exception("Could not send out message for event#$event->id to user $eventdata->userto");
+                    mtrace("Could not send out message for event#$event->id to user $eventdata->userto");
                 }
-            } catch (moodle_exception $mex) {
+            } catch (\Exception $mex) {
                 $failedcount++;
                 mtrace('Error: local/reminders/lib.php local_reminders_cron(): '.$mex->getMessage());
             }
@@ -343,13 +354,13 @@ function local_reminders_cron_pre($currtime) {
             mtrace("  [Local Reminder] All reminders was sent successfully for event#$event->id !");
         }
 
-        if ($usize != $failedcount) {
+        if ($usize > $failedcount) {
             $allemailfailed = false;
         }
         $reminderref->cleanup();
     }
 
-    if (!$allemailfailed) {
+    if (!$allemailfailed || $triedcount == 0) {
         add_flag_record_db($timewindowend, 'sent');
         mtrace('  [Local Reminder] Marked this reminder execution as success.');
     } else {
@@ -361,13 +372,14 @@ function local_reminders_cron_pre($currtime) {
  * Runs and sends reminders for overdue activities.
  *
  * @param int $currtime current time in epoch.
+ * @param int $timewindowstart start time of the current processing window.
  * @return void
  */
-function local_reminders_cron_overdue_activity($currtime) {
+function local_reminders_cron_overdue_activity($currtime, $timewindowstart) {
     // Loading roles allowed to receive reminder messages from configuration.
     $rolesofsystem = get_roles_for_reminders();
     $fromuser = get_from_user();
-    send_overdue_activity_reminders($currtime, $rolesofsystem[1], $fromuser);
+    send_overdue_activity_reminders($currtime, $timewindowstart, $rolesofsystem[1], $fromuser);
 }
 
 /**
@@ -387,6 +399,29 @@ function add_flag_record_db($timewindowend, $crontype = '') {
     $newrecord->time = $timewindowend;
     $newrecord->type = $crontype;
     $DB->insert_record("local_reminders", $newrecord);
+}
+
+/**
+ * Returns window start time for the current cron processing cycle.
+ *
+ * @param int $currtime current time.
+ * @return int start time of the processing time window.
+ */
+function get_timewindow_starttime($currtime) {
+    global $DB;
+
+    $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
+
+    $timewindowstart = $currtime;
+    if (!$logrows) {  // This is the first cron cycle, after plugin is just installed.
+        mtrace("   [Local Reminder] This is the first cron cycle");
+        $timewindowstart = $timewindowstart - REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS * 24 * 3600;
+    } else {
+        // Info field includes that starting time of last cron cycle.
+        $firstrecord = current($logrows);
+        $timewindowstart = $firstrecord->time + 1;
+    }
+    return $timewindowstart;
 }
 
 /**
@@ -443,6 +478,14 @@ function when_calendar_event_updated($updateevent, $changetype) {
     }
     $aheadday = floor($diffsecondsuntil / (REMINDERS_DAYIN_SECONDS * 1.0));
 
+    $excludedmodules = array();
+    if (isset($CFG->local_reminders_excludedmodulenames)) {
+        $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
+    }
+    if (in_array($event->modulename, $excludedmodules)) {
+        return;
+    }
+
     $reminderref = null;
     $tmprolesreminders = get_roles_for_reminders();
     $courseroleids = $tmprolesreminders[0];
@@ -479,7 +522,6 @@ function when_calendar_event_updated($updateevent, $changetype) {
             }
         case 'due':
             if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
-                $showtrace && mtrace("  [Local Reminder] Activity event $event->id reminders disabled in the course settings.");
                 break;
             }
             $reminderref = process_activity_event($event, $aheadday, $activityroleids, false);
@@ -502,8 +544,11 @@ function when_calendar_event_updated($updateevent, $changetype) {
         return;
     }
 
+    $ctxinfo = new \stdClass;
+    $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
+    $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
     foreach ($sendusers as $touser) {
-        $eventdata = $reminderref->get_updating_send_event($changetype, $fromuser, $touser);
+        $eventdata = $reminderref->get_updating_send_event($changetype, $fromuser, $touser, $ctxinfo);
 
         $mailresult = message_send($eventdata);
     }

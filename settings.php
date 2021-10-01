@@ -76,6 +76,41 @@ if ($hassiteconfig) {
             get_string('filtereventsdescription', 'local_reminders'),
             REMINDERS_SEND_ONLY_VISIBLE, $choices));
 
+    $corepluginmanager = core_plugin_manager::instance();
+    $formatplugins = $corepluginmanager->get_plugins_of_type('mod');
+    $enabledplugins = $corepluginmanager->get_enabled_plugins('mod');
+    $excludedoptions = array();
+    foreach ($formatplugins as $key => $value) {
+        if (in_array($key, $enabledplugins)) {
+            $excludedoptions[$key] = $value->displayname;
+        }
+    }
+
+    $settings->add(new admin_setting_configmultiselect('local_reminders_excludedmodulenames',
+            get_string('excludedmodules', 'local_reminders'),
+            get_string('excludedmodulesdesc', 'local_reminders'),
+            array(),
+            $excludedoptions));
+
+    // REMINDER EMAIL CONFIGURATIONS.
+    $settings->add(new admin_setting_heading('local_reminders_heading_emailcutomizations',
+            get_string('emailconfigsheading', 'local_reminders'), ''));
+
+    $settings->add(new admin_setting_confightmleditor('local_reminders_emailheadercustom',
+        get_string('emailheadercustomname', 'local_reminders'),
+        get_string('emailheadercustomnamedesc', 'local_reminders'), ''));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_emailfooterdefaultenabled',
+        get_string('emailfooterdefaultname', 'local_reminders'),
+        get_string('emailfooterdefaultnamedesc', 'local_reminders'), 1));
+
+    $settings->add(new admin_setting_confightmleditor('local_reminders_emailfootercustom',
+        get_string('emailfootercustomname', 'local_reminders'),
+        get_string('emailfootercustomnamedesc', 'local_reminders'), ''));
+
+    // END OF EMAIL CONFIGURATIONS.
+
+
     $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
                        'days3' => ' '.get_string('days3', 'local_reminders'),
                        'days1' => ' '.get_string('days1', 'local_reminders'));
@@ -189,6 +224,14 @@ if ($hassiteconfig) {
             get_string('overdueactivityreminders', 'local_reminders'),
             get_string('overdueactivityremindersdescription', 'local_reminders'), 1));
 
+    $settings->add(new admin_setting_configtext('local_reminders_overduewarnprefix',
+            get_string('overduewarnprefix', 'local_reminders'),
+            get_string('overduewarnprefixdescription', 'local_reminders'), 'OVERDUE'));
+
+    $settings->add(new admin_setting_configtext('local_reminders_overduewarnmessage',
+            get_string('overduewarnmessage', 'local_reminders'),
+            get_string('overduewarnmessagedescription', 'local_reminders'), 'This activity is overdue!'));
+
     $activitychoices = array(REMINDERS_ACTIVITY_BOTH => get_string('activityremindersboth', 'local_reminders'),
                              REMINDERS_ACTIVITY_ONLY_OPENINGS => get_string('activityremindersonlyopenings', 'local_reminders'),
                              REMINDERS_ACTIVITY_ONLY_CLOSINGS => get_string('activityremindersonlyclosings', 'local_reminders'));
@@ -197,6 +240,10 @@ if ($hassiteconfig) {
             get_string('sendactivityreminders', 'local_reminders'),
             get_string('explainsendactivityreminders', 'local_reminders'),
             REMINDERS_ACTIVITY_BOTH, $activitychoices));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_explicitenable',
+            get_string('activityconfexplicitenable', 'local_reminders'),
+            get_string('activityconfexplicitenabledesc', 'local_reminders'), 0));
 
     $settings->add(new admin_setting_configmulticheckbox2('local_reminders_duerdays',
             get_string('reminderdaysahead', 'local_reminders'),

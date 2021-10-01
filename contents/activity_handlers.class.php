@@ -56,7 +56,7 @@ abstract class local_reminder_activity_handler {
      * @param object $event event instance
      * @return string description related to this activity.
      */
-    public abstract function get_description($activity, $event);
+    abstract public function get_description($activity, $event);
 
     /**
      * Filter out users who still does not have completed this activity.
@@ -114,6 +114,56 @@ abstract class local_reminder_activity_handler {
 }
 
 /**
+ * Supports generic activity completion using Moodle's completion_info API.
+ *
+ * This class will be used when no specific handler being implemented for the given
+ * module. And also will gracefully failed, if filtering cannot be fulfilled.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class local_reminder_generic_handler extends local_reminder_activity_handler {
+
+    /**
+     * Filter out users who still does not have completed this module using Moodle core completion API.
+     *
+     * @param array $users user array to check.
+     * @param string $type reminder call type PRE|POST.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+        $filteredusers = array();
+        foreach ($users as $auser) {
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
+            if (!$status) {
+                $filteredusers[] = $auser;
+            }
+        }
+        return $filteredusers;
+    }
+
+    /**
+     * Return survey intro field as description.
+     *
+     * @param object $activity activity instance
+     * @param object $event event instance
+     * @return string description related to this activity.
+     */
+    public function get_description($activity, $event) {
+        if (isset($activity->intro)) {
+            return $activity->intro;
+        }
+        return null;
+    }
+}
+
+
+/**
  * Supports quiz related information.
  *
  * @package    local_reminders
@@ -160,8 +210,8 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
             if (!$canattempt) {
                 continue;
             }
-            $attempts = quiz_get_user_attempts($activity->id, $auser->id);
-            if (!isset($attempts) || empty($attempts)) {
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
+            if (!$status) {
                 $filteredusers[] = $auser;
             }
         }
@@ -219,10 +269,7 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = assign_get_completion_state($course, $coursemodule, $auser->id, null);
-            if (is_null($status)) {
-                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
-            }
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
                 $filteredusers[] = $auser;
             }
@@ -298,10 +345,7 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = choice_get_completion_state($course, $coursemodule, $auser->id, null);
-            if (is_null($status)) {
-                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
-            }
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
                 $filteredusers[] = $auser;
             }
@@ -355,10 +399,8 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
             if (!$cansubmit) {
                 continue;
             }
-            $status = feedback_get_completion_state($course, $coursemodule, $auser->id, null);
-            if (is_null($status)) {
-                $status = $this->check_completion_status($course, $coursemodule, $auser->id);
-            }
+
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
                 $filteredusers[] = $auser;
             }
@@ -484,6 +526,59 @@ class local_reminder_survey_handler extends local_reminder_activity_handler {
                 continue;
             }
             $status = survey_get_completion_state($course, $coursemodule, $auser->id, false);
+            if (!$status) {
+                $filteredusers[] = $auser;
+            }
+        }
+        return $filteredusers;
+    }
+
+    /**
+     * Return survey intro field as description.
+     *
+     * @param object $activity activity instance
+     * @param object $event event instance
+     * @return string description related to this activity.
+     */
+    public function get_description($activity, $event) {
+        if (isset($activity->intro)) {
+            return $activity->intro;
+        }
+        return null;
+    }
+}
+
+/**
+ * Supports resource module related filtering.
+ *
+ * @package    local_reminders
+ * @copyright  2012 Isuru Madushanka Weerarathna
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class local_reminder_resource_handler extends local_reminder_activity_handler {
+
+    /**
+     * Filter out users who still does not have completed this resource.
+     *
+     * @param array $users user array to check.
+     * @param string $type reminder call type PRE|POST.
+     * @param object $activity activity instance.
+     * @param object $course course instance belong to.
+     * @param object $coursemodule course module instance.
+     * @param object $coursemodulecontext course module context instance.
+     * @return array array of filtered users.
+     */
+    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/resource/lib.php');
+
+        $filteredusers = array();
+        foreach ($users as $auser) {
+            $cansubmit = has_capability('mod/resource:view', $coursemodulecontext, $auser);
+            if (!$cansubmit) {
+                continue;
+            }
+            $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
                 $filteredusers[] = $auser;
             }
