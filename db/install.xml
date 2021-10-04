@@ -7,7 +7,7 @@
     <TABLE NAME="local_reminders" COMMENT="Using to append records about reminders sent flags.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="time" TYPE="char" LENGTH="16" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="time" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="type" TYPE="char" LENGTH="32" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>
