@@ -50,16 +50,16 @@ function get_upcoming_events_for_course($courseid, $currtime) {
     if (isset($CFG->local_reminders_separateactivityopenings) && $CFG->local_reminders_separateactivityopenings) {
         array_push($statuses, 'open');
     }
-    list($insql, $inparams) = $DB->get_in_or_equal($statuses);
+    list($insql, $inparams) = $DB->get_in_or_equal($statuses, SQL_PARAMS_NAMED);
 
     return $DB->get_records_sql("SELECT *
         FROM {event}
-        WHERE courseid = $courseid
-            AND timestart > $currtime
+        WHERE courseid = :courseid
+            AND timestart > :timestart
             AND visible = 1
             AND eventtype $insql
         ORDER BY timestart",
-        $inparams);
+        array_merge(['courseid' => $courseid, 'timestart' => $currtime], $inparams));
 }
 
 /**
@@ -171,18 +171,19 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
 
     $rangestart = $timewindowstart;
     $statuses = ['due', 'close', 'expectcompletionon', 'gradingdue'];
-    list($insql, $inparams) = $DB->get_in_or_equal($statuses);
+    list($insql, $inparams) = $DB->get_in_or_equal($statuses, SQL_PARAMS_NAMED);
 
     $querysql = "SELECT e.*
         FROM {event} e
             LEFT JOIN {local_reminders_post_act} lrpa ON e.id = lrpa.eventid
         WHERE
-            e.timestart >= $rangestart AND e.timestart < $curtime
+            e.timestart >= :rangestart AND e.timestart < :curtime
             AND lrpa.eventid IS NULL
             AND e.eventtype $insql
             AND e.visible = 1";
 
-    $allexpiredevents = $DB->get_records_sql($querysql, $inparams);
+    $allexpiredevents = $DB->get_records_sql($querysql, array_merge(['rangestart' => $rangestart, 'curtime' => $curtime], $inparams));
+
     if (!$allexpiredevents || count($allexpiredevents) == 0) {
         mtrace('[LOCAL REMINDERS] No expired events found for this cron cycle! Skipped.');
         return;
@@ -849,7 +850,7 @@ function fetch_module_instance($modulename, $instance, $courseid=0, $showtrace=t
     try {
         return $DB->get_record_sql($sql, $params, IGNORE_MISSING);
     } catch (moodle_exception $mex) {
-        $showtrace && mtrace('  [Local Reminder - ERROR] Failed to fetch module instance! '.$mex.getMessage);
+        $showtrace && mtrace('  [Local Reminder - ERROR] Failed to fetch module instance! '.$mex->getMessage());
         return null;
     }
 }
