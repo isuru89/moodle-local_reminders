@@ -235,6 +235,8 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
                     mtrace("   [Local Reminder] Couldn't find option for event $event->id [type: $event->eventtype]");
                     continue;
                 }
+            } else if ($event->eventtype == 'open') {
+                $optionstr = 'local_reminders_dueopenrdays';
             }
 
             $options = $CFG->$optionstr;

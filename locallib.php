@@ -42,9 +42,14 @@ require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php')
  * @return array list of event records.
  */
 function get_upcoming_events_for_course($courseid, $currtime) {
-    global $DB;
+    global $DB, $CFG;
 
     $statuses = ['due', 'close', 'course', 'expectcompletionon', 'gradingdue', 'meeting_start'];
+
+    // When activity openings separation is enabled in global settings, we will retrieve those events too.
+    if (isset($CFG->local_reminders_separateactivityopenings) && $CFG->local_reminders_separateactivityopenings) {
+        array_push($statuses, 'open');
+    }
     list($insql, $inparams) = $DB->get_in_or_equal($statuses);
 
     return $DB->get_records_sql("SELECT *
