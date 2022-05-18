@@ -158,7 +158,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                         $activitydayarray, null, false);
                     $mform->disabledIf($groupkey, $key, 'unchecked');
 
-                    $overduesupports = $activity->eventtype != 'course';
+                    $overduesupports = $activity->eventtype != 'course' && $activity->eventtype != 'open';
                     if ($overduesupports) {
                         $keyoverdue = "activity_".$activity->id.'_enabledoverdue';
                         $mform->addElement('advcheckbox', $keyoverdue, get_string('enabledoverdue', 'local_reminders'), ' ');
