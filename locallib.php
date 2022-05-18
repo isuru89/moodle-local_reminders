@@ -42,9 +42,14 @@ require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php')
  * @return array list of event records.
  */
 function get_upcoming_events_for_course($courseid, $currtime) {
-    global $DB;
+    global $DB, $CFG;
 
     $statuses = ['due', 'close', 'course', 'expectcompletionon', 'gradingdue', 'meeting_start'];
+
+    // When activity openings separation is enabled in global settings, we will retrieve those events too.
+    if (isset($CFG->local_reminders_separateactivityopenings) && $CFG->local_reminders_separateactivityopenings) {
+        array_push($statuses, 'open');
+    }
     list($insql, $inparams) = $DB->get_in_or_equal($statuses);
 
     return $DB->get_records_sql("SELECT *
@@ -215,8 +220,19 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
         $ctxinfo = new \stdClass;
         $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
         $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
+        $alreadysentuserids = array();
+
         foreach ($sendusers as $touser) {
             try {
+
+                // Check whether already an overdue email is sent or not...
+                if (in_array($touser->id, $alreadysentuserids)) {
+                    mtrace("[LOCAL REMINDERS] An overdue reminder has been sent to user $touser->id ($touser->username) " .
+                    "already for this event! Skipping.");
+                    continue;
+                }
+                $alreadysentuserids[] = $touser->id;
+
                 $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser, $ctxinfo);
 
                 $mailresult = message_send($eventdata);

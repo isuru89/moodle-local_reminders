@@ -235,6 +235,8 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
                     mtrace("   [Local Reminder] Couldn't find option for event $event->id [type: $event->eventtype]");
                     continue;
                 }
+            } else if ($event->eventtype == 'open') {
+                $optionstr = 'local_reminders_dueopenrdays';
             }
 
             $options = $CFG->$optionstr;
@@ -332,7 +334,18 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
         $triedcount++;
 
         $sendusers = $reminderref->get_sending_users();
+        $alreadysentuserids = array();
+
         foreach ($sendusers as $touser) {
+
+            // Check whether already an email is sent or not...
+            if (in_array($touser->id, $alreadysentuserids)) {
+                mtrace("   [Local Reminder] A reminder has been sent to user $touser->id ($touser->username) " .
+                "already for this event! Skipping.");
+                continue;
+            }
+            $alreadysentuserids[] = $touser->id;
+
             try {
                 $eventdata = $reminderref->get_event_to_send($fromuser, $touser);
 
