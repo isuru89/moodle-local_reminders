@@ -220,8 +220,19 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
         $ctxinfo = new \stdClass;
         $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
         $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
+        $alreadysentuserids = array();
+
         foreach ($sendusers as $touser) {
             try {
+
+                // Check whether already an overdue email is sent or not...
+                if (in_array($touser->id, $alreadysentuserids)) {
+                    mtrace("[LOCAL REMINDERS] An overdue reminder has been sent to user $touser->id ($touser->username) " .
+                    "already for this event! Skipping.");
+                    continue;
+                }
+                $alreadysentuserids[] = $touser->id;
+
                 $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser, $ctxinfo);
 
                 $mailresult = message_send($eventdata);
