@@ -174,7 +174,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
 
     $fromuser = get_from_user();
     $excludedmodules = array();
-    if (isset($CFG->local_reminders_excludedmodulenames)) {
+    if (isset($CFG->local_reminders_excludedmodulenames) && !empty($CFG->local_reminders_excludedmodulenames)) {
         $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
     }
 
@@ -492,7 +492,7 @@ function when_calendar_event_updated($updateevent, $changetype) {
     $aheadday = floor($diffsecondsuntil / (REMINDERS_DAYIN_SECONDS * 1.0));
 
     $excludedmodules = array();
-    if (isset($CFG->local_reminders_excludedmodulenames)) {
+    if (isset($CFG->local_reminders_excludedmodulenames) && !empty($CFG->local_reminders_excludedmodulenames)) {
         $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
     }
     if (in_array($event->modulename, $excludedmodules)) {
