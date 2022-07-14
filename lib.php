@@ -143,6 +143,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
     }
 
     $whereclause = '(timestart > '.$timewindowend.') AND (';
+
     $flagor = false;
     foreach ($secondsaheads as $sahead) {
         if ($flagor) {
@@ -572,14 +573,14 @@ function when_calendar_event_updated($updateevent, $changetype) {
  * Cleans the local_reminders table by deleting older unnecessary records.
  */
 function clean_local_reminders_logs() {
-    global $CFG, $DB, $PAGE;
+    global $DB;
 
     $cutofftime = time() - REMINDERS_7DAYSBEFORE_INSECONDS;
     mtrace("  [Local Reminders][CLEAN] clean cutoff time: $cutofftime");
-    $recordcount = $DB->count_records_select(REMINDERS_CLEAN_TABLE, "time >= $cutofftime");
+    $recordcount = $DB->count_records_select(REMINDERS_CLEAN_TABLE, "time >= :cutofftime", ['cutofftime' => $cutofftime]);
     if ($recordcount > 0) {
         mtrace('  [Local Reminders][CLEAN] Cleaning can be executed now as there are newer records.');
-        $deletestatus = $DB->delete_records_select(REMINDERS_CLEAN_TABLE, "time < $cutofftime");
+        $deletestatus = $DB->delete_records_select(REMINDERS_CLEAN_TABLE, "time < :cutofftime", ['cutofftime' => $cutofftime]);
         mtrace('  [Local Reminders][CLEAN] Cleaning status: '.$deletestatus);
     } else {
         mtrace('  [Local Reminders][CLEAN] No records allow to clean since reminders cron has not bee executed for long time!');
