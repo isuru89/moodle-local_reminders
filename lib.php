@@ -79,7 +79,6 @@ define('REMINDERS_ENABLED_KEY', 'enabled');
 define('REMINDERS_SUPPORTED_OVERRIDES', array('assign', 'quiz'));
 define('REMINDERS_SUPPORTED_OVERRIDES_REF_IDS', array('assign' => 'assignid', 'quiz' => 'quiz'));
 
-
 /**
  * ======== FUNCTIONS =========================================
  */

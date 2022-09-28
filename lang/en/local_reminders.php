@@ -140,3 +140,4 @@ $string['siteheading'] = 'Site Event Reminders';
 $string['taskreminder'] = 'Reminders Task';
 $string['titlesubjectprefix'] = 'Reminder';
 $string['userheading'] = 'User Event Reminders';
+$string['useservertimezone'] = "Use Server Timezone";
