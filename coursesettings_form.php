@@ -107,7 +107,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                 get_string('activityconfupcomingactivitiesdesc', 'local_reminders'));
 
             $daytimeformat = get_string('strftimedaydate', 'langconfig');
-            $tzone = core_date::get_user_timezone($USER);
+            $tzone = reminders_get_timezone($USER);
             foreach ($upcomingactivities as $daytime => $dailyactivities) {
                 $mform->addElement('static', 'header'.$daytime, '<h4><b>'.userdate($daytime, $daytimeformat, $tzone).'</b></h4>');
                 $isfirstone = true;
