@@ -88,14 +88,16 @@ function xmldb_local_reminders_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020032000, 'local', 'reminders');
     }
 
-    if ($oldversion < 2021100500) {
+    // Migrate invalid db column in local_reminders table.
+    // Converts existing char column to a number column.
+    if ($oldversion < 2022110700) {
         $table = new xmldb_table('local_reminders');
         $field = new xmldb_field('time');
         $field->set_attributes(XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 10);
         $dbman->change_field_type($table, $field);
 
         // Reminders savepoint reached.
-        upgrade_plugin_savepoint(true, 2021100500, 'local', 'reminders');
+        upgrade_plugin_savepoint(true, 2022110700, 'local', 'reminders');
     }
 
     return true;
