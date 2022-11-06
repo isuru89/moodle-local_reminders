@@ -84,7 +84,7 @@ abstract class local_reminder_activity_handler {
     protected function format_datetime($datetime, $user, $reminder) {
         $tzone = 99;
         if (isset($user) && !empty($user)) {
-            $tzone = core_date::get_user_timezone($user);
+            $tzone = reminders_get_timezone($user);
         }
 
         $daytimeformat = get_string('strftimedaydate', 'langconfig');
