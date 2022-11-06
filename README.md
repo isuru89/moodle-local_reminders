@@ -1,6 +1,6 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.5-blue)
+![Version](https://img.shields.io/badge/version-v2.6-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
 ![Maturiy](https://img.shields.io/badge/maturity-STABLE-brightgreen)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
@@ -98,6 +98,11 @@ In addition to above, user can control reminders for calendar event changes per 
  | Explicit Reminder Activation | If checked, teachers or relevant authorities must explicitly enable reminders for each activity under course reminders settings page. | false |
 
 ## Changelog
+
+### v2.6
+  * Decouple activity start from activity end reminders #151
+  * Fix: Description of event for group activity reminders missing in email message #150 #109
+  * Fix: Duplicate reminder emails when a user has two or more roles in a course #149
 
 ### v2.5
   * Ability to customize reminder email header and footer #137 #135

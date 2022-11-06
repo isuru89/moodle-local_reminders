@@ -52,6 +52,10 @@ if ($hassiteconfig) {
             get_string('enabled', 'local_reminders'),
             get_string('enableddescription', 'local_reminders'), 1));
 
+    $settings->add(new admin_setting_configcheckbox('local_reminders_timezone',
+            get_string('useservertimezone', 'local_reminders'),
+            '', 0));
+
     $settings->add(new admin_setting_configtext('local_reminders_messagetitleprefix',
             get_string('messagetitleprefix', 'local_reminders'),
             get_string('messagetitleprefixdescription', 'local_reminders'), 'Moodle-Reminder'));
@@ -122,6 +126,7 @@ if ($hassiteconfig) {
     $defaultcategory = array('days7' => 0, 'days3' => 1, 'days1' => 0);
     $defaultgroup = array('days7' => 0, 'days3' => 1, 'days1' => 0);
     $defaultdue = array('days7' => 0, 'days3' => 1, 'days1' => 0);
+    $defaultdueopen = array('days7' => 0, 'days3' => 1, 'days1' => 0);
 
     // CALENDAR EVENT CHANGED EVENTS.
 
@@ -240,6 +245,15 @@ if ($hassiteconfig) {
             get_string('sendactivityreminders', 'local_reminders'),
             get_string('explainsendactivityreminders', 'local_reminders'),
             REMINDERS_ACTIVITY_BOTH, $activitychoices));
+
+    $settings->add(new admin_setting_configcheckbox('local_reminders_separateactivityopenings',
+            get_string('activityopeningseparation', 'local_reminders'),
+            get_string('activityopeningseparationdesc', 'local_reminders'), 0));
+
+    $settings->add(new admin_setting_configmulticheckbox2('local_reminders_dueopenrdays',
+            get_string('activitydueopenahead', 'local_reminders'),
+            get_string('activitydueopenaheaddesc', 'local_reminders'),
+            $defaultdueopen, $daysarray));
 
     $settings->add(new admin_setting_configcheckbox('local_reminders_explicitenable',
             get_string('activityconfexplicitenable', 'local_reminders'),

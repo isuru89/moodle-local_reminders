@@ -185,7 +185,8 @@ class due_reminder extends course_reminder {
             }
         }
 
-        $description = isset($formattercls) ? $formattercls->get_description($this->activityobj, $this->event) : '';
+        $description = isset($formattercls) ? $formattercls->get_description($this->activityobj, $this->event) :
+            $this->event->description;
         $htmlmail .= $this->write_description($description, $this->event);
 
         $htmlmail .= $this->get_html_footer();
