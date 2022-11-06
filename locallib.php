@@ -609,16 +609,15 @@ function get_users_of_course($courseid, $courseroleids, &$arraytoappend) {
     }
 }
 
-// ----
-function reminders_get_timezone($user){
+function reminders_get_timezone($user) {
     global $CFG;
-    if($CFG->local_reminders_timezone){
-        return core_date::get_default_php_timezone();// Server timezone
-    }else{
-        return core_date::get_user_timezone($user);// User selected timezone
+    if ($CFG->local_reminders_timezone) {
+        return core_date::get_default_php_timezone(); // Server timezone.
+    } else {
+        return core_date::get_user_timezone($user); // User selected timezone.
     }
 }
-// ---
+
 /**
  * This function formats the due time of the event appropiately. If this event
  * has a duration then formatted time will be [starttime]-[endtime].
