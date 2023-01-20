@@ -44,7 +44,7 @@ require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php')
 function get_upcoming_events_for_course($courseid, $currtime) {
     global $DB, $CFG;
 
-    $statuses = ['due', 'close', 'course', 'expectcompletionon', 'gradingdue', 'meeting_start'];
+    $statuses = ['due', 'close', 'course', 'expectcompletionon', 'gradingdue', 'meeting_start', 'zoom'];
 
     // When activity openings separation is enabled in global settings, we will retrieve those events too.
     if (isset($CFG->local_reminders_separateactivityopenings) && $CFG->local_reminders_separateactivityopenings) {
@@ -109,9 +109,10 @@ function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck=RE
  * @param object $event event instance reference.
  * @param object $options context options.
  * @param number $aheadday number of days ahead this activity belongs to.
+ * @param object $custom_time contains the custom time value and unit (if configured). 
  * @return bool true if reminders can sent, otherwise false.
  */
-function should_run_for_activity($event, $options, $aheadday=null) {
+function should_run_for_activity($event, $options, $aheadday=null, $custom_time=null) {
     global $DB, $CFG;
 
     $showtrace = $options->showtrace;
@@ -130,6 +131,10 @@ function should_run_for_activity($event, $options, $aheadday=null) {
         $showtrace && mtrace("  [Local Reminder] Reminders for activity event#$eventid (title=$event->name) ".
             "have been disabled for $aheadday days ahead.");
         return false;
+    } else if ($custom_time && array_key_exists("custom", $activitysettings) && !$activitysettings["custom"]) {
+        $showtrace && mtrace("  [Local Reminder] Reminders for activity event#$eventid (title=$event->name) ".
+            "have been disabled for custom time ($custom_time->value  $custom_time->unit) ahead.");
+        return false;                
     }
 
     if ($explicitenable) {
@@ -138,6 +143,14 @@ function should_run_for_activity($event, $options, $aheadday=null) {
             && $activitysettings[REMINDERS_ENABLED_KEY]
             && array_key_exists($aheaddayskey, $activitysettings)
             && $activitysettings[$aheaddayskey]) {
+            return true;
+        }
+
+        // Handle custom setting
+        if (array_key_exists(REMINDERS_ENABLED_KEY, $activitysettings)
+            && $activitysettings[REMINDERS_ENABLED_KEY]
+            && array_key_exists("custom", $activitysettings)
+            && $activitysettings["custom"]) {
             return true;
         }
 
@@ -276,6 +289,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
 
     $showtrace = $options->showtrace;
     $aheadday = $options->aheadday;
+    $custom_time = $options->custom_time;
 
     if ($event->courseid > 0) {
         $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
@@ -288,14 +302,14 @@ function handle_course_activity_event($event, $course, $cm, $options) {
     if (is_course_hidden_and_denied($course)) {
         $showtrace && mtrace("  [Local Reminder] Course is hidden. No reminders will be sent.");
         return null;
-    } else if (!should_run_for_activity($event, $options, $aheadday)) {
+    } else if (!should_run_for_activity($event, $options, $aheadday, $custom_time)) {
         return null;
     }
 
     $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid, $showtrace);
     $context = context_module::instance($cm->id);
     $sendusers = array();
-    $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
+    $reminder = new due_reminder($event, $course, $context, $cm, $aheadday, $custom_time);
 
     mtrace("   [Local Reminder] Finding out users for event#".$event->id."...");
     if ($event->courseid <= 0 && $event->userid > 0) {
@@ -313,6 +327,16 @@ function handle_course_activity_event($event, $course, $cm, $options) {
         // from get_role_users (has odd behaivior when called with an array for $roleid param'.
         $sendusers = get_active_role_users($options->activityroleids, $context);
         $sendusers = filter_user_group_overrides($event, $sendusers, $showtrace);
+
+        // In the filter_user_list below the user id required and NOT the role_assignments id which is returned from get_active_role_users
+        // Need to switch to the user id below before filtering
+        if ($sendusers) {
+            $user_array = [];
+            foreach($sendusers as $role_assignment_user) {
+                $user_array += [$role_assignment_user->id => \core_user::get_user($role_assignment_user->id)];
+            }
+            $sendusers = $user_array;
+        }
 
         // Filter user list,
         // see: https://docs.moodle.org/dev/Availability_API.
@@ -341,12 +365,13 @@ function handle_course_activity_event($event, $course, $cm, $options) {
  *
  * @param object $event calendar event.
  * @param int $aheadday number of days ahead.
+ * @param object $custom_time contains the custom time value and unit (if configured).  
  * @param array $activityroleids role ids for activities.
  * @param boolean $showtrace whether to print logs or not.
  * @param string $calltype calling type PRE|OVERDUE.
  * @return reminder_ref reminder reference instance.
  */
-function process_activity_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
+function process_activity_event($event, $aheadday, $custom_time=null, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
     if (isemptystring($event->modulename)) {
         return null;
     }
@@ -364,6 +389,7 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
     if (!empty($course) && !empty($cm)) {
         $options = new \stdClass;
         $options->aheadday = $aheadday;
+        $options->custom_time = $custom_time;
         $options->showtrace = $showtrace;
         $options->activityroleids = $activityroleids;
         $options->calltype = $calltype;
@@ -379,18 +405,19 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
  *
  * @param object $event calendar event.
  * @param int $aheadday number of days ahead.
+ * @param object $custom_time contains the custom time value and unit (if configured).  
  * @param array $activityroleids role ids for activities.
  * @param boolean $showtrace whether to print logs or not.
  * @param string $calltype calling type PRE|OVERDUE.
  * @return reminder_ref reminder reference instance.
  */
-function process_unknown_event($event, $aheadday, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
+function process_unknown_event($event, $aheadday, $custom_time=null, $activityroleids=null, $showtrace=true, $calltype=REMINDERS_CALL_TYPE_PRE) {
     if (isemptystring($event->modulename)) {
         $showtrace && mtrace("  [Local Reminder] Unknown event type [$event->eventtype]!");
         return null;
     }
 
-    return process_activity_event($event, $aheadday, $activityroleids, $showtrace, $calltype);
+    return process_activity_event($event, $aheadday, $custom_time, $activityroleids, $showtrace, $calltype);
 }
 
 /**
@@ -398,11 +425,12 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
  *
  * @param object $event calendar event.
  * @param int $aheadday number of days ahead.
+ * @param object $custom_time contains the custom time value and unit (if configured). 
  * @param array $courseroleids role ids for course.
  * @param boolean $showtrace whether to print logs or not.
  * @return reminder_ref reminder reference instance.
  */
-function process_course_event($event, $aheadday, $courseroleids=null, $showtrace=true) {
+function process_course_event($event, $aheadday, $custom_time=null, $courseroleids=null, $showtrace=true) {
     global $DB, $PAGE;
 
     $course = $DB->get_record('course', array('id' => $event->courseid));
@@ -424,7 +452,7 @@ function process_course_event($event, $aheadday, $courseroleids=null, $showtrace
         $sendusers = array();
         get_users_of_course($course->id, $courseroleids, $sendusers);
 
-        $reminder = new course_reminder($event, $course, $aheadday);
+        $reminder = new course_reminder($event, $course, $aheadday,  $custom_time);
         return new reminder_ref($reminder, $sendusers);
     }
     return null;
@@ -435,11 +463,12 @@ function process_course_event($event, $aheadday, $courseroleids=null, $showtrace
  *
  * @param object $event calendar event.
  * @param int $aheadday number of days ahead.
+ * @param object $custom_time contains the custom time value and unit (if configured).  
  * @param array $courseroleids role ids for course.
  * @param boolean $showtrace whether to print logs or not.
  * @return reminder_ref reminder reference instance.
  */
-function process_category_event($event, $aheadday, $courseroleids=null, $showtrace=true) {
+function process_category_event($event, $aheadday, $custom_time=null, $courseroleids=null, $showtrace=true) {
     global $CFG;
 
     $catid = $event->categoryid;
@@ -470,7 +499,7 @@ function process_category_event($event, $aheadday, $courseroleids=null, $showtra
     }
     $showtrace && mtrace("   [LOCAL REMINDERS] Total users to send = ".count($allusers));
 
-    $reminder = new category_reminder($event, $cat, $aheadday);
+    $reminder = new category_reminder($event, $cat, $aheadday, $custom_time);
     return new reminder_ref($reminder, $allusers);
 }
 
@@ -479,10 +508,11 @@ function process_category_event($event, $aheadday, $courseroleids=null, $showtra
  *
  * @param object $event calendar event.
  * @param int $aheadday number of days ahead.
+ * @param object $custom_time contains the custom time value and unit (if configured).
  * @param boolean $showtrace whether to print logs or not.
  * @return reminder_ref reminder reference instance.
  */
-function process_group_event($event, $aheadday, $showtrace=true) {
+function process_group_event($event, $aheadday, $custom_time=null, $showtrace=true) {
     global $DB, $PAGE;
 
     $group = $DB->get_record('groups', array('id' => $event->groupid));
@@ -496,7 +526,7 @@ function process_group_event($event, $aheadday, $showtrace=true) {
             return null;
         }
 
-        $reminder = new group_reminder($event, $group, $aheadday);
+        $reminder = new group_reminder($event, $group, $aheadday, $custom_time);
 
         // Add module details, if this event is a mod type event.
         if (!isemptystring($event->modulename) && $event->courseid > 0) {
@@ -513,15 +543,16 @@ function process_group_event($event, $aheadday, $showtrace=true) {
  *
  * @param object $event calendar event.
  * @param int $aheadday number of days ahead.
+ * @param object $custom_time contains the custom time value and unit (if configured). 
  * @return reminder_ref reminder reference instance.
  */
-function process_user_event($event, $aheadday) {
+function process_user_event($event, $aheadday, $custom_time=null) {
     global $DB;
 
     $user = $DB->get_record('user', array('id' => $event->userid, 'deleted' => 0));
 
     if (!empty($user)) {
-        $reminder = new user_reminder($event, $user, $aheadday);
+        $reminder = new user_reminder($event, $user, $aheadday, $custom_time);
         $sendusers[] = $user;
         return new reminder_ref($reminder, $sendusers);
     }
@@ -533,12 +564,13 @@ function process_user_event($event, $aheadday) {
  *
  * @param object $event calendar event.
  * @param int $aheadday number of days ahead.
+ * @param object $custom_time contains the custom time value and unit (if configured). 
  * @return reminder_ref reminder reference instance.
  */
-function process_site_event($event, $aheadday) {
+function process_site_event($event, $aheadday, $custom_time=null) {
     global $DB, $PAGE;
 
-    $reminder = new site_reminder($event, $aheadday);
+    $reminder = new site_reminder($event, $aheadday, $custom_time);
     $sendusers = $DB->get_records_sql("SELECT *
         FROM {user}
         WHERE id > 1 AND deleted=0 AND suspended=0 AND confirmed=1;");

@@ -66,9 +66,10 @@ class due_reminder extends course_reminder {
      * @param object $cm coursemodulecontext instance.
      * @param object $coursemodule course module.
      * @param integer $aheaddays ahead days in number.
+     * @param object $custom_time contains the custom time value and unit (if configured).
      */
-    public function __construct($event, $course, $cm, $coursemodule, $aheaddays = 1) {
-        parent::__construct($event, $course, $aheaddays);
+    public function __construct($event, $course, $cm, $coursemodule, $aheaddays = 1, $custom_time = null) {
+        parent::__construct($event, $course, $aheaddays, $custom_time);
         $this->cm = $cm;
         $this->coursemodule = $coursemodule;
     }
@@ -204,7 +205,11 @@ class due_reminder extends course_reminder {
      * @return string Message content as plain-text.
      */
     public function get_message_plaintext($user=null, $changetype=null) {
-        $text  = $this->get_message_title().' ['.$this->pluralize($this->aheaddays, ' day').' to go]'."\n";
+        if ($this->aheaddays != 0) {
+            $text  = $this->get_message_title().' ['.$this->pluralize($this->aheaddays, ' day').' to go]'."\n";
+        } else {
+            $text  = $this->get_message_title().' ['.$this->pluralize($this->custom_time->value, ' ' . $this->custom_time->unit).' to go]'."\n";
+        }
         $text .= get_string('contentwhen', 'local_reminders').': '.$this->get_tzinfo_plain($user, $this->event)."\n";
         $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname."\n";
         $text .= get_string('contenttypeactivity', 'local_reminders').': '.$this->cm->get_context_name()."\n";

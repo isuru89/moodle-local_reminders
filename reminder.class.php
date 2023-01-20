@@ -43,6 +43,11 @@ abstract class local_reminder {
     protected $aheaddays;
 
     /**
+     * @var object custom time ahead of the actual event.
+     */
+    protected $custom_time;
+
+    /**
      * @var int indicates immediate sending of message as a notification.
      */
     protected $notification = 1;
@@ -139,10 +144,12 @@ abstract class local_reminder {
      *
      * @param object $event calendar event.
      * @param integer $aheaddays number of days ahead.
+     * @param object $custom_time contains the custom time value and unit (if configured). 
      */
-    public function __construct($event, $aheaddays = 1) {
+    public function __construct($event, $aheaddays = 1, $custom_time=null) {
         $this->event = $event;
         $this->aheaddays = $aheaddays;
+        $this->custom_time = $custom_time;
     }
 
     /**

@@ -57,6 +57,7 @@ $string['contenttypeuser'] = 'User';
 $string['contenttypelocation'] = 'Where';
 $string['contentwhen'] = 'When';
 $string['courseheading'] = 'Course Event Reminders';
+$string['custom'] = 'Custom';
 $string['days7'] = '7 Days';
 $string['days3'] = '3 Days';
 $string['days1'] = '1 Day';
