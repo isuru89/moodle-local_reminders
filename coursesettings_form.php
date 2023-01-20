@@ -47,6 +47,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
         $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
             'days3' => ' '.get_string('days3', 'local_reminders'),
             'days1' => ' '.get_string('days1', 'local_reminders'),
+            'custom' => ' '.get_string('custom', 'local_reminders')
         );
 
         $mform = $this->_form;
@@ -89,6 +90,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
         $noactivities = true;
         $mform->addElement('header', 'description',
                 get_string('activityconfupcomingactivities', 'local_reminders'));
+        $custom_unit_label = empty($coursesettings->customunit) ? '' : '(' . $coursesettings->customunit . ')';
 
         if (!empty($upcomingactivities)) {
             // Group activities by start time.
@@ -146,7 +148,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                     foreach ($daysarray as $dkey => $dvalue) {
                         $trefkey = "activityglobal_$dkey";
                         $daykey = "activity_".$activity->id."_$dkey";
-                        $activitydayarray[] = $mform->createElement('advcheckbox', $daykey, '', $dvalue);
+                        $activitydayarray[] = $mform->createElement('advcheckbox', $daykey, '', $dkey != 'custom' ? $dvalue : $dvalue . ' ' .$custom_unit_label);
                         if (!$explicitlyenable) {
                             $mform->disabledIf($daykey, $trefkey, 'eq', 0);
                         }

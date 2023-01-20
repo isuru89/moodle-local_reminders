@@ -25,6 +25,11 @@
 require('../../config.php');
 require_once($CFG->dirroot.'/local/reminders/coursesettings_form.php');
 
+define('CUSTOM_MINUTE_SECS', 60);
+define('CUSTOM_HOUR_SECS', CUSTOM_MINUTE_SECS * 60);
+define('CUSTOM_DAY_SECS', CUSTOM_HOUR_SECS * 24);
+define('CUSTOM_WEEK_SECS', CUSTOM_DAY_SECS * 7);
+
 $activityprefix = 'activity_';
 
 $courseid = required_param('courseid', PARAM_INT);
@@ -58,6 +63,25 @@ $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
 foreach ($aheaddaysindex as $dkey => $dvalue) {
     $daykey = 'activityglobal_days'.$dkey;
     $coursesettings->$daykey = $globalactivityaheaddays[$dvalue];
+}
+
+$globalactivity_custom = $CFG->local_reminders_duecustom;
+$customkey = 'activityglobal_custom';
+if ($globalactivity_custom && intval($globalactivity_custom) > 0) {
+    $custom_value = intval($globalactivity_custom);
+    $coursesettings->$customkey = 1;
+    $custom_time_units = ['weeks' => CUSTOM_WEEK_SECS, 'days' => CUSTOM_DAY_SECS, 'hours' => CUSTOM_HOUR_SECS, 'minutes' => CUSTOM_MINUTE_SECS, 'seconds' => 1];
+    foreach($custom_time_units as $unit_key => $unit_value) {
+        $remainder = $custom_value % $unit_value;
+        if ($remainder == 0) {
+            $value = intdiv($globalactivity_custom, $unit_value);
+            $coursesettings->customunit = $value . ' ' . $unit_key;
+            break;
+        }
+    }
+} else {
+    $coursesettings->$customkey = 0;
+    $coursesettings->customunit = '';
 }
 
 require_login($course);

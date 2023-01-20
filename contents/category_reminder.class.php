@@ -50,9 +50,10 @@ class category_reminder extends local_reminder {
      * @param object $event calendar event.
      * @param object $coursecategory course instance.
      * @param integer $aheaddays number of days ahead.
+     * @param object $custom_time contains the custom time value and unit (if configured). 
      */
-    public function __construct($event, $coursecategory, $aheaddays = 1) {
-        parent::__construct($event, $aheaddays);
+    public function __construct($event, $coursecategory, $aheaddays = 1, $custom_time = null) {
+        parent::__construct($event, $aheaddays, $custom_time);
         $this->coursecategory = $coursecategory;
     }
 
@@ -108,7 +109,11 @@ class category_reminder extends local_reminder {
      * @return string Message content as plain-text.
      */
     public function get_message_plaintext($user=null, $changetype=null) {
-        $text  = $this->get_message_title().' ['.$this->pluralize($this->aheaddays, ' day').' to go]'."\n";
+        if ($this->aheaddays != 0) {
+            $text  = $this->get_message_title().' ['.$this->pluralize($this->aheaddays, ' day').' to go]'."\n";
+        } else {
+            $text  = $this->get_message_title().' ['.$this->pluralize($this->custom_time->value, ' ' . $this->custom_time->unit).' to go]'."\n";
+        }
         $text .= get_string('contentwhen', 'local_reminders').': '.$this->get_tzinfo_plain($user, $this->event)."\n";
         $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->coursecategory->name."\n";
         $text .= get_string('contentdescription', 'local_reminders').': '.$this->event->description."\n";
