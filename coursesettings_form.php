@@ -46,7 +46,8 @@ class local_reminders_coursesettings_edit_form extends moodleform {
 
         $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
             'days3' => ' '.get_string('days3', 'local_reminders'),
-            'days1' => ' '.get_string('days1', 'local_reminders'));
+            'days1' => ' '.get_string('days1', 'local_reminders'),
+        );
 
         $mform = $this->_form;
         list($coursesettings) = $this->_customdata;

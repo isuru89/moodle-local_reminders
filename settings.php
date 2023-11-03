@@ -61,7 +61,8 @@ if ($hassiteconfig) {
             get_string('messagetitleprefixdescription', 'local_reminders'), 'Moodle-Reminder'));
 
     $replychoices = array(REMINDERS_SEND_AS_ADMIN => get_string('sendasadmin', 'local_reminders'),
-                          REMINDERS_SEND_AS_NO_REPLY => get_string('sendasnoreply', 'local_reminders'));
+                          REMINDERS_SEND_AS_NO_REPLY => get_string('sendasnoreply', 'local_reminders'),
+                        );
 
     $settings->add(new admin_setting_configselect('local_reminders_sendas',
         get_string('sendas', 'local_reminders'),
@@ -73,7 +74,8 @@ if ($hassiteconfig) {
         get_string('sendasnamedescription', 'local_reminders'), 'No Reply'));
 
     $choices = array(REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
-                     REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'));
+                     REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'),
+                );
 
     $settings->add(new admin_setting_configselect('local_reminders_filterevents',
             get_string('filterevents', 'local_reminders'),
@@ -117,7 +119,8 @@ if ($hassiteconfig) {
 
     $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
                        'days3' => ' '.get_string('days3', 'local_reminders'),
-                       'days1' => ' '.get_string('days1', 'local_reminders'));
+                       'days1' => ' '.get_string('days1', 'local_reminders'),
+                );
 
     // Default settings for each event type.
     $defaultsite = array('days7' => 0, 'days3' => 1, 'days1' => 0);
@@ -239,7 +242,8 @@ if ($hassiteconfig) {
 
     $activitychoices = array(REMINDERS_ACTIVITY_BOTH => get_string('activityremindersboth', 'local_reminders'),
                              REMINDERS_ACTIVITY_ONLY_OPENINGS => get_string('activityremindersonlyopenings', 'local_reminders'),
-                             REMINDERS_ACTIVITY_ONLY_CLOSINGS => get_string('activityremindersonlyclosings', 'local_reminders'));
+                             REMINDERS_ACTIVITY_ONLY_CLOSINGS => get_string('activityremindersonlyclosings', 'local_reminders'),
+                        );
 
     $settings->add(new admin_setting_configselect('local_reminders_duesend',
             get_string('sendactivityreminders', 'local_reminders'),
