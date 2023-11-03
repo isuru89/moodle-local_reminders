@@ -130,7 +130,8 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
     // Now lets filter appropiate events to send reminders.
     $secondsaheads = array(REMINDERS_7DAYSBEFORE_INSECONDS,
         REMINDERS_3DAYSBEFORE_INSECONDS,
-        REMINDERS_1DAYBEFORE_INSECONDS);
+        REMINDERS_1DAYBEFORE_INSECONDS,
+    );
 
     // Append custom schedule if any of event categories has defined it.
     foreach ($eventtypearray as $etype) {
@@ -597,7 +598,7 @@ function local_reminders_extend_settings_navigation($settingsnav, $context) {
     global $PAGE;
 
     // Only add this settings item on non-site course pages.
-    if (!$PAGE->course or $PAGE->course->id == 1) {
+    if (!$PAGE->course || $PAGE->course->id == 1) {
         return;
     }
 

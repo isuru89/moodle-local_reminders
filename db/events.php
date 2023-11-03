@@ -31,10 +31,10 @@ $observers = array(
     ),
     array(
         'eventname' => '\core\event\calendar_event_created',
-        'callback' => '\local_reminders\calendar_observer::calendar_event_added'
+        'callback' => '\local_reminders\calendar_observer::calendar_event_added',
     ),
     array(
         'eventname' => '\core\event\calendar_event_deleted',
-        'callback' => '\local_reminders\calendar_observer::calendar_event_removed'
-    )
+        'callback' => '\local_reminders\calendar_observer::calendar_event_removed',
+    ),
 );

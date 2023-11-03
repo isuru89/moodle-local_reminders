@@ -579,7 +579,7 @@ function get_roles_for_reminders() {
     return array(
         $courseroleids,
         $activityroleids,
-        $categoryroleids
+        $categoryroleids,
     );
 }
 
@@ -609,6 +609,12 @@ function get_users_of_course($courseid, $courseroleids, &$arraytoappend) {
     }
 }
 
+/**
+ * This function returns user timezone.
+ *
+ * @param object $user user object
+ * @return object timezone of the user
+ */
 function reminders_get_timezone($user) {
     global $CFG;
     if ($CFG->local_reminders_timezone) {

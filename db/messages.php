@@ -48,6 +48,6 @@ $messageproviders = array (
 
     // Reminders for due events.
     'reminders_due' => array (
-    )
+    ),
 
 );

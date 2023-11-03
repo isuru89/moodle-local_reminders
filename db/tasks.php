@@ -32,7 +32,7 @@ $tasks = [
         'hour' => '*',
         'day' => '*',
         'dayofweek' => '*',
-        'month' => '*'
+        'month' => '*',
     ],
     [
         'classname' => 'local_reminders\\task\\clean_reminders_logs',
@@ -41,6 +41,6 @@ $tasks = [
         'hour' => '1',
         'day' => '*',
         'dayofweek' => '*',
-        'month' => '*'
-    ]
+        'month' => '*',
+    ],
 ];
