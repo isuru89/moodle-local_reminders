@@ -1,6 +1,6 @@
 # Moodle - Local Reminders
 ---
-![Version](https://img.shields.io/badge/version-v2.7-blue)
+![Version](https://img.shields.io/badge/version-v2.7.1-blue)
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
 ![Maturiy](https://img.shields.io/badge/maturity-STABLE-brightgreen)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
@@ -98,6 +98,10 @@ In addition to above, user can control reminders for calendar event changes per 
  | Explicit Reminder Activation | If checked, teachers or relevant authorities must explicitly enable reminders for each activity under course reminders settings page. | false |
 
 ## Changelog
+
+### v2.7.1
+  * Support for moodle 4.1, 4.2 and 4.3
+  * Fix: Object of class stdClass could not be converted to string #170 
 
 ### v2.7
   * Moodle v4 support #162
