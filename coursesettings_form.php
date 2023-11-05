@@ -119,7 +119,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                     if (!isemptystring($activity->modulename)) {
                         $modinfo = fetch_module_instance($activity->modulename, $activity->instance, $coursesettings->courseid);
                         $activitytypename = get_string('pluginname', $activity->modulename).': ';
-                        $activityname = isset($modinfo->name) ? $modinfo->name : $activity->name;
+                        $activityname = $modinfo->name ?? $activity->name;
                     }
 
                     if (!$isfirstone) {
