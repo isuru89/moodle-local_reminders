@@ -22,6 +22,9 @@
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use core_availability\info_module;
+
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/course/lib.php');
@@ -217,7 +220,7 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
         mtrace('[LOCAL REMINDERS] Processing post-activity event for '.$event->id.' occurred @ '.$event->timestart);
 
         $sendusers = $reminderref->get_sending_users();
-        $ctxinfo = new \stdClass;
+        $ctxinfo = new stdClass;
         $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
         $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
         $alreadysentuserids = array();
@@ -241,19 +244,19 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
                 if (!$mailresult) {
                     mtrace("[LOCAL REMINDERS] Could not send out message for event#$event->id to user $eventdata->userto");
                 }
-            } catch (\Exception $mex) {
+            } catch (Exception $mex) {
                 mtrace('[LOCAL REMINDERS] Error: local/reminders/locallib.php send_post_activity_reminders(): '.$mex->getMessage());
             }
         }
 
         try {
-            $activityrecord = new \stdClass();
+            $activityrecord = new stdClass();
             $activityrecord->sendtime = $curtime;
             $activityrecord->eventid = $event->id;
             $DB->insert_record('local_reminders_post_act', $activityrecord, false);
             mtrace('[LOCAL REMINDERS] Successfully marked event#'.$event->id.' as overdue sent completed in db.');
 
-        } catch (\Exception $dex) {
+        } catch (Exception $dex) {
             // Catastrophic failure and not sure what to do at this moment.
             mtrace('[LOCAL REMINDERS] Error: It seems Local Reminders plugin cannot write to database!'
                 .'Please disable overdue reminders until database write access provided!'
@@ -316,7 +319,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
 
         // Filter user list,
         // see: https://docs.moodle.org/dev/Availability_API.
-        $info = new \core_availability\info_module($cm);
+        $info = new info_module($cm);
         $sendusers = $info->filter_user_list($sendusers);
     }
 
@@ -362,7 +365,7 @@ function process_activity_event($event, $aheadday, $activityroleids=null, $showt
     $cm = $courseandcm[1];
 
     if (!empty($course) && !empty($cm)) {
-        $options = new \stdClass;
+        $options = new stdClass;
         $options->aheadday = $aheadday;
         $options->showtrace = $showtrace;
         $options->activityroleids = $activityroleids;
@@ -896,7 +899,7 @@ function get_from_user() {
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class local_reminders_tz_info extends \core_date {
+class local_reminders_tz_info extends core_date {
     /**
      * hold the timezone mappings.
      *

@@ -25,6 +25,8 @@
 
 namespace local_reminders\privacy;
 
+use core_privacy\local\metadata\null_provider;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -32,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 class provider implements
     // This plugin does not store any personal user data.
-    \core_privacy\local\metadata\null_provider {
+    null_provider {
 
     /**
      * Get the language string identifier with the component's language

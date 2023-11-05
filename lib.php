@@ -356,7 +356,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
                 } else {
                     mtrace('[LOCAL_REMINDERS] Mail Result: '.$mailresult);
                 }
-            } catch (\Exception $mex) {
+            } catch (Exception $mex) {
                 $failedcount++;
                 mtrace('Error: local/reminders/lib.php local_reminders_cron(): '.$mex->getMessage());
             }
@@ -558,7 +558,7 @@ function when_calendar_event_updated($updateevent, $changetype) {
         return;
     }
 
-    $ctxinfo = new \stdClass;
+    $ctxinfo = new stdClass;
     $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
     $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
     foreach ($sendusers as $touser) {

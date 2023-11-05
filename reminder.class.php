@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\message\message;
+
 defined('MOODLE_INTERNAL') || die;
 
 /**
@@ -403,7 +405,7 @@ abstract class local_reminder {
         }
 
          // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
-        $eventdata = new \core\message\message();
+        $eventdata = new message();
 
         $eventdata->component           = 'local_reminders';
         $eventdata->name                = $this->get_message_provider();
@@ -525,7 +527,7 @@ abstract class local_reminder {
         $smallmsg = $this->get_message_plaintext($touser, $changetype);
 
          // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
-        $eventdata = new \core\message\message();
+        $eventdata = new message();
 
         $eventdata->component           = 'local_reminders';
         $eventdata->name                = $this->get_message_provider();
