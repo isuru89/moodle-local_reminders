@@ -21,7 +21,6 @@
  * @copyright 2012 Isuru Madushanka Weerarathna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Run the upgrade for the plugin.

@@ -25,8 +25,6 @@
 
 use core\message\message;
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * Abstract class for reminder object.
  *
