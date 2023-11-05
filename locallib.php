@@ -490,7 +490,7 @@ function process_group_event($event, $aheadday, $showtrace=true) {
 
     $group = $DB->get_record('groups', array('id' => $event->groupid));
     if (!empty($group)) {
-        if (isset($group->courseid) && !empty($group->courseid)) {
+        if (!empty($group->courseid)) {
             $PAGE->set_context(context_course::instance($group->courseid));
         }
         $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $group->courseid));
@@ -643,7 +643,7 @@ function format_event_time_duration($user, $event, $tzstyle=null, $includetz=tru
     $usertimeformat = get_correct_timeformat_user($user);
 
     $tzone = 99;
-    if (isset($user) && !empty($user)) {
+    if (!empty($user)) {
         $tzone = reminders_get_timezone($user);
     }
 
@@ -824,7 +824,7 @@ function is_course_hidden_and_denied($course) {
  * @return boolean true if string is empty or whitespace.
  */
 function isemptystring($str) {
-    return !isset($str) || empty($str) || trim($str) === '';
+    return empty($str) || trim($str) === '';
 }
 
 /**
@@ -881,7 +881,7 @@ function get_from_user() {
     global $CFG;
 
     $fromuser = core_user::get_noreply_user();
-    if (isset($CFG->local_reminders_sendasname) && !empty($CFG->local_reminders_sendasname)) {
+    if (!empty($CFG->local_reminders_sendasname)) {
         $fromuser->firstname = $CFG->local_reminders_sendasname;
     }
     if (isset($CFG->local_reminders_sendas) && $CFG->local_reminders_sendas == REMINDERS_SEND_AS_ADMIN) {

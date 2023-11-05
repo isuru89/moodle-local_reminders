@@ -136,7 +136,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
     // Append custom schedule if any of event categories has defined it.
     foreach ($eventtypearray as $etype) {
         $tempconfigstr = 'local_reminders_'.$etype.'custom';
-        if (isset($CFG->$tempconfigstr) && !empty($CFG->$tempconfigstr)
+        if (!empty($CFG->$tempconfigstr)
             && $CFG->$tempconfigstr > 0 && !in_array($CFG->$tempconfigstr, $secondsaheads)) {
             array_push($secondsaheads, $CFG->$tempconfigstr);
         }
@@ -209,7 +209,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
         } else {
             // Find if custom schedule has been defined by user.
             $tempconfigstr = 'local_reminders_'.$event->eventtype.'custom';
-            if (isset($CFG->$tempconfigstr) && !empty($CFG->$tempconfigstr) && $CFG->$tempconfigstr > 0) {
+            if (!empty($CFG->$tempconfigstr) && $CFG->$tempconfigstr > 0) {
                 $customsecs = $CFG->$tempconfigstr;
                 if ($event->timestart - $customsecs >= $timewindowstart &&
                     $event->timestart - $customsecs <= $timewindowend) {
@@ -241,7 +241,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
 
             $options = $CFG->$optionstr;
 
-            if (empty($options) || $options == null) {
+            if (empty($options)) {
                 mtrace("   [Local Reminder] No configuration for eventtype $event->eventtype " .
                     "[event#$event->id is ignored!]...");
                 continue;

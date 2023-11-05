@@ -83,7 +83,7 @@ abstract class local_reminder_activity_handler {
      */
     protected function format_datetime($datetime, $user, $reminder) {
         $tzone = 99;
-        if (isset($user) && !empty($user)) {
+        if (!empty($user)) {
             $tzone = reminders_get_timezone($user);
         }
 

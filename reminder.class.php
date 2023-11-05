@@ -198,7 +198,7 @@ abstract class local_reminder {
      * @param object $event event instance.
      */
     protected function write_location_info($event) {
-        if (isset($event->location) && !empty($event->location)) {
+        if (!empty($event->location)) {
             return self::write_table_row(get_string('contenttypelocation', 'local_reminders'), $event->location);
         }
     }
@@ -433,7 +433,7 @@ abstract class local_reminder {
      * @return event object notification instance.
      */
     public function set_sendto_user($user, $refreshcontent=true, $fromuser=null) {
-        if (!isset($this->eventobject) || empty($this->eventobject)) {
+        if (empty($this->eventobject)) {
             $this->create_reminder_message_object();
         }
 
