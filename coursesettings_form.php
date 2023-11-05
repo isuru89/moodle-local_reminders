@@ -44,10 +44,10 @@ class local_reminders_coursesettings_edit_form extends moodleform {
     public function definition() {
         global $USER;
 
-        $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
+        $daysarray = ['days7' => ' '.get_string('days7', 'local_reminders'),
             'days3' => ' '.get_string('days3', 'local_reminders'),
             'days1' => ' '.get_string('days1', 'local_reminders'),
-        );
+        ];
 
         $mform = $this->_form;
         list($coursesettings) = $this->_customdata;
@@ -92,13 +92,13 @@ class local_reminders_coursesettings_edit_form extends moodleform {
 
         if (!empty($upcomingactivities)) {
             // Group activities by start time.
-            $allactivities = array();
+            $allactivities = [];
             foreach ($upcomingactivities as $activity) {
                 $starttime = $activity->timestart - ($activity->timestart % (24 * 3600));
                 if (array_key_exists($starttime, $allactivities)) {
                     $allactivities[$starttime][] = $activity;
                 } else {
-                    $allactivities[$starttime] = array($activity);
+                    $allactivities[$starttime] = [$activity];
                 }
             }
             ksort($allactivities);
@@ -142,7 +142,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                     $mform->addElement('advcheckbox', $key, get_string('enabled', 'local_reminders'), ' ');
                     $mform->setDefault($key, $explicitlyenable ? 0 : 1);
 
-                    $activitydayarray = array();
+                    $activitydayarray = [];
                     foreach ($daysarray as $dkey => $dvalue) {
                         $trefkey = "activityglobal_$dkey";
                         $daykey = "activity_".$activity->id."_$dkey";
@@ -206,7 +206,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
      * @return string complete url for the event
      */
     private function generate_event_link($event) {
-        $params = array('view' => 'day', 'time' => $event->timestart);
+        $params = ['view' => 'day', 'time' => $event->timestart];
         $calurl = new moodle_url('/calendar/view.php', $params);
         $calurl->set_anchor('event_'.$event->id);
 

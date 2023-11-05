@@ -79,8 +79,8 @@ function fetch_course_activity_settings($courseid, $eventid) {
     $records = $DB->get_records_sql("SELECT settingkey, settingvalue
         FROM {local_reminders_activityconf}
         WHERE courseid = :courseid AND eventid = :eventid",
-        array('courseid' => $courseid, 'eventid' => $eventid));
-    $pairs = array();
+        ['courseid' => $courseid, 'eventid' => $eventid]);
+    $pairs = [];
     if (!empty($records)) {
         foreach ($records as $record) {
             $pairs[$record->settingkey] = $record->settingvalue;
@@ -191,7 +191,7 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
         return;
     }
 
-    $excludedmodules = array();
+    $excludedmodules = [];
     if (isset($CFG->local_reminders_excludedmodulenames)) {
         $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
     }
@@ -223,7 +223,7 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
         $ctxinfo = new stdClass;
         $ctxinfo->overduemessage = $CFG->local_reminders_overduewarnmessage ?? '';
         $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
-        $alreadysentuserids = array();
+        $alreadysentuserids = [];
 
         foreach ($sendusers as $touser) {
             try {
@@ -281,7 +281,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
     $aheadday = $options->aheadday;
 
     if ($event->courseid > 0) {
-        $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
+        $coursesettings = $DB->get_record('local_reminders_course', ['courseid' => $event->courseid]);
         if (isset($coursesettings->status_activities) && $coursesettings->status_activities == 0) {
             $showtrace && mtrace("  [Local Reminder] Reminders for activities has been restricted in the configs.");
             return null;
@@ -297,19 +297,19 @@ function handle_course_activity_event($event, $course, $cm, $options) {
 
     $activityobj = fetch_module_instance($event->modulename, $event->instance, $event->courseid, $showtrace);
     $context = context_module::instance($cm->id);
-    $sendusers = array();
+    $sendusers = [];
     $reminder = new due_reminder($event, $course, $context, $cm, $aheadday);
 
     mtrace("   [Local Reminder] Finding out users for event#".$event->id."...");
     if ($event->courseid <= 0 && $event->userid > 0) {
         // A user overridden activity.
         $showtrace && mtrace("  [Local Reminder] Event #".$event->id." is a user overridden ".$event->modulename." event.");
-        $user = $DB->get_record('user', array('id' => $event->userid));
+        $user = $DB->get_record('user', ['id' => $event->userid]);
         $sendusers[] = $user;
     } else if ($event->groupid > 0) {
         // A group overridden activity.
         $showtrace && mtrace("  [Local Reminder] Event #".$event->id." is a group overridden ".$event->modulename." event.");
-        $group = $DB->get_record('groups', array('id' => $event->groupid));
+        $group = $DB->get_record('groups', ['id' => $event->groupid]);
         $sendusers = get_users_in_group($group);
     } else {
         // Here 'ra.id field added to avoid printing debug message,
@@ -325,7 +325,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
 
     // This is not pretty. But we can do better.
     if (strcmp($event->eventtype, 'gradingdue') == 0 && isset($context)) {
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($sendusers as $guser) {
             if (has_capability('mod/assign:grade', $context, $guser)) {
                 $filteredusers[] = $guser;
@@ -408,7 +408,7 @@ function process_unknown_event($event, $aheadday, $activityroleids=null, $showtr
 function process_course_event($event, $aheadday, $courseroleids=null, $showtrace=true) {
     global $DB, $PAGE;
 
-    $course = $DB->get_record('course', array('id' => $event->courseid));
+    $course = $DB->get_record('course', ['id' => $event->courseid]);
     if (is_course_hidden_and_denied($course)) {
         $showtrace && mtrace("  [Local Reminder] Course is hidden. No reminders will be sent.");
         return null;
@@ -417,14 +417,14 @@ function process_course_event($event, $aheadday, $courseroleids=null, $showtrace
         return null;
     }
 
-    $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $event->courseid));
+    $coursesettings = $DB->get_record('local_reminders_course', ['courseid' => $event->courseid]);
     if (isset($coursesettings->status_course) && $coursesettings->status_course == 0) {
         $showtrace && mtrace("  [Local Reminder] Reminders for course events has been restricted.");
         return null;
     }
 
     if (!empty($course)) {
-        $sendusers = array();
+        $sendusers = [];
         get_users_of_course($course->id, $courseroleids, $sendusers);
 
         $reminder = new course_reminder($event, $course, $aheadday);
@@ -461,7 +461,7 @@ function process_category_event($event, $aheadday, $courseroleids=null, $showtra
     }
     $showtrace && mtrace("   [LOCAL REMINDERS] Course category: $catid => $cat->name");
     $childrencourses = $cat->get_courses(['recursive' => true]);
-    $allusers = array();
+    $allusers = [];
     $currenttime = time();
     $allcourses = isset($CFG->local_reminders_category_noforcompleted) && !$CFG->local_reminders_category_noforcompleted;
     foreach ($childrencourses as $course) {
@@ -488,12 +488,12 @@ function process_category_event($event, $aheadday, $courseroleids=null, $showtra
 function process_group_event($event, $aheadday, $showtrace=true) {
     global $DB, $PAGE;
 
-    $group = $DB->get_record('groups', array('id' => $event->groupid));
+    $group = $DB->get_record('groups', ['id' => $event->groupid]);
     if (!empty($group)) {
         if (!empty($group->courseid)) {
             $PAGE->set_context(context_course::instance($group->courseid));
         }
-        $coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $group->courseid));
+        $coursesettings = $DB->get_record('local_reminders_course', ['courseid' => $group->courseid]);
         if (isset($coursesettings->status_group) && $coursesettings->status_group == 0) {
             $showtrace && mtrace("  [Local Reminder] Reminders for group events has been restricted in the configs.");
             return null;
@@ -521,7 +521,7 @@ function process_group_event($event, $aheadday, $showtrace=true) {
 function process_user_event($event, $aheadday) {
     global $DB;
 
-    $user = $DB->get_record('user', array('id' => $event->userid, 'deleted' => 0));
+    $user = $DB->get_record('user', ['id' => $event->userid, 'deleted' => 0]);
 
     if (!empty($user)) {
         $reminder = new user_reminder($event, $user, $aheadday);
@@ -558,9 +558,9 @@ function get_roles_for_reminders() {
     global $CFG;
 
     $allroles = get_all_roles();
-    $courseroleids = array();
-    $activityroleids = array();
-    $categoryroleids = array();
+    $courseroleids = [];
+    $activityroleids = [];
+    $categoryroleids = [];
     if (!empty($allroles)) {
         $flag = 0;
         foreach ($allroles as $arole) {
@@ -579,11 +579,11 @@ function get_roles_for_reminders() {
             $flag++;
         }
     }
-    return array(
+    return [
         $courseroleids,
         $activityroleids,
         $categoryroleids,
-    );
+    ];
 }
 
 /**
@@ -727,7 +727,7 @@ function get_active_role_users($activityroleids, $context) {
     return get_role_users($activityroleids, $context, true, 'ra.id as ra_id, u.*',
                     null, false, '', '', '',
                     'ue.status = :userenrolstatus',
-                    array('userenrolstatus' => ENROL_USER_ACTIVE));
+                    ['userenrolstatus' => ENROL_USER_ACTIVE]);
 }
 
 /**
@@ -748,7 +748,7 @@ function filter_user_group_overrides($event, $sendusers, $showtrace) {
 
     $showtrace && mtrace("  [Local Reminder] Event supports overrides for key ");
     $idcolumn = REMINDERS_SUPPORTED_OVERRIDES_REF_IDS[$event->modulename];
-    $overridesrecords = $DB->get_records($event->modulename.'_overrides', array($idcolumn => $event->instance));
+    $overridesrecords = $DB->get_records($event->modulename.'_overrides', [$idcolumn => $event->instance]);
     if (empty($overridesrecords)) {
         $showtrace && mtrace("  [Local Reminder] No overrides for activity ".$event->instance."!");
         return $sendusers;
@@ -788,12 +788,12 @@ function filter_user_group_overrides($event, $sendusers, $showtrace) {
 function get_users_in_group($group) {
     global $DB;
 
-    $sendusers = array();
+    $sendusers = [];
     $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
     if ($groupmemberroles) {
         foreach ($groupmemberroles as $roleid => $roledata) {
             foreach ($roledata->users as $member) {
-                $sendusers[] = $DB->get_record('user', array('id' => $member->id));
+                $sendusers[] = $DB->get_record('user', ['id' => $member->id]);
             }
         }
     }
@@ -848,7 +848,7 @@ function isemptystring($str) {
 function fetch_module_instance($modulename, $instance, $courseid=0, $showtrace=true) {
     global $DB;
 
-    $params = array('instance' => $instance, 'modulename' => $modulename);
+    $params = ['instance' => $instance, 'modulename' => $modulename];
 
     $courseselect = "";
 
@@ -933,7 +933,7 @@ class local_reminders_tz_info extends core_date {
      * @return void.
      */
     private static function load_tz_info() {
-        self::$mapping = array();
+        self::$mapping = [];
         foreach (static::$badzones as $detailname => $abbr) {
             if (!is_numeric($detailname)) {
                 self::$mapping[$abbr] = $detailname;

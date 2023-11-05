@@ -178,7 +178,7 @@ abstract class local_reminder {
      */
     public function write_table_row($headervalue, $value, $customizedstyle=null, $overridestyle=true) {
         $htmltext = html_writer::start_tag('tr');
-        $defheadercss = array('style' => $this->defheaderstyle);
+        $defheadercss = ['style' => $this->defheaderstyle];
         if (isset($customizedstyle)) {
             $finalstyles = $customizedstyle;
             if (!$overridestyle) {
@@ -212,7 +212,7 @@ abstract class local_reminder {
      */
     protected function write_description($description, $event) {
         $htmltext = html_writer::start_tag('tr');
-        $columndescstyle = array('style' => $this->descstyle, 'colspan' => 2);
+        $columndescstyle = ['style' => $this->descstyle, 'colspan' => 2];
         if (isemptystring($description)) {
             $htmltext .= html_writer::tag('td', "<p>$event->name</p>", $columndescstyle);
         } else {
@@ -282,15 +282,15 @@ abstract class local_reminder {
 
         $footer = html_writer::start_tag('tr');
         $moodlecalendarname = get_string('moodlecalendarname', 'local_reminders');
-        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', $moodlecalendarname, array('target' => '_blank'));
+        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', $moodlecalendarname, ['target' => '_blank']);
 
         if (isset($CFG->local_reminders_emailfooterdefaultenabled) && $CFG->local_reminders_emailfooterdefaultenabled) {
-            $footer .= html_writer::start_tag('td', array('style' => $this->footerdefstyle, 'colspan' => 2));
+            $footer .= html_writer::start_tag('td', ['style' => $this->footerdefstyle, 'colspan' => 2]);
             $footer .= get_string('reminderfrom', 'local_reminders').' ';
             $footer .= $calendarlink;
 
         } else if (isset($CFG->local_reminders_emailfootercustom) && trim($CFG->local_reminders_emailfootercustom) !== '') {
-            $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
+            $footer .= html_writer::start_tag('td', ['style' => $this->footerstyle, 'colspan' => 2]);
             $footer .= text_to_html($CFG->local_reminders_emailfootercustom, false, false, true);
 
         } else {
@@ -307,9 +307,9 @@ abstract class local_reminder {
      * @return string complete url for the event
      */
     protected function generate_event_link() {
-        $params = array('view' => 'day', 'cal_d' => date('j', $this->event->timestart),
+        $params = ['view' => 'day', 'cal_d' => date('j', $this->event->timestart),
             'cal_m' => date('n', $this->event->timestart), 'cal_y' => date('Y', $this->event->timestart),
-        );
+        ];
         $calurl = new moodle_url('/calendar/view.php', $params);
         $calurl->set_anchor('event_'.$this->event->id);
 
@@ -365,7 +365,7 @@ abstract class local_reminder {
         $urlinfo = parse_url($CFG->wwwroot);
         $hostname = $urlinfo['host'];
 
-        return array('Message-ID: <moodlereminder'.$this->event->id.'@'.$hostname.'>');
+        return ['Message-ID: <moodlereminder'.$this->event->id.'@'.$hostname.'>'];
     }
 
     /**

@@ -137,7 +137,7 @@ class local_reminder_generic_handler extends local_reminder_activity_handler {
      * @return array array of filtered users.
      */
     public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
@@ -204,7 +204,7 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
         global $CFG;
         require_once($CFG->dirroot . '/mod/quiz/lib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $canattempt = has_capability('mod/quiz:attempt', $coursemodulecontext, $auser);
             if (!$canattempt) {
@@ -263,7 +263,7 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
         require_once($CFG->dirroot . '/mod/assign/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/assign:submit', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -339,7 +339,7 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
         require_once($CFG->dirroot . '/mod/choice/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/choice:choose', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -393,7 +393,7 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
         require_once($CFG->dirroot . '/mod/feedback/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/feedback:complete', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -447,7 +447,7 @@ class local_reminder_lesson_handler extends local_reminder_activity_handler {
         global $CFG;
         require_once($CFG->dirroot . '/mod/lesson/lib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/lesson:view', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -519,7 +519,7 @@ class local_reminder_survey_handler extends local_reminder_activity_handler {
         global $CFG;
         require_once($CFG->dirroot . '/mod/survey/lib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/survey:participate', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -572,7 +572,7 @@ class local_reminder_resource_handler extends local_reminder_activity_handler {
         global $CFG;
         require_once($CFG->dirroot . '/mod/resource/lib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/resource:view', $coursemodulecontext, $auser);
             if (!$cansubmit) {

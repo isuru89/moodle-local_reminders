@@ -29,10 +29,10 @@ $activityprefix = 'activity_';
 
 $courseid = required_param('courseid', PARAM_INT);
 
-$return = new moodle_url('/course/view.php', array('id' => $courseid));
+$return = new moodle_url('/course/view.php', ['id' => $courseid]);
 
-$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
-$coursesettings = $DB->get_record('local_reminders_course', array('courseid' => $courseid));
+$course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
+$coursesettings = $DB->get_record('local_reminders_course', ['courseid' => $courseid]);
 if (!$coursesettings) {
     $coursesettings = new stdClass();
 }
@@ -40,9 +40,9 @@ $coursesettings->courseid = $courseid;
 $coursesettings->explicitenable = isset($CFG->local_reminders_explicitenable) && $CFG->local_reminders_explicitenable;
 $coursecontext = context_course::instance($course->id);
 
-$activitysettings = $DB->get_records('local_reminders_activityconf', array('courseid' => $courseid));
+$activitysettings = $DB->get_records('local_reminders_activityconf', ['courseid' => $courseid]);
 if (!$activitysettings) {
-    $activitysettings = array();
+    $activitysettings = [];
 } else {
     foreach ($activitysettings as $asetting) {
         $actkey = 'activity_'.$asetting->eventid.'_'.$asetting->settingkey;
@@ -52,9 +52,9 @@ if (!$activitysettings) {
 
 $globalactivityaheaddays = $CFG->local_reminders_duerdays;
 if (!isset($globalactivityaheaddays)) {
-    $globalactivityaheaddays = array(0, 0, 0);
+    $globalactivityaheaddays = [0, 0, 0];
 }
-$aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
+$aheaddaysindex = [7 => 0, 3 => 1, 1 => 2];
 foreach ($aheaddaysindex as $dkey => $dvalue) {
     $daykey = 'activityglobal_days'.$dkey;
     $coursesettings->$daykey = $globalactivityaheaddays[$dvalue];
@@ -64,11 +64,11 @@ require_login($course);
 require_capability('moodle/course:update', $coursecontext);
 
 $PAGE->set_pagelayout('admin');
-$PAGE->set_url('/local/reminders/coursesettings.php', array('courseid' => $courseid));
+$PAGE->set_url('/local/reminders/coursesettings.php', ['courseid' => $courseid]);
 $PAGE->set_title(get_string('admintreelabel', 'local_reminders'));
 $PAGE->set_heading($course->fullname);
 
-$mform = new local_reminders_coursesettings_edit_form(null, array($coursesettings));
+$mform = new local_reminders_coursesettings_edit_form(null, [$coursesettings]);
 
 if ($mform->is_cancelled()) {
     redirect($return);
@@ -91,7 +91,7 @@ if ($mform->is_cancelled()) {
             $status = $DB->get_record_sql("SELECT id
                 FROM {local_reminders_activityconf}
                 WHERE courseid = :courseid AND eventid = :eventid AND settingkey = :settingkey",
-                array('courseid' => $data->courseid, 'eventid' => $eventid, 'settingkey' => $keyparts[2]));
+                ['courseid' => $data->courseid, 'eventid' => $eventid, 'settingkey' => $keyparts[2]]);
 
             $actdata = new stdClass();
             $actdata->courseid = $data->courseid;

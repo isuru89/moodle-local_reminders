@@ -66,11 +66,11 @@ class category_reminder extends local_reminder {
      */
     public function get_message_html($user=null, $changetype=null, $ctxinfo=null) {
         $htmlmail = $this->get_html_header();
-        $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
+        $htmlmail .= html_writer::start_tag('body', ['id' => 'email']);
         $htmlmail .= $this->get_reminder_header();
         $htmlmail .= html_writer::start_tag('div');
         $htmlmail .= html_writer::start_tag('table',
-                array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+                ['cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle]);
 
         $contenttitle = $this->get_message_title();
         if (!isemptystring($changetype)) {
@@ -78,10 +78,10 @@ class category_reminder extends local_reminder {
             $contenttitle = "[$titleprefixlangstr]: $contenttitle";
         }
         $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
+        $htmlmail .= html_writer::start_tag('td', ['colspan' => 2]);
         $htmlmail .= html_writer::link($this->generate_event_link(),
-                html_writer::tag('h3', $contenttitle, array('style' => $this->titlestyle)),
-                array('style' => 'text-decoration: none'));
+                html_writer::tag('h3', $contenttitle, ['style' => $this->titlestyle]),
+                ['style' => 'text-decoration: none']);
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
         $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),

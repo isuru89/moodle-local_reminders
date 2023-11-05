@@ -113,7 +113,7 @@ class group_reminder extends local_reminder {
     private function load_course_object() {
         global $DB;
 
-        $this->course = $DB->get_record('course', array('id' => $this->group->courseid));
+        $this->course = $DB->get_record('course', ['id' => $this->group->courseid]);
         if (!empty($this->course) && !empty($this->event->instance)) {
             $cmx = get_coursemodule_from_instance($this->event->modulename, $this->event->instance, $this->group->courseid);
             if (!empty($cmx)) {
@@ -134,11 +134,11 @@ class group_reminder extends local_reminder {
         global $CFG;
 
         $htmlmail = $this->get_html_header();
-        $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
+        $htmlmail .= html_writer::start_tag('body', ['id' => 'email']);
         $htmlmail .= $this->get_reminder_header();
         $htmlmail .= html_writer::start_tag('div');
         $htmlmail .= html_writer::start_tag('table',
-                array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+                ['cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle]);
 
         $contenttitle = $this->get_message_title();
         if (!isemptystring($changetype)) {
@@ -146,10 +146,10 @@ class group_reminder extends local_reminder {
             $contenttitle = "[$titleprefixlangstr]: $contenttitle";
         }
         $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
+        $htmlmail .= html_writer::start_tag('td', ['colspan' => 2]);
         $htmlmail .= html_writer::link($this->generate_event_link(),
-                html_writer::tag('h3', $contenttitle, array('style' => $this->titlestyle)),
-                array('style' => 'text-decoration: none'));
+                html_writer::tag('h3', $contenttitle, ['style' => $this->titlestyle]),
+                ['style' => 'text-decoration: none']);
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
         $htmlmail .= $this->write_table_row(get_string('contentwhen', 'local_reminders'),
@@ -163,7 +163,7 @@ class group_reminder extends local_reminder {
         if (!empty($this->cm)) {
             $cmlink = html_writer::link($this->cm->get_url(), $this->cm->get_context_name());
             $htmlmail .= $this->write_table_row(get_string('contenttypeactivity', 'local_reminders'),
-                $cmlink, array('target' => '_blank'), false);
+                $cmlink, ['target' => '_blank'], false);
         }
 
         if (isset($CFG->local_reminders_groupshowname) && $CFG->local_reminders_groupshowname) {

@@ -76,8 +76,8 @@ define('REMINDERS_CALL_TYPE_OVERDUE', 'OVERDUE');
 define('REMINDERS_CLEAN_TABLE', 'local_reminders');
 define('REMINDERS_ENABLED_KEY', 'enabled');
 
-define('REMINDERS_SUPPORTED_OVERRIDES', array('assign', 'quiz'));
-define('REMINDERS_SUPPORTED_OVERRIDES_REF_IDS', array('assign' => 'assignid', 'quiz' => 'quiz'));
+define('REMINDERS_SUPPORTED_OVERRIDES', ['assign', 'quiz']);
+define('REMINDERS_SUPPORTED_OVERRIDES_REF_IDS', ['assign' => 'assignid', 'quiz' => 'quiz']);
 
 /**
  * ======== FUNCTIONS =========================================
@@ -115,8 +115,8 @@ function local_reminders_cron_task() {
 function local_reminders_cron_pre($currtime, $timewindowstart) {
     global $CFG, $DB;
 
-    $aheaddaysindex = array(7 => 0, 3 => 1, 1 => 2);
-    $eventtypearray = array('site', 'user', 'course', 'due', 'group');
+    $aheaddaysindex = [7 => 0, 3 => 1, 1 => 2];
+    $eventtypearray = ['site', 'user', 'course', 'due', 'group'];
 
     // Loading roles allowed to receive reminder messages from configuration.
     $tmprolesreminders = get_roles_for_reminders();
@@ -128,10 +128,10 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
     $timewindowend = $currtime;
 
     // Now lets filter appropiate events to send reminders.
-    $secondsaheads = array(REMINDERS_7DAYSBEFORE_INSECONDS,
+    $secondsaheads = [REMINDERS_7DAYSBEFORE_INSECONDS,
         REMINDERS_3DAYSBEFORE_INSECONDS,
         REMINDERS_1DAYBEFORE_INSECONDS,
-    );
+    ];
 
     // Append custom schedule if any of event categories has defined it.
     foreach ($eventtypearray as $etype) {
@@ -173,7 +173,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
     mtrace("   [Local Reminder] Found ".count($upcomingevents)." upcoming events. Continuing...");
 
     $fromuser = get_from_user();
-    $excludedmodules = array();
+    $excludedmodules = [];
     if (isset($CFG->local_reminders_excludedmodulenames)) {
         $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
     }
@@ -334,7 +334,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
         $triedcount++;
 
         $sendusers = $reminderref->get_sending_users();
-        $alreadysentuserids = array();
+        $alreadysentuserids = [];
 
         foreach ($sendusers as $touser) {
 
@@ -424,7 +424,7 @@ function add_flag_record_db($timewindowend, $crontype = '') {
 function get_timewindow_starttime($currtime) {
     global $DB;
 
-    $logrows = $DB->get_records("local_reminders", array(), 'time DESC', '*', 0, 1);
+    $logrows = $DB->get_records("local_reminders", [], 'time DESC', '*', 0, 1);
 
     $timewindowstart = $currtime;
     if (!$logrows) {  // This is the first cron cycle, after plugin is just installed.
@@ -492,7 +492,7 @@ function when_calendar_event_updated($updateevent, $changetype) {
     }
     $aheadday = floor($diffsecondsuntil / (REMINDERS_DAYIN_SECONDS * 1.0));
 
-    $excludedmodules = array();
+    $excludedmodules = [];
     if (isset($CFG->local_reminders_excludedmodulenames)) {
         $excludedmodules = explode(',', $CFG->local_reminders_excludedmodulenames);
     }
@@ -609,7 +609,7 @@ function local_reminders_extend_settings_navigation($settingsnav, $context) {
 
     if ($settingnode = $settingsnav->find('courseadmin', navigation_node::TYPE_COURSE)) {
         $name = get_string('admintreelabel', 'local_reminders');
-        $url = new moodle_url('/local/reminders/coursesettings.php', array('courseid' => $PAGE->course->id));
+        $url = new moodle_url('/local/reminders/coursesettings.php', ['courseid' => $PAGE->course->id]);
         $navnode = navigation_node::create(
             $name,
             $url,
