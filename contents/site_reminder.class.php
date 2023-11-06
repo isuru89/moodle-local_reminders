@@ -92,9 +92,9 @@ class site_reminder extends local_reminder {
      * @return string Message content as plain-text.
      */
     public function get_message_plaintext($user = null, $changetype = null) {
-        $text  = $this->get_message_title() . ' [' . $this->pluralize($this->aheaddays, ' day') . ' to go]' . "\n";
-        $text .= get_string('contentwhen', 'local_reminders') . ': ' . $this->get_tzinfo_plain($user, $this->event) . "\n";
-        $text .= get_string('contentdescription', 'local_reminders') . ': ' . $this->event->description . "\n";
+        $text  = $this->get_message_title() . ' [' . $this->pluralize($this->aheaddays, ' day') . ' to go]' . PHP_EOL;
+        $text .= get_string('contentwhen', 'local_reminders') . ': ' . $this->get_tzinfo_plain($user, $this->event) . PHP_EOL;
+        $text .= get_string('contentdescription', 'local_reminders') . ': ' . $this->event->description . PHP_EOL;
 
         return $text;
     }

@@ -210,16 +210,16 @@ class group_reminder extends local_reminder {
      * @return string Message content as plain-text.
      */
     public function get_message_plaintext($user = null, $changetype = null) {
-        $text  = $this->get_message_title() . ' [' . $this->pluralize($this->aheaddays, ' day') . ' to go]' . "\n";
-        $text .= get_string('contentwhen', 'local_reminders') . ': ' . $this->get_tzinfo_plain($user, $this->event) . "\n";
+        $text  = $this->get_message_title() . ' [' . $this->pluralize($this->aheaddays, ' day') . ' to go]' . PHP_EOL;
+        $text .= get_string('contentwhen', 'local_reminders') . ': ' . $this->get_tzinfo_plain($user, $this->event) . PHP_EOL;
         if (!empty($this->course)) {
-            $text .= get_string('contenttypecourse', 'local_reminders') . ': ' . $this->course->fullname . "\n";
+            $text .= get_string('contenttypecourse', 'local_reminders') . ': ' . $this->course->fullname . PHP_EOL;
         }
         if (!empty($this->cm)) {
-            $text .= get_string('contenttypeactivity', 'local_reminders') . ': ' . $this->cm->get_context_name() . "\n";
+            $text .= get_string('contenttypeactivity', 'local_reminders') . ': ' . $this->cm->get_context_name() . PHP_EOL;
         }
-        $text .= get_string('contenttypegroup', 'local_reminders') . ': ' . $this->group->name . "\n";
-        $text .= get_string('contentdescription', 'local_reminders') . ': ' . $this->event->description . "\n";
+        $text .= get_string('contenttypegroup', 'local_reminders') . ': ' . $this->group->name . PHP_EOL;
+        $text .= get_string('contentdescription', 'local_reminders') . ': ' . $this->event->description . PHP_EOL;
 
         return $text;
     }
