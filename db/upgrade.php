@@ -54,7 +54,6 @@ function xmldb_local_reminders_upgrade($oldversion) {
     // Put any upgrade step following this.
 
     if ($oldversion < 2014121301) {
-
         // Define table local_reminders_course to be created.
         $table = new xmldb_table('local_reminders_course');
 

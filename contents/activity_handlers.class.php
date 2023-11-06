@@ -32,7 +32,6 @@ defined('MOODLE_INTERNAL') || die;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class local_reminder_activity_handler {
-
     /**
      * This function will format/append reminder messages with necessary info
      * based on constraints in that activity instance.
@@ -45,7 +44,7 @@ abstract class local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user = null, $event = null, $reminder = null) {
         // Do nothing.
     }
 
@@ -89,10 +88,10 @@ abstract class local_reminder_activity_handler {
 
         $daytimeformat = get_string('strftimedaydate', 'langconfig');
         $utimeformat = get_correct_timeformat_user($user);
-        return userdate($datetime, $daytimeformat, $tzone).
-            ' '.userdate($datetime, $utimeformat, $tzone).
-            ' &nbsp;&nbsp;<span style="'.$reminder->tzshowstyle.'">'.
-            local_reminders_tz_info::get_human_readable_tz($tzone).'</span>';
+        return userdate($datetime, $daytimeformat, $tzone) .
+            ' ' . userdate($datetime, $utimeformat, $tzone) .
+            ' &nbsp;&nbsp;<span style="' . $reminder->tzshowstyle . '">' .
+            local_reminders_tz_info::get_human_readable_tz($tzone) . '</span>';
     }
 
     /**
@@ -110,7 +109,6 @@ abstract class local_reminder_activity_handler {
         }
         return false;
     }
-
 }
 
 /**
@@ -124,7 +122,6 @@ abstract class local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_generic_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have completed this module using Moodle core completion API.
      *
@@ -171,7 +168,6 @@ class local_reminder_generic_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_quiz_handler extends local_reminder_activity_handler {
-
     /**
      * Returns description of the quiz activity if only quiz has not yet started.
      *
@@ -229,11 +225,12 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user = null, $event = null, $reminder = null) {
         if (isset($activity->timelimit) && $activity->timelimit > 0) {
             $htmlmail .= $reminder->write_table_row(
                 get_string('timelimit', 'quiz'),
-                format_time($activity->timelimit));
+                format_time($activity->timelimit)
+            );
         }
     }
 }
@@ -246,7 +243,6 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_assign_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have submitted assignment.
      *
@@ -288,11 +284,12 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user = null, $event = null, $reminder = null) {
         if (isset($activity->cutoffdate) && $activity->cutoffdate > 0) {
             $htmlmail .= $reminder->write_table_row(
                 get_string('cutoffdate', 'assign'),
-                $this->format_datetime($activity->cutoffdate, $user, $reminder));
+                $this->format_datetime($activity->cutoffdate, $user, $reminder)
+            );
         }
     }
 
@@ -322,7 +319,6 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_choice_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have submitted choice.
      *
@@ -376,7 +372,6 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_feedback_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have submitted feedback.
      *
@@ -431,7 +426,6 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_lesson_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have completed lesson activity.
      *
@@ -472,11 +466,12 @@ class local_reminder_lesson_handler extends local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user = null, $event = null, $reminder = null) {
         if (isset($activity->timelimit) && $activity->timelimit > 0) {
             $htmlmail .= $reminder->write_table_row(
                 get_string('timelimit', 'lesson'),
-                format_time($activity->timelimit));
+                format_time($activity->timelimit)
+            );
         }
     }
 
@@ -503,7 +498,6 @@ class local_reminder_lesson_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_survey_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have submitted survey.
      *
@@ -556,7 +550,6 @@ class local_reminder_survey_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_resource_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have completed this resource.
      *

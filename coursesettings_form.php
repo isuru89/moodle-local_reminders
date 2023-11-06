@@ -24,8 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/local/reminders/locallib.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/local/reminders/locallib.php');
 
 /**
  * Form class for editing course specific reminder settings.
@@ -35,7 +35,6 @@ require_once($CFG->dirroot.'/local/reminders/locallib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminders_coursesettings_edit_form extends moodleform {
-
     /**
      * Creates the form definition using received information.
      *
@@ -44,9 +43,9 @@ class local_reminders_coursesettings_edit_form extends moodleform {
     public function definition() {
         global $USER;
 
-        $daysarray = ['days7' => ' '.get_string('days7', 'local_reminders'),
-            'days3' => ' '.get_string('days3', 'local_reminders'),
-            'days1' => ' '.get_string('days1', 'local_reminders'),
+        $daysarray = ['days7' => ' ' . get_string('days7', 'local_reminders'),
+            'days3' => ' ' . get_string('days3', 'local_reminders'),
+            'days1' => ' ' . get_string('days1', 'local_reminders'),
         ];
 
         $mform = $this->_form;
@@ -54,23 +53,36 @@ class local_reminders_coursesettings_edit_form extends moodleform {
         $explicitlyenable = $coursesettings->explicitenable;
 
         if ($explicitlyenable) {
-            $mform->addElement('static', 'descriptionex2sub', '',
-                get_string('activityconfexplicitenablehint', 'local_reminders'));
+            $mform->addElement(
+                'static',
+                'descriptionex2sub',
+                '',
+                get_string('activityconfexplicitenablehint', 'local_reminders')
+            );
         }
 
-        $mform->addElement('advcheckbox', 'status_activities',
+        $mform->addElement(
+            'advcheckbox',
+            'status_activities',
             get_string('dueheading', 'local_reminders'),
-            get_string('enabled', 'local_reminders'));
+            get_string('enabled', 'local_reminders')
+        );
         $mform->setDefault('status_activities', 1);
 
-        $mform->addElement('advcheckbox', 'status_course',
+        $mform->addElement(
+            'advcheckbox',
+            'status_course',
             get_string('courseheading', 'local_reminders'),
-            get_string('enabled', 'local_reminders'));
+            get_string('enabled', 'local_reminders')
+        );
         $mform->setDefault('status_course', 1);
 
-        $mform->addElement('advcheckbox', 'status_group',
+        $mform->addElement(
+            'advcheckbox',
+            'status_group',
             get_string('groupheading', 'local_reminders'),
-            get_string('enabled', 'local_reminders'));
+            get_string('enabled', 'local_reminders')
+        );
         $mform->setDefault('status_group', 1);
 
         $mform->addElement('hidden', 'courseid');
@@ -87,8 +99,11 @@ class local_reminders_coursesettings_edit_form extends moodleform {
         $currtime = time() - (24 * 3600);
         $upcomingactivities = get_upcoming_events_for_course($coursesettings->courseid, $currtime);
         $noactivities = true;
-        $mform->addElement('header', 'description',
-                get_string('activityconfupcomingactivities', 'local_reminders'));
+        $mform->addElement(
+            'header',
+            'description',
+            get_string('activityconfupcomingactivities', 'local_reminders')
+        );
 
         if (!empty($upcomingactivities)) {
             // Group activities by start time.
@@ -104,13 +119,18 @@ class local_reminders_coursesettings_edit_form extends moodleform {
             ksort($allactivities);
             $upcomingactivities = $allactivities;
 
-            $mform->addElement('static', 'descriptionsub', '',
-                get_string('activityconfupcomingactivitiesdesc', 'local_reminders'));
+            $mform->addElement(
+                'static',
+                'descriptionsub',
+                '',
+                get_string('activityconfupcomingactivitiesdesc', 'local_reminders'),
+            );
 
             $daytimeformat = get_string('strftimedaydate', 'langconfig');
             $tzone = reminders_get_timezone($USER);
             foreach ($upcomingactivities as $daytime => $dailyactivities) {
-                $mform->addElement('static', 'header'.$daytime, '<h4><b>'.userdate($daytime, $daytimeformat, $tzone).'</b></h4>');
+                $mform->addElement('static', 'header' . $daytime, '<h4><b>' .
+                    userdate($daytime, $daytimeformat, $tzone) . '</b></h4>');
                 $isfirstone = true;
 
                 foreach ($dailyactivities as $activity) {
@@ -118,50 +138,63 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                     $activityname = $activity->name;
                     if (!isemptystring($activity->modulename)) {
                         $modinfo = fetch_module_instance($activity->modulename, $activity->instance, $coursesettings->courseid);
-                        $activitytypename = get_string('pluginname', $activity->modulename).': ';
+                        $activitytypename = get_string('pluginname', $activity->modulename) . ': ';
                         $activityname = $modinfo->name ?? $activity->name;
                     }
 
                     if (!$isfirstone) {
-                        $mform->addElement('static', 'duetime'.$daytime.$activity->modulename.$activity->instance,
+                        $mform->addElement(
+                            'static',
+                            'duetime' . $daytime . $activity->modulename . $activity->instance,
                             '',
-                            '<div style="color: #ddd;">'.str_repeat('_', 70).'</div>');
+                            '<div style="color: #ddd;">' . str_repeat('_', 70) . '</div>'
+                        );
                     }
 
                     $eventlink = $this->generate_event_link($activity);
-                    $friendlyeventtypetext = $this->load_string_safe('eventtype'.$activity->eventtype, '');
-                    $mform->addElement('static', 'header'.$daytime.$activity->modulename.$activity->instance,
+                    $friendlyeventtypetext = $this->load_string_safe('eventtype' . $activity->eventtype, '');
+                    $mform->addElement(
+                        'static',
+                        'header' . $daytime . $activity->modulename . $activity->instance,
                         '',
-                        '<h5><b><a href="'.$eventlink.'">'.$activitytypename.$activityname
-                        ."</a></b></h5>$friendlyeventtypetext");
-                    $mform->addElement('static', 'duetime'.$daytime.$activity->modulename.$activity->instance,
+                        '<h5><b><a href="' . $eventlink . '">' . $activitytypename . $activityname .
+                        "</a></b></h5>$friendlyeventtypetext"
+                    );
+                    $mform->addElement(
+                        'static',
+                        'duetime' . $daytime . $activity->modulename . $activity->instance,
                         get_string('activityconfduein', 'local_reminders'),
-                        userdate($activity->timestart, get_string('strftimedatetime', 'langconfig'), $tzone));
+                        userdate($activity->timestart, get_string('strftimedatetime', 'langconfig'), $tzone)
+                    );
 
-                    $key = "activity_".$activity->id.'_enabled';
+                    $key = "activity_" . $activity->id . '_enabled';
                     $mform->addElement('advcheckbox', $key, get_string('enabled', 'local_reminders'), ' ');
                     $mform->setDefault($key, $explicitlyenable ? 0 : 1);
 
                     $activitydayarray = [];
                     foreach ($daysarray as $dkey => $dvalue) {
                         $trefkey = "activityglobal_$dkey";
-                        $daykey = "activity_".$activity->id."_$dkey";
+                        $daykey = "activity_" . $activity->id . "_$dkey";
                         $activitydayarray[] = $mform->createElement('advcheckbox', $daykey, '', $dvalue);
                         if (!$explicitlyenable) {
                             $mform->disabledIf($daykey, $trefkey, 'eq', 0);
                         }
                         $mform->setDefault($daykey, $coursesettings->$trefkey);
                     }
-                    $groupkey = 'reminder_'.$activity->id.'_group';
-                    $daysgroup = $mform->addElement('group',
+                    $groupkey = 'reminder_' . $activity->id . '_group';
+                    $daysgroup = $mform->addElement(
+                        'group',
                         $groupkey,
                         get_string('reminderdaysaheadschedule', 'local_reminders'),
-                        $activitydayarray, null, false);
+                        $activitydayarray,
+                        null,
+                        false
+                    );
                     $mform->disabledIf($groupkey, $key, 'unchecked');
 
                     $overduesupports = $activity->eventtype != 'course' && $activity->eventtype != 'open';
                     if ($overduesupports) {
-                        $keyoverdue = "activity_".$activity->id.'_enabledoverdue';
+                        $keyoverdue = "activity_" . $activity->id . '_enabledoverdue';
                         $mform->addElement('advcheckbox', $keyoverdue, get_string('enabledoverdue', 'local_reminders'), ' ');
                         $mform->setDefault($keyoverdue, 1);
                     }
@@ -175,8 +208,12 @@ class local_reminders_coursesettings_edit_form extends moodleform {
         }
 
         if ($noactivities) {
-            $mform->addElement('static', 'descriptionsubnoact', '',
-                get_string('activityconfnoupcomingactivities', 'local_reminders'));
+            $mform->addElement(
+                'static',
+                'descriptionsubnoact',
+                '',
+                get_string('activityconfnoupcomingactivities', 'local_reminders')
+            );
         }
 
         $this->add_action_buttons(true);
@@ -191,7 +228,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
      * @param string $defaultvalue default value to load if nx.
      * @return string loaded string.
      */
-    private function load_string_safe($key, $defaultvalue='') {
+    private function load_string_safe($key, $defaultvalue = '') {
         $stringman = get_string_manager();
         if ($stringman->string_exists($key, 'local_reminders')) {
             return get_string($key, 'local_reminders');
@@ -208,7 +245,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
     private function generate_event_link($event) {
         $params = ['view' => 'day', 'time' => $event->timestart];
         $calurl = new moodle_url('/calendar/view.php', $params);
-        $calurl->set_anchor('event_'.$event->id);
+        $calurl->set_anchor('event_' . $event->id);
 
         return $calurl->out(false);
     }

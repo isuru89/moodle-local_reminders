@@ -40,7 +40,6 @@ require_once($CFG->dirroot . '/local/reminders/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class send_reminders extends scheduled_task {
-
     /**
      * Execute the main send reminders cron function.
      *
@@ -58,5 +57,4 @@ class send_reminders extends scheduled_task {
     public function get_name() {
         return get_string('reminderstask', 'local_reminders');
     }
-
 }
