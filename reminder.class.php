@@ -55,65 +55,71 @@ abstract class local_reminder {
      *
      * @var string
      */
-    protected $tbodycssstyle = 'width:100%;'.
-        'font-family:Tahoma,Arial,Sans-serif;'.
-        'border-width:1px 2px 2px 1px;'.
-        'border:1px solid #ccc;'.
-        'font-size:13px';
+    protected $tbodycssstyle =
+        'width:100%;
+        font-family:Tahoma,Arial,Sans-serif;
+        border-width:1px 2px 2px 1px;
+        border:1px solid #ccc;
+        font-size:13px';
     /**
      * CSS styles for title content.
      *
      * @var string
      */
-    protected $titlestyle = 'padding:10px 0 10px 0;'.
-        'margin:0;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:16px;'.
-        'font-weight:bold;'.
-        'color:#222';
+    protected $titlestyle =
+        'padding:10px 0 10px 0;
+        margin:0;
+        font-family:Arial,Sans-serif;
+        font-size:16px;
+        font-weight:bold;
+        color:#222';
     /**
      * CSS styles for overdue content.
      *
      * @var string
      */
-    protected $overduestyle = 'padding:10px 0 10px 10px;'.
-        'background-color: #f3e3e3;'.
-        'margin:0;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:16px;'.
-        'font-weight:bold;'.
-        'color:#ec4040';
+    protected $overduestyle =
+        'padding:10px 0 10px 10px;
+        background-color: #f3e3e3;
+        margin:0;
+        font-family:Arial,Sans-serif;
+        font-size:16px;
+        font-weight:bold;
+        color:#ec4040';
     /**
      * CSS styles for footer content.
      *
      * @var string
      */
-    protected $footerstyle = 'background-color:#f6f6f6;'.
-        'color:#888;'.
-        'border-top:1px solid #ccc;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:11px;'.
-        'padding: 0px;';
+    protected $footerstyle =
+        'background-color:#f6f6f6
+        color:#888;
+        border-top:1px solid #ccc;
+        font-family:Arial,Sans-serif;
+        font-size:11px;
+        padding: 0px;';
     /**
      * CSS styles for default footer content.
      *
      * @var string
      */
-    protected $footerdefstyle = 'background-color:#f6f6f6;'.
-        'color:#888;'.
-        'border-top:1px solid #ccc;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:11px;'.
-        'padding: 20px 10px;';
+    protected $footerdefstyle =
+        'background-color:#f6f6f6;
+        color:#888;
+        border-top:1px solid #ccc;
+        font-family:Arial,Sans-serif;
+        font-size:11px;
+        padding: 20px 10px;';
     /**
      * CSS style for description div.
      *
      * @var string
      */
-    protected $descstyle = 'border-top:1px solid #eee;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:13px;'.
-        'padding: 2px 15px;';
+    protected $descstyle =
+        'border-top:1px solid #eee;
+        font-family:Arial,Sans-serif;
+        font-size:13px;
+        padding: 2px 15px;';
     /**
      * CSS style for title header.
      *
