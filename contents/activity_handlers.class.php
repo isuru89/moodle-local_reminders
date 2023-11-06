@@ -61,14 +61,12 @@ abstract class local_reminder_activity_handler {
      * Filter out users who still does not have completed this activity.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         return $users;
     }
 
@@ -126,14 +124,12 @@ class local_reminder_generic_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have completed this module using Moodle core completion API.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         $filteredusers = [];
         foreach ($users as $auser) {
             $status = $this->check_completion_status($course, $coursemodule, $auser->id);
@@ -189,14 +185,12 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have finished the quiz.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/quiz/lib.php');
 
@@ -247,14 +241,12 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have submitted assignment.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/assign/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
@@ -323,14 +315,12 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have submitted choice.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/choice/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
@@ -376,14 +366,12 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have submitted feedback.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/feedback/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
@@ -430,14 +418,12 @@ class local_reminder_lesson_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have completed lesson activity.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/lesson/lib.php');
 
@@ -502,14 +488,12 @@ class local_reminder_survey_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have submitted survey.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/survey/lib.php');
 
@@ -554,14 +538,12 @@ class local_reminder_resource_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have completed this resource.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/resource/lib.php');
 

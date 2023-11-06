@@ -98,10 +98,9 @@ class due_reminder extends course_reminder {
      * Filter out users who still does not have completed this activity.
      *
      * @param array $users user array to check.
-     * @param string $type call type.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type = null) {
+    public function filter_authorized_users($users) {
         global $CFG;
 
         if (
@@ -117,8 +116,6 @@ class due_reminder extends course_reminder {
                 $handlercls = new $clsname();
                 return $handlercls->filter_authorized_users(
                     $users,
-                    $type,
-                    $this->activityobj,
                     $this->course,
                     $this->coursemodule,
                     $this->cm
@@ -128,8 +125,6 @@ class due_reminder extends course_reminder {
                     $handlercls = new local_reminder_generic_handler();
                     return $handlercls->filter_authorized_users(
                         $users,
-                        $type,
-                        $this->activityobj,
                         $this->course,
                         $this->coursemodule,
                         $this->cm

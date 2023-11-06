@@ -163,10 +163,9 @@ abstract class local_reminder {
      * Filter out users who still does not have completed this activity.
      *
      * @param array $users user array to check.
-     * @param string $type type of request. Pre|Post for now.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type = null) {
+    public function filter_authorized_users($users) {
         return $users;
     }
 

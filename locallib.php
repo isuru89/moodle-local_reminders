@@ -346,7 +346,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
     }
 
     $reminder->set_activity($event->modulename, $activityobj);
-    $filteredusers = $reminder->filter_authorized_users($sendusers, $options->calltype);
+    $filteredusers = $reminder->filter_authorized_users($sendusers);
     return new reminder_ref($reminder, $filteredusers);
 }
 
