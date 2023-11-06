@@ -521,6 +521,7 @@ function process_group_event($event, $aheadday, $showtrace = true) {
         $sendusers = get_users_in_group($group);
         return new reminder_ref($reminder, $sendusers);
     }
+    return null;
 }
 
 /**
