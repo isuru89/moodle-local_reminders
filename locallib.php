@@ -115,10 +115,9 @@ function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck = 
  *
  * @param object $event event instance reference.
  * @param object $options context options.
- * @param number $aheadday number of days ahead this activity belongs to.
  * @return bool true if reminders can sent, otherwise false.
  */
-function should_run_for_activity($event, $options, $aheadday = null) {
+function should_run_for_activity($event, $options) {
     global $CFG;
 
     $showtrace = $options->showtrace;
@@ -299,7 +298,7 @@ function handle_course_activity_event($event, $course, $cm, $options) {
     if (is_course_hidden_and_denied($course)) {
         $showtrace && mtrace("  [Local Reminder] Course is hidden. No reminders will be sent.");
         return null;
-    } else if (!should_run_for_activity($event, $options, $aheadday)) {
+    } else if (!should_run_for_activity($event, $options)) {
         return null;
     }
 
