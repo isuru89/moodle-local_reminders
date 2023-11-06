@@ -889,7 +889,7 @@ function fetch_module_instance($modulename, $instance, $courseid = 0, $showtrace
     try {
         return $DB->get_record_sql($sql, $params, IGNORE_MISSING);
     } catch (moodle_exception $mex) {
-        $showtrace && mtrace('  [Local Reminder - ERROR] Failed to fetch module instance! ' . $mex.getMessage);
+        $showtrace && mtrace('  [Local Reminder - ERROR] Failed to fetch module instance! ' . $mex->getMessage());
         return null;
     }
 }
