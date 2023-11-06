@@ -794,10 +794,9 @@ function filter_user_group_overrides($event, $sendusers, $showtrace) {
         }
     }
 
-    $finalarray = array_filter($sendusers, function ($it) use ($extendedusers) {
+    return array_filter($sendusers, function ($it) use ($extendedusers) {
         return !in_array($it->id, $extendedusers);
     });
-    return $finalarray;
 }
 
 
