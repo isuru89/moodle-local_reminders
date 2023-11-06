@@ -51,7 +51,7 @@ function get_upcoming_events_for_course($courseid, $currtime) {
 
     // When activity openings separation is enabled in global settings, we will retrieve those events too.
     if (isset($CFG->local_reminders_separateactivityopenings) && $CFG->local_reminders_separateactivityopenings) {
-        array_push($statuses, 'open');
+        $statuses[] = 'open';
     }
     list($insql, $inparams) = $DB->get_in_or_equal($statuses);
 

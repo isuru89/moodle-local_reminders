@@ -140,7 +140,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
             !empty($CFG->$tempconfigstr)
             && $CFG->$tempconfigstr > 0 && !in_array($CFG->$tempconfigstr, $secondsaheads)
         ) {
-            array_push($secondsaheads, $CFG->$tempconfigstr);
+            $secondsaheads[] = $CFG->$tempconfigstr;
         }
     }
 
