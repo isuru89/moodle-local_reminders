@@ -119,7 +119,7 @@ function has_disabled_reminders_for_activity($courseid, $eventid, $keytocheck = 
  * @return bool true if reminders can sent, otherwise false.
  */
 function should_run_for_activity($event, $options, $aheadday = null) {
-    global $DB, $CFG;
+    global $CFG;
 
     $showtrace = $options->showtrace;
     $aheadday = $options->aheadday;
@@ -418,7 +418,7 @@ function process_unknown_event($event, $aheadday, $activityroleids = null, $show
  * @return reminder_ref reminder reference instance.
  */
 function process_course_event($event, $aheadday, $courseroleids = null, $showtrace = true) {
-    global $DB, $PAGE;
+    global $DB;
 
     $course = $DB->get_record('course', ['id' => $event->courseid]);
     if (is_course_hidden_and_denied($course)) {

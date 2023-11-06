@@ -583,7 +583,7 @@ function when_calendar_event_updated($updateevent, $changetype) {
  * Cleans the local_reminders table by deleting older unnecessary records.
  */
 function clean_local_reminders_logs() {
-    global $CFG, $DB, $PAGE;
+    global $DB;
 
     $cutofftime = time() - REMINDERS_7DAYSBEFORE_INSECONDS;
     mtrace("  [Local Reminders][CLEAN] clean cutoff time: $cutofftime");
