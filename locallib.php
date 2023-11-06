@@ -870,6 +870,21 @@ function fetch_module_instance($modulename, $instance, $courseid=0, $showtrace=t
 }
 
 /**
+ * Returns filter_multilangsecond instance if filter is installed.
+ *
+ * @return filter_multilang2
+ */
+function get_multilangsecond_filter() {
+    $filterinfo = core_plugin_manager::instance()->get_plugin_info('filter_multilang2');
+    if ($filterinfo) {
+        require_once($filterinfo->rootdir . '/filter.php');
+        return new filter_multilang2(null, []);
+    } else {
+        return null;
+    }
+}
+
+/**
  * Returns the from user instance which should be send notifications.
  *
  * @return object from user object.
