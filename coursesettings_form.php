@@ -182,7 +182,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                         $mform->setDefault($daykey, $coursesettings->$trefkey);
                     }
                     $groupkey = 'reminder_' . $activity->id . '_group';
-                    $daysgroup = $mform->addElement(
+                    $mform->addElement(
                         'group',
                         $groupkey,
                         get_string('reminderdaysaheadschedule', 'local_reminders'),

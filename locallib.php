@@ -786,7 +786,7 @@ function filter_user_group_overrides($event, $sendusers, $showtrace) {
             $showtrace && mtrace("     Overrides for group id: " . $record->groupid);
             $groupmemberroles = groups_get_members_by_role($record->groupid, $event->courseid, 'u.id');
             if (!empty($groupmemberroles)) {
-                foreach ($groupmemberroles as $roleid => $roledata) {
+                foreach ($groupmemberroles as $roledata) {
                     foreach ($roledata->users as $member) {
                         $extendedusers[] = $member->id;
                     }
@@ -813,7 +813,7 @@ function get_users_in_group($group) {
     $sendusers = [];
     $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');
     if ($groupmemberroles) {
-        foreach ($groupmemberroles as $roleid => $roledata) {
+        foreach ($groupmemberroles as $roledata) {
             foreach ($roledata->users as $member) {
                 $sendusers[] = $DB->get_record('user', ['id' => $member->id]);
             }

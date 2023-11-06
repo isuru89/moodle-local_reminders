@@ -482,7 +482,6 @@ function when_calendar_event_updated($updateevent, $changetype) {
         return;
     }
 
-    $event = null;
     if ($changetype == REMINDERS_CALENDAR_EVENT_REMOVED) {
         $event = $updateevent->get_record_snapshot($updateevent->objecttable, $updateevent->objectid);
     } else {
@@ -575,8 +574,7 @@ function when_calendar_event_updated($updateevent, $changetype) {
     $ctxinfo->overduetitle = $CFG->local_reminders_overduewarnprefix ?? '';
     foreach ($sendusers as $touser) {
         $eventdata = $reminderref->get_updating_send_event($changetype, $fromuser, $touser, $ctxinfo);
-
-        $mailresult = message_send($eventdata);
+        message_send($eventdata);
     }
     $reminderref->cleanup();
 }

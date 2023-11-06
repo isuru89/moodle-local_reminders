@@ -163,7 +163,6 @@ class due_reminder extends course_reminder {
         $contenttitle = $this->get_message_title();
         if (!isemptystring($changetype)) {
             if (!is_null($ctxinfo) && property_exists($ctxinfo, 'overduetitle') && !isemptystring($ctxinfo->overduetitle)) {
-                $titleprefixlangstr = get_string('calendarevent' . strtolower($changetype) . 'prefix', 'local_reminders');
                 $contenttitle = "[$ctxinfo->overduetitle]: $contenttitle";
             }
         }

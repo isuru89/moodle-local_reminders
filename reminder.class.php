@@ -445,7 +445,6 @@ abstract class local_reminder {
 
         if ($refreshcontent) {
             $contenthtml = $this->get_message_html($user);
-            $titlehtml = $this->get_message_title();
             $smallmsg = $this->get_message_plaintext($user);
 
             $this->eventobject->fullmessagehtml = $contenthtml;
