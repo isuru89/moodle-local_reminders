@@ -152,7 +152,7 @@ class local_reminders_coursesettings_edit_form extends moodleform {
                     }
 
                     $eventlink = $this->generate_event_link($activity);
-                    $friendlyeventtypetext = $this->load_string_safe('eventtype' . $activity->eventtype, '');
+                    $friendlyeventtypetext = $this->load_string_safe('eventtype' . $activity->eventtype);
                     $mform->addElement(
                         'static',
                         'header' . $daytime . $activity->modulename . $activity->instance,
@@ -225,15 +225,14 @@ class local_reminders_coursesettings_edit_form extends moodleform {
      * Loads language string safely with default value if not exists.
      *
      * @param string $key key to load for.
-     * @param string $defaultvalue default value to load if nx.
      * @return string loaded string.
      */
-    private function load_string_safe($key, $defaultvalue = '') {
+    private function load_string_safe($key): string {
         $stringman = get_string_manager();
         if ($stringman->string_exists($key, 'local_reminders')) {
             return get_string($key, 'local_reminders');
         }
-        return $defaultvalue;
+        return '';
     }
 
     /**
