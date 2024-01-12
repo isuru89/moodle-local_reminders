@@ -4,8 +4,8 @@
 ![Moodle Version](https://img.shields.io/badge/moodle-%3E%3D%203.5-orange)
 ![Maturiy](https://img.shields.io/badge/maturity-STABLE-brightgreen)
 ![License](https://img.shields.io/badge/license-GPL%20v3-green)
-![Maintenance](https://img.shields.io/maintenance/yes/2022)
-[![Build Status](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml/badge.svg?branch=release_2.0)](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml)
+![Maintenance](https://img.shields.io/maintenance/yes/2024)
+[![Build Status](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml/badge.svg?branch=master)](https://github.com/isuru89/moodle-local_reminders/actions/workflows/moodle-ci.yml)
 
 This plugin will send email reminders for [Moodle](https://moodle.org/) calendar events.
 
