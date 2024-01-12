@@ -24,6 +24,8 @@
 
 namespace local_reminders\task;
 
+use core\task\scheduled_task;
+
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
@@ -37,8 +39,7 @@ require_once($CFG->dirroot . '/local/reminders/lib.php');
  * @copyright  2012 Isuru Madushanka Weerarathna
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class clean_reminders_logs extends \core\task\scheduled_task {
-
+class clean_reminders_logs extends scheduled_task {
     /**
      * Executes the cleaning cron task.
      *
@@ -56,5 +57,4 @@ class clean_reminders_logs extends \core\task\scheduled_task {
     public function get_name() {
         return get_string('reminderstaskclean', 'local_reminders');
     }
-
 }

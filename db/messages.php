@@ -24,30 +24,30 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$messageproviders = array (
+$messageproviders = [
 
     // Reminders for site events.
-    'reminders_site' => array (
-    ),
+    'reminders_site' => [
+    ],
 
     // Reminders for user events.
-    'reminders_user' => array (
-    ),
+    'reminders_user' => [
+    ],
 
     // Reminders for course events.
-    'reminders_course' => array (
-    ),
+    'reminders_course' => [
+    ],
 
     // Reminders for course events.
-    'reminders_coursecategory' => array (
-    ),
+    'reminders_coursecategory' => [
+    ],
 
     // Reminders for group events.
-    'reminders_group' => array (
-    ),
+    'reminders_group' => [
+    ],
 
     // Reminders for due events.
-    'reminders_due' => array (
-    ),
+    'reminders_due' => [
+    ],
 
-);
+];

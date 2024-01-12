@@ -23,7 +23,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+use core\message\message;
 
 /**
  * Abstract class for reminder object.
@@ -36,7 +36,6 @@ defined('MOODLE_INTERNAL') || die;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class local_reminder {
-
     /**
      * @var int number of days in advance to actual event.
      */
@@ -56,65 +55,71 @@ abstract class local_reminder {
      *
      * @var string
      */
-    protected $tbodycssstyle = 'width:100%;'.
-        'font-family:Tahoma,Arial,Sans-serif;'.
-        'border-width:1px 2px 2px 1px;'.
-        'border:1px solid #ccc;'.
-        'font-size:13px';
+    protected $tbodycssstyle =
+        'width:100%;
+        font-family:Tahoma,Arial,Sans-serif;
+        border-width:1px 2px 2px 1px;
+        border:1px solid #ccc;
+        font-size:13px';
     /**
      * CSS styles for title content.
      *
      * @var string
      */
-    protected $titlestyle = 'padding:10px 0 10px 0;'.
-        'margin:0;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:16px;'.
-        'font-weight:bold;'.
-        'color:#222';
+    protected $titlestyle =
+        'padding:10px 0 10px 0;
+        margin:0;
+        font-family:Arial,Sans-serif;
+        font-size:16px;
+        font-weight:bold;
+        color:#222';
     /**
      * CSS styles for overdue content.
      *
      * @var string
      */
-    protected $overduestyle = 'padding:10px 0 10px 10px;'.
-        'background-color: #f3e3e3;'.
-        'margin:0;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:16px;'.
-        'font-weight:bold;'.
-        'color:#ec4040';
+    protected $overduestyle =
+        'padding:10px 0 10px 10px;
+        background-color: #f3e3e3;
+        margin:0;
+        font-family:Arial,Sans-serif;
+        font-size:16px;
+        font-weight:bold;
+        color:#ec4040';
     /**
      * CSS styles for footer content.
      *
      * @var string
      */
-    protected $footerstyle = 'background-color:#f6f6f6;'.
-        'color:#888;'.
-        'border-top:1px solid #ccc;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:11px;'.
-        'padding: 0px;';
+    protected $footerstyle =
+        'background-color:#f6f6f6
+        color:#888;
+        border-top:1px solid #ccc;
+        font-family:Arial,Sans-serif;
+        font-size:11px;
+        padding: 0px;';
     /**
      * CSS styles for default footer content.
      *
      * @var string
      */
-    protected $footerdefstyle = 'background-color:#f6f6f6;'.
-        'color:#888;'.
-        'border-top:1px solid #ccc;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:11px;'.
-        'padding: 20px 10px;';
+    protected $footerdefstyle =
+        'background-color:#f6f6f6;
+        color:#888;
+        border-top:1px solid #ccc;
+        font-family:Arial,Sans-serif;
+        font-size:11px;
+        padding: 20px 10px;';
     /**
      * CSS style for description div.
      *
      * @var string
      */
-    protected $descstyle = 'border-top:1px solid #eee;'.
-        'font-family:Arial,Sans-serif;'.
-        'font-size:13px;'.
-        'padding: 2px 15px;';
+    protected $descstyle =
+        'border-top:1px solid #eee;
+        font-family:Arial,Sans-serif;
+        font-size:13px;
+        padding: 2px 15px;';
     /**
      * CSS style for title header.
      *
@@ -158,10 +163,9 @@ abstract class local_reminder {
      * Filter out users who still does not have completed this activity.
      *
      * @param array $users user array to check.
-     * @param string $type type of request. Pre|Post for now.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type=null) {
+    public function filter_authorized_users($users) {
         return $users;
     }
 
@@ -174,9 +178,9 @@ abstract class local_reminder {
      * @param array $overridestyle boolean to override or not the specified styles if given.
      * @return string generated html row.
      */
-    public function write_table_row($headervalue, $value, $customizedstyle=null, $overridestyle=true) {
+    public function write_table_row($headervalue, $value, $customizedstyle = null, $overridestyle = true) {
         $htmltext = html_writer::start_tag('tr');
-        $defheadercss = array('style' => $this->defheaderstyle);
+        $defheadercss = ['style' => $this->defheaderstyle];
         if (isset($customizedstyle)) {
             $finalstyles = $customizedstyle;
             if (!$overridestyle) {
@@ -187,18 +191,18 @@ abstract class local_reminder {
             $htmltext .= html_writer::tag('td', $headervalue, $defheadercss);
         }
         $htmltext .= html_writer::tag('td', $value);
-        return $htmltext.html_writer::end_tag('tr');
+        return $htmltext . html_writer::end_tag('tr');
     }
 
     /**
      * Write location to the email if exists.
      *
      * @param object $event event instance.
+     * @return string generated html row
      */
-    protected function write_location_info($event) {
-        if (isset($event->location) && !empty($event->location)) {
-            return self::write_table_row(get_string('contenttypelocation', 'local_reminders'), $event->location);
-        }
+    protected function write_location_info($event): string {
+        return !empty($event->location) ?
+            self::write_table_row(get_string('contenttypelocation', 'local_reminders'), $event->location) : '';
     }
 
     /**
@@ -210,7 +214,7 @@ abstract class local_reminder {
      */
     protected function write_description($description, $event) {
         $htmltext = html_writer::start_tag('tr');
-        $columndescstyle = array('style' => $this->descstyle, 'colspan' => 2);
+        $columndescstyle = ['style' => $this->descstyle, 'colspan' => 2];
         if (isemptystring($description)) {
             $htmltext .= html_writer::tag('td', "<p>$event->name</p>", $columndescstyle);
         } else {
@@ -220,7 +224,7 @@ abstract class local_reminder {
                 $htmltext .= html_writer::tag('td', "<p>$description</p>", $columndescstyle);
             }
         }
-        return $htmltext.html_writer::end_tag('tr');
+        return $htmltext . html_writer::end_tag('tr');
     }
 
     /**
@@ -243,7 +247,7 @@ abstract class local_reminder {
         if (isset($CFG->local_reminders_emailheadercustom) && trim($CFG->local_reminders_emailheadercustom) !== '') {
             $htmltext = html_writer::start_tag('div');
             $htmltext .= text_to_html($CFG->local_reminders_emailheadercustom, false, false, true);
-            return $htmltext.html_writer::end_tag('div');
+            return $htmltext . html_writer::end_tag('div');
         }
         return '';
     }
@@ -267,7 +271,7 @@ abstract class local_reminder {
      * @return string pluralized string if necessary.
      */
     protected function pluralize($number, $text) {
-        return $number.($number > 1 ? $text.'s' : $text);
+        return $number . ($number > 1 ? $text . 's' : $text);
     }
 
     /**
@@ -280,22 +284,20 @@ abstract class local_reminder {
 
         $footer = html_writer::start_tag('tr');
         $moodlecalendarname = get_string('moodlecalendarname', 'local_reminders');
-        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', $moodlecalendarname, array('target' => '_blank'));
+        $calendarlink = html_writer::link($CFG->wwwroot . '/calendar/index.php', $moodlecalendarname, ['target' => '_blank']);
 
         if (isset($CFG->local_reminders_emailfooterdefaultenabled) && $CFG->local_reminders_emailfooterdefaultenabled) {
-            $footer .= html_writer::start_tag('td', array('style' => $this->footerdefstyle, 'colspan' => 2));
-            $footer .= get_string('reminderfrom', 'local_reminders').' ';
+            $footer .= html_writer::start_tag('td', ['style' => $this->footerdefstyle, 'colspan' => 2]);
+            $footer .= get_string('reminderfrom', 'local_reminders') . ' ';
             $footer .= $calendarlink;
-
         } else if (isset($CFG->local_reminders_emailfootercustom) && trim($CFG->local_reminders_emailfootercustom) !== '') {
-            $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
+            $footer .= html_writer::start_tag('td', ['style' => $this->footerstyle, 'colspan' => 2]);
             $footer .= text_to_html($CFG->local_reminders_emailfootercustom, false, false, true);
-
         } else {
             return '';
         }
 
-        $footer .= html_writer::end_tag('td').html_writer::end_tag('tr');
+        $footer .= html_writer::end_tag('td') . html_writer::end_tag('tr');
         return $footer;
     }
 
@@ -305,11 +307,11 @@ abstract class local_reminder {
      * @return string complete url for the event
      */
     protected function generate_event_link() {
-        $params = array('view' => 'day', 'cal_d' => date('j', $this->event->timestart),
+        $params = ['view' => 'day', 'cal_d' => date('j', $this->event->timestart),
             'cal_m' => date('n', $this->event->timestart), 'cal_y' => date('Y', $this->event->timestart),
-        );
+        ];
         $calurl = new moodle_url('/calendar/view.php', $params);
-        $calurl->set_anchor('event_'.$this->event->id);
+        $calurl->set_anchor('event_' . $this->event->id);
 
         return $calurl->out(false);
     }
@@ -330,7 +332,7 @@ abstract class local_reminder {
      * @param stdClass $ctxinfo additional context info needed to process.
      * @return string Message content as HTML text.
      */
-    abstract public function get_message_html($user=null, $changetype=null, $ctxinfo=null);
+    abstract public function get_message_html($user = null, $changetype = null, $ctxinfo = null);
 
     /**
      * Generates a message content as a plain-text. Suitable for popup messages.
@@ -339,7 +341,7 @@ abstract class local_reminder {
      * @param object $changetype change type (add/update/removed)
      * @return string Message content as plain-text.
      */
-    abstract public function get_message_plaintext($user=null, $changetype=null);
+    abstract public function get_message_plaintext($user = null, $changetype = null);
 
     /**
      * Generates a message title for the reminder. Used for all message types.
@@ -347,7 +349,7 @@ abstract class local_reminder {
      * @param string $type type of message to be send (null=reminder cron)
      * @return string Message title as a plain-text.
      */
-    abstract public function get_message_title($type=null);
+    abstract public function get_message_title($type = null);
 
     /**
      * Gets an array of custom headers for the reminder message, specially
@@ -363,7 +365,7 @@ abstract class local_reminder {
         $urlinfo = parse_url($CFG->wwwroot);
         $hostname = $urlinfo['host'];
 
-        return array('Message-ID: <moodlereminder'.$this->event->id.'@'.$hostname.'>');
+        return ['Message-ID: <moodlereminder' . $this->event->id . '@' . $hostname . '>'];
     }
 
     /**
@@ -374,7 +376,7 @@ abstract class local_reminder {
      *
      * @return object a message object which will be sent to the messaging API
      */
-    public function create_reminder_message_object($admin=null) {
+    public function create_reminder_message_object($admin = null) {
         global $CFG;
 
         if ($admin == null) {
@@ -392,7 +394,7 @@ abstract class local_reminder {
             }
         }
 
-        $msgtitle = '['.$subjectprefix.'] '.$titlehtml;
+        $msgtitle = '[' . $subjectprefix . '] ' . $titlehtml;
         if (empty($subjectprefix)) {
             $msgtitle = $titlehtml;
         }
@@ -403,7 +405,7 @@ abstract class local_reminder {
         }
 
          // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
-        $eventdata = new \core\message\message();
+        $eventdata = new message();
 
         $eventdata->component           = 'local_reminders';
         $eventdata->name                = $this->get_message_provider();
@@ -430,8 +432,8 @@ abstract class local_reminder {
      * @param object $fromuser sending user.
      * @return event object notification instance.
      */
-    public function set_sendto_user($user, $refreshcontent=true, $fromuser=null) {
-        if (!isset($this->eventobject) || empty($this->eventobject)) {
+    public function set_sendto_user($user, $refreshcontent = true, $fromuser = null) {
+        if (empty($this->eventobject)) {
             $this->create_reminder_message_object();
         }
 
@@ -442,7 +444,6 @@ abstract class local_reminder {
 
         if ($refreshcontent) {
             $contenthtml = $this->get_message_html($user);
-            $titlehtml = $this->get_message_title();
             $smallmsg = $this->get_message_plaintext($user);
 
             $this->eventobject->fullmessagehtml = $contenthtml;
@@ -471,16 +472,16 @@ abstract class local_reminder {
      * @param stdClass $ctxinfo additional context information.
      * @return string prefix to be appended.
      */
-    protected function get_relavant_title_prefix($changetype, $ctxinfo=null) {
+    protected function get_relavant_title_prefix($changetype, $ctxinfo = null) {
         $toreturn = '';
         if ($changetype == REMINDERS_CALL_TYPE_OVERDUE) {
             if (!is_null($ctxinfo) && property_exists($ctxinfo, 'overduetitle') && !isemptystring($ctxinfo->overduetitle)) {
                 $toreturn = $ctxinfo->overduetitle;
             }
         } else {
-            $toreturn = get_string('calendarevent'.strtolower($changetype).'prefix', 'local_reminders');
+            $toreturn = get_string('calendarevent' . strtolower($changetype) . 'prefix', 'local_reminders');
         }
-        return !empty($toreturn) ? $toreturn.':' : '';
+        return !empty($toreturn) ? $toreturn . ':' : '';
     }
 
     /**
@@ -492,7 +493,7 @@ abstract class local_reminder {
      * @param stdClass $ctxinfo additional context information.
      * @return object notification instance.
      */
-    public function get_updating_event_message($changetype, $admin=null, $touser=null, $ctxinfo=null) {
+    public function get_updating_event_message($changetype, $admin = null, $touser = null, $ctxinfo = null) {
         global $CFG;
 
         $fromuser = $admin;
@@ -512,9 +513,9 @@ abstract class local_reminder {
             }
         }
 
-        $msgtitle = '['.$subjectprefix.'] '.$titleprefixlangstr.' '.$titlehtml;
+        $msgtitle = '[' . $subjectprefix . '] ' . $titleprefixlangstr . ' ' . $titlehtml;
         if (empty($subjectprefix)) {
-            $msgtitle = $titleprefixlangstr.' '.$titlehtml;
+            $msgtitle = $titleprefixlangstr . ' ' . $titlehtml;
         }
 
         $cheaders = $this->get_custom_headers();
@@ -525,7 +526,7 @@ abstract class local_reminder {
         $smallmsg = $this->get_message_plaintext($touser, $changetype);
 
          // BUG FIX: $eventdata must be a new \core\message\message() for Moodle 3.5+.
-        $eventdata = new \core\message\message();
+        $eventdata = new message();
 
         $eventdata->component           = 'local_reminders';
         $eventdata->name                = $this->get_message_provider();
@@ -540,5 +541,4 @@ abstract class local_reminder {
 
         return $eventdata;
     }
-
 }

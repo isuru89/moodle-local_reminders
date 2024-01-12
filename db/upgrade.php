@@ -21,7 +21,6 @@
  * @copyright 2012 Isuru Madushanka Weerarathna
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Run the upgrade for the plugin.
@@ -55,7 +54,6 @@ function xmldb_local_reminders_upgrade($oldversion) {
     // Put any upgrade step following this.
 
     if ($oldversion < 2014121301) {
-
         // Define table local_reminders_course to be created.
         $table = new xmldb_table('local_reminders_course');
 
@@ -67,8 +65,8 @@ function xmldb_local_reminders_upgrade($oldversion) {
         $table->add_field('status_group', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '1');
 
         // Adding keys to table local_reminders_course.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
-        $table->add_key('relatedcourse', XMLDB_KEY_FOREIGN_UNIQUE, array('courseid'), 'course', array('id'));
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('relatedcourse', XMLDB_KEY_FOREIGN_UNIQUE, ['courseid'], 'course', ['id']);
 
         // Conditionally launch create table for local_reminders_course.
         if (!$dbman->table_exists($table)) {
@@ -120,10 +118,10 @@ function create_local_reminders_activity_config_table($dbman) {
     $table->add_field('settingvalue', XMLDB_TYPE_TEXT, null, null, null, null, null);
 
     // Adding keys to table local_reminders_post_activity.
-    $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+    $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
     // Adding indexes for faster access.
-    $table->add_index('localremindercourses', XMLDB_INDEX_NOTUNIQUE, array('courseid'));
+    $table->add_index('localremindercourses', XMLDB_INDEX_NOTUNIQUE, ['courseid']);
 
     // Conditionally launch create table for local_reminders_post_activity.
     if (!$dbman->table_exists($table)) {
@@ -146,7 +144,7 @@ function create_local_reminders_post_activity_table($dbman) {
     $table->add_field('eventid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
 
     // Adding keys to table local_reminders_post_activity.
-    $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+    $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
     // Conditionally launch create table for local_reminders_post_activity.
     if (!$dbman->table_exists($table)) {

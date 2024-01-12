@@ -32,7 +32,6 @@ defined('MOODLE_INTERNAL') || die;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class local_reminder_activity_handler {
-
     /**
      * This function will format/append reminder messages with necessary info
      * based on constraints in that activity instance.
@@ -45,7 +44,7 @@ abstract class local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user = null, $event = null, $reminder = null) {
         // Do nothing.
     }
 
@@ -62,14 +61,12 @@ abstract class local_reminder_activity_handler {
      * Filter out users who still does not have completed this activity.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         return $users;
     }
 
@@ -83,16 +80,16 @@ abstract class local_reminder_activity_handler {
      */
     protected function format_datetime($datetime, $user, $reminder) {
         $tzone = 99;
-        if (isset($user) && !empty($user)) {
+        if (!empty($user)) {
             $tzone = reminders_get_timezone($user);
         }
 
         $daytimeformat = get_string('strftimedaydate', 'langconfig');
         $utimeformat = get_correct_timeformat_user($user);
-        return userdate($datetime, $daytimeformat, $tzone).
-            ' '.userdate($datetime, $utimeformat, $tzone).
-            ' &nbsp;&nbsp;<span style="'.$reminder->tzshowstyle.'">'.
-            local_reminders_tz_info::get_human_readable_tz($tzone).'</span>';
+        return userdate($datetime, $daytimeformat, $tzone) .
+            ' ' . userdate($datetime, $utimeformat, $tzone) .
+            ' &nbsp;&nbsp;<span style="' . $reminder->tzshowstyle . '">' .
+            local_reminders_tz_info::get_human_readable_tz($tzone) . '</span>';
     }
 
     /**
@@ -110,7 +107,6 @@ abstract class local_reminder_activity_handler {
         }
         return false;
     }
-
 }
 
 /**
@@ -124,20 +120,17 @@ abstract class local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_generic_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have completed this module using Moodle core completion API.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
-        $filteredusers = array();
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
+        $filteredusers = [];
         foreach ($users as $auser) {
             $status = $this->check_completion_status($course, $coursemodule, $auser->id);
             if (!$status) {
@@ -171,7 +164,6 @@ class local_reminder_generic_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_quiz_handler extends local_reminder_activity_handler {
-
     /**
      * Returns description of the quiz activity if only quiz has not yet started.
      *
@@ -193,18 +185,16 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
      * Filter out users who still does not have finished the quiz.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/quiz/lib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $canattempt = has_capability('mod/quiz:attempt', $coursemodulecontext, $auser);
             if (!$canattempt) {
@@ -229,11 +219,12 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user = null, $event = null, $reminder = null) {
         if (isset($activity->timelimit) && $activity->timelimit > 0) {
             $htmlmail .= $reminder->write_table_row(
                 get_string('timelimit', 'quiz'),
-                format_time($activity->timelimit));
+                format_time($activity->timelimit)
+            );
         }
     }
 }
@@ -246,24 +237,21 @@ class local_reminder_quiz_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_assign_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have submitted assignment.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/assign/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/assign:submit', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -288,11 +276,12 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user = null, $event = null, $reminder = null) {
         if (isset($activity->cutoffdate) && $activity->cutoffdate > 0) {
             $htmlmail .= $reminder->write_table_row(
                 get_string('cutoffdate', 'assign'),
-                $this->format_datetime($activity->cutoffdate, $user, $reminder));
+                $this->format_datetime($activity->cutoffdate, $user, $reminder)
+            );
         }
     }
 
@@ -322,24 +311,21 @@ class local_reminder_assign_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_choice_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have submitted choice.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/choice/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/choice:choose', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -376,24 +362,21 @@ class local_reminder_choice_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_feedback_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have submitted feedback.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/feedback/lib.php');
         require_once($CFG->dirroot . '/lib/completionlib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/feedback:complete', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -431,23 +414,20 @@ class local_reminder_feedback_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_lesson_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have completed lesson activity.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/lesson/lib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/lesson:view', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -472,11 +452,12 @@ class local_reminder_lesson_handler extends local_reminder_activity_handler {
      * @param object $reminder reminder reference.
      * @return void nothing.
      */
-    public function append_info(&$htmlmail, $modulename, $activity, $user=null, $event=null, $reminder=null) {
+    public function append_info(&$htmlmail, $modulename, $activity, $user = null, $event = null, $reminder = null) {
         if (isset($activity->timelimit) && $activity->timelimit > 0) {
             $htmlmail .= $reminder->write_table_row(
                 get_string('timelimit', 'lesson'),
-                format_time($activity->timelimit));
+                format_time($activity->timelimit)
+            );
         }
     }
 
@@ -503,23 +484,20 @@ class local_reminder_lesson_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_survey_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have submitted survey.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/survey/lib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/survey:participate', $coursemodulecontext, $auser);
             if (!$cansubmit) {
@@ -556,23 +534,20 @@ class local_reminder_survey_handler extends local_reminder_activity_handler {
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_reminder_resource_handler extends local_reminder_activity_handler {
-
     /**
      * Filter out users who still does not have completed this resource.
      *
      * @param array $users user array to check.
-     * @param string $type reminder call type PRE|POST.
-     * @param object $activity activity instance.
      * @param object $course course instance belong to.
      * @param object $coursemodule course module instance.
      * @param object $coursemodulecontext course module context instance.
      * @return array array of filtered users.
      */
-    public function filter_authorized_users($users, $type, $activity, $course, $coursemodule, $coursemodulecontext) {
+    public function filter_authorized_users($users, $course, $coursemodule, $coursemodulecontext) {
         global $CFG;
         require_once($CFG->dirroot . '/mod/resource/lib.php');
 
-        $filteredusers = array();
+        $filteredusers = [];
         foreach ($users as $auser) {
             $cansubmit = has_capability('mod/resource:view', $coursemodulecontext, $auser);
             if (!$cansubmit) {
