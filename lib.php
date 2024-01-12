@@ -50,7 +50,7 @@ require_once($CFG->dirroot . '/local/reminders/locallib.php');
 
 define('REMINDERS_DAYIN_SECONDS', 24 * 3600);
 
-define('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 1);
+define('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 7);
 
 define('REMINDERS_7DAYSBEFORE_INSECONDS', 7 * 24 * 3600);
 define('REMINDERS_3DAYSBEFORE_INSECONDS', 3 * 24 * 3600);
