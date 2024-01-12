@@ -44,13 +44,16 @@ require_once($CFG->dirroot . '/local/reminders/contents/due_reminder.class.php')
 function get_upcoming_events_for_course($courseid, $currtime) {
     global $DB, $CFG;
 
-    $statuses = ['due', 'close', 'course', 'expectcompletionon', 'gradingdue', 'meeting_start', 'zoom'];
+    // we default exclude these kind of event types
+    $excludedstatuses = ['site', 'user', 'open'];
 
     // When activity openings separation is enabled in global settings, we will retrieve those events too.
     if (isset($CFG->local_reminders_separateactivityopenings) && $CFG->local_reminders_separateactivityopenings) {
-        array_push($statuses, 'open');
+        $excludedstatuses = array_filter($excludedstatuses, function ($it) {
+            return $it != 'open';
+        });
     }
-    list($insql, $inparams) = $DB->get_in_or_equal($statuses);
+    list($insql, $inparams) = $DB->get_in_or_equal($excludedstatuses, SQL_PARAMS_QM, 'param', false);
 
     return $DB->get_records_sql("SELECT *
         FROM {event}
