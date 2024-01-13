@@ -23,18 +23,17 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$observers = array(
-
-    array(
+$observers = [
+    [
         'eventname' => '\core\event\calendar_event_updated',
         'callback' => '\local_reminders\calendar_observer::calendar_event_updated',
-    ),
-    array(
+    ],
+    [
         'eventname' => '\core\event\calendar_event_created',
         'callback' => '\local_reminders\calendar_observer::calendar_event_added',
-    ),
-    array(
+    ],
+    [
         'eventname' => '\core\event\calendar_event_deleted',
         'callback' => '\local_reminders\calendar_observer::calendar_event_removed',
-    ),
-);
+    ],
+];

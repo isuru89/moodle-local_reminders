@@ -25,8 +25,6 @@
 
 namespace local_reminders\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy provider class for package local_reminders
  */

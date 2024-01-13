@@ -35,7 +35,7 @@ if ($hassiteconfig) {
     // Load all roles in the moodle.
     $systemcontext = context_system::instance();
     $allroles = role_fix_names(get_all_roles(), $systemcontext, ROLENAME_ORIGINAL);
-    $rolesarray = array();
+    $rolesarray = [];
     if (!empty($allroles)) {
         foreach ($allroles as $arole) {
             $rolesarray[$arole->shortname] = ' '.$arole->localname;
@@ -43,9 +43,9 @@ if ($hassiteconfig) {
     }
 
     // Default settings for recieving reminders according to role.
-    $defaultrolesforcourse = array('student' => 1);
-    $defaultrolesforcategory = array('editingteacher' => 1, 'teacher' => 1);
-    $defaultrolesforactivity = array('student' => 1, 'editingteacher' => 1);
+    $defaultrolesforcourse = ['student' => 1];
+    $defaultrolesforcategory = ['editingteacher' => 1, 'teacher' => 1];
+    $defaultrolesforactivity = ['student' => 1, 'editingteacher' => 1];
 
     // Adds a checkbox to enable/disable sending reminders.
     $settings->add(new admin_setting_configcheckbox('local_reminders_enable',
@@ -60,9 +60,10 @@ if ($hassiteconfig) {
             get_string('messagetitleprefix', 'local_reminders'),
             get_string('messagetitleprefixdescription', 'local_reminders'), 'Moodle-Reminder'));
 
-    $replychoices = array(REMINDERS_SEND_AS_ADMIN => get_string('sendasadmin', 'local_reminders'),
-                          REMINDERS_SEND_AS_NO_REPLY => get_string('sendasnoreply', 'local_reminders'),
-                        );
+    $replychoices = [
+        REMINDERS_SEND_AS_ADMIN => get_string('sendasadmin', 'local_reminders'),
+        REMINDERS_SEND_AS_NO_REPLY => get_string('sendasnoreply', 'local_reminders'),
+    ];
 
     $settings->add(new admin_setting_configselect('local_reminders_sendas',
         get_string('sendas', 'local_reminders'),
@@ -73,9 +74,10 @@ if ($hassiteconfig) {
         get_string('sendasnametitle', 'local_reminders'),
         get_string('sendasnamedescription', 'local_reminders'), 'No Reply'));
 
-    $choices = array(REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
-                     REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'),
-                );
+    $choices = [
+        REMINDERS_SEND_ALL_EVENTS => get_string('filtereventssendall', 'local_reminders'),
+        REMINDERS_SEND_ONLY_VISIBLE => get_string('filtereventsonlyvisible', 'local_reminders'),
+    ];
 
     $settings->add(new admin_setting_configselect('local_reminders_filterevents',
             get_string('filterevents', 'local_reminders'),
@@ -85,7 +87,7 @@ if ($hassiteconfig) {
     $corepluginmanager = core_plugin_manager::instance();
     $formatplugins = $corepluginmanager->get_plugins_of_type('mod');
     $enabledplugins = $corepluginmanager->get_enabled_plugins('mod');
-    $excludedoptions = array();
+    $excludedoptions = [];
     foreach ($formatplugins as $key => $value) {
         if (in_array($key, $enabledplugins)) {
             $excludedoptions[$key] = $value->displayname;
@@ -95,7 +97,7 @@ if ($hassiteconfig) {
     $settings->add(new admin_setting_configmultiselect('local_reminders_excludedmodulenames',
             get_string('excludedmodules', 'local_reminders'),
             get_string('excludedmodulesdesc', 'local_reminders'),
-            array(),
+            [],
             $excludedoptions));
 
     // REMINDER EMAIL CONFIGURATIONS.
@@ -117,19 +119,20 @@ if ($hassiteconfig) {
     // END OF EMAIL CONFIGURATIONS.
 
 
-    $daysarray = array('days7' => ' '.get_string('days7', 'local_reminders'),
-                       'days3' => ' '.get_string('days3', 'local_reminders'),
-                       'days1' => ' '.get_string('days1', 'local_reminders'),
-                );
+    $daysarray = [
+        'days7' => ' '.get_string('days7', 'local_reminders'),
+        'days3' => ' '.get_string('days3', 'local_reminders'),
+        'days1' => ' '.get_string('days1', 'local_reminders'),
+    ];
 
     // Default settings for each event type.
-    $defaultsite = array('days7' => 0, 'days3' => 1, 'days1' => 0);
-    $defaultuser = array('days7' => 0, 'days3' => 0, 'days1' => 1);
-    $defaultcourse = array('days7' => 0, 'days3' => 1, 'days1' => 0);
-    $defaultcategory = array('days7' => 0, 'days3' => 1, 'days1' => 0);
-    $defaultgroup = array('days7' => 0, 'days3' => 1, 'days1' => 0);
-    $defaultdue = array('days7' => 0, 'days3' => 1, 'days1' => 0);
-    $defaultdueopen = array('days7' => 0, 'days3' => 1, 'days1' => 0);
+    $defaultsite = ['days7' => 0, 'days3' => 1, 'days1' => 0];
+    $defaultuser = ['days7' => 0, 'days3' => 0, 'days1' => 1];
+    $defaultcourse = ['days7' => 0, 'days3' => 1, 'days1' => 0];
+    $defaultcategory = ['days7' => 0, 'days3' => 1, 'days1' => 0];
+    $defaultgroup = ['days7' => 0, 'days3' => 1, 'days1' => 0];
+    $defaultdue = ['days7' => 0, 'days3' => 1, 'days1' => 0];
+    $defaultdueopen = ['days7' => 0, 'days3' => 1, 'days1' => 0];
 
     // CALENDAR EVENT CHANGED EVENTS.
 
@@ -240,10 +243,11 @@ if ($hassiteconfig) {
             get_string('overduewarnmessage', 'local_reminders'),
             get_string('overduewarnmessagedescription', 'local_reminders'), 'This activity is overdue!'));
 
-    $activitychoices = array(REMINDERS_ACTIVITY_BOTH => get_string('activityremindersboth', 'local_reminders'),
-                             REMINDERS_ACTIVITY_ONLY_OPENINGS => get_string('activityremindersonlyopenings', 'local_reminders'),
-                             REMINDERS_ACTIVITY_ONLY_CLOSINGS => get_string('activityremindersonlyclosings', 'local_reminders'),
-                        );
+    $activitychoices = [
+        REMINDERS_ACTIVITY_BOTH => get_string('activityremindersboth', 'local_reminders'),
+        REMINDERS_ACTIVITY_ONLY_OPENINGS => get_string('activityremindersonlyopenings', 'local_reminders'),
+        REMINDERS_ACTIVITY_ONLY_CLOSINGS => get_string('activityremindersonlyclosings', 'local_reminders'),
+    ];
 
     $settings->add(new admin_setting_configselect('local_reminders_duesend',
             get_string('sendactivityreminders', 'local_reminders'),

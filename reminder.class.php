@@ -23,7 +23,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
 
 /**
  * Abstract class for reminder object.
@@ -45,7 +44,7 @@ abstract class local_reminder {
     /**
      * @var object custom time ahead of the actual event.
      */
-    protected $custom_time;
+    protected $customtime;
 
     /**
      * @var int indicates immediate sending of message as a notification.
@@ -144,12 +143,12 @@ abstract class local_reminder {
      *
      * @param object $event calendar event.
      * @param integer $aheaddays number of days ahead.
-     * @param object $custom_time contains the custom time value and unit (if configured). 
+     * @param object $customtime contains the custom time value and unit (if configured).
      */
-    public function __construct($event, $aheaddays = 1, $custom_time=null) {
+    public function __construct($event, $aheaddays = 1, $customtime=null) {
         $this->event = $event;
         $this->aheaddays = $aheaddays;
-        $this->custom_time = $custom_time;
+        $this->customtime = $customtime;
     }
 
     /**
@@ -183,7 +182,7 @@ abstract class local_reminder {
      */
     public function write_table_row($headervalue, $value, $customizedstyle=null, $overridestyle=true) {
         $htmltext = html_writer::start_tag('tr');
-        $defheadercss = array('style' => $this->defheaderstyle);
+        $defheadercss = ['style' => $this->defheaderstyle];
         if (isset($customizedstyle)) {
             $finalstyles = $customizedstyle;
             if (!$overridestyle) {
@@ -217,7 +216,7 @@ abstract class local_reminder {
      */
     protected function write_description($description, $event) {
         $htmltext = html_writer::start_tag('tr');
-        $columndescstyle = array('style' => $this->descstyle, 'colspan' => 2);
+        $columndescstyle = ['style' => $this->descstyle, 'colspan' => 2];
         if (isemptystring($description)) {
             $htmltext .= html_writer::tag('td', "<p>$event->name</p>", $columndescstyle);
         } else {
@@ -267,6 +266,21 @@ abstract class local_reminder {
     }
 
     /**
+     * Returns number of ahead days as a plain text.
+     * The format looks like: "[# days to go]" when aheaddays > 0.
+     * For custom scehdules: "[# {timeunit}s to go]".
+     *
+     * @return string number of days/time units in advance as a text.
+     */
+    protected function get_aheaddays_plain() {
+        if ($this->aheaddays != 0) {
+            return '['.$this->pluralize($this->aheaddays, ' day').' to go]';
+        } else {
+            return '['.$this->pluralize($this->customtime->value, ' ' . $this->customtime->unit).' to go]';
+        }
+    }
+
+    /**
      * Pluralize given text by appending 's' if number if greater than 1.
      *
      * @param int $number number to check.
@@ -287,15 +301,15 @@ abstract class local_reminder {
 
         $footer = html_writer::start_tag('tr');
         $moodlecalendarname = get_string('moodlecalendarname', 'local_reminders');
-        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', $moodlecalendarname, array('target' => '_blank'));
+        $calendarlink = html_writer::link($CFG->wwwroot.'/calendar/index.php', $moodlecalendarname, ['target' => '_blank']);
 
         if (isset($CFG->local_reminders_emailfooterdefaultenabled) && $CFG->local_reminders_emailfooterdefaultenabled) {
-            $footer .= html_writer::start_tag('td', array('style' => $this->footerdefstyle, 'colspan' => 2));
+            $footer .= html_writer::start_tag('td', ['style' => $this->footerdefstyle, 'colspan' => 2]);
             $footer .= get_string('reminderfrom', 'local_reminders').' ';
             $footer .= $calendarlink;
 
         } else if (isset($CFG->local_reminders_emailfootercustom) && trim($CFG->local_reminders_emailfootercustom) !== '') {
-            $footer .= html_writer::start_tag('td', array('style' => $this->footerstyle, 'colspan' => 2));
+            $footer .= html_writer::start_tag('td', ['style' => $this->footerstyle, 'colspan' => 2]);
             $footer .= text_to_html($CFG->local_reminders_emailfootercustom, false, false, true);
 
         } else {
@@ -312,9 +326,10 @@ abstract class local_reminder {
      * @return string complete url for the event
      */
     protected function generate_event_link() {
-        $params = array('view' => 'day', 'cal_d' => date('j', $this->event->timestart),
+        $params = [
+            'view' => 'day', 'cal_d' => date('j', $this->event->timestart),
             'cal_m' => date('n', $this->event->timestart), 'cal_y' => date('Y', $this->event->timestart),
-        );
+        ];
         $calurl = new moodle_url('/calendar/view.php', $params);
         $calurl->set_anchor('event_'.$this->event->id);
 
@@ -370,7 +385,7 @@ abstract class local_reminder {
         $urlinfo = parse_url($CFG->wwwroot);
         $hostname = $urlinfo['host'];
 
-        return array('Message-ID: <moodlereminder'.$this->event->id.'@'.$hostname.'>');
+        return ['Message-ID: <moodlereminder'.$this->event->id.'@'.$hostname.'>'];
     }
 
     /**
