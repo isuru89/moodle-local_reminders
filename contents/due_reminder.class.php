@@ -66,10 +66,10 @@ class due_reminder extends course_reminder {
      * @param object $cm coursemodulecontext instance.
      * @param object $coursemodule course module.
      * @param integer $aheaddays ahead days in number.
-     * @param object $custom_time contains the custom time value and unit (if configured).
+     * @param object $customtime contains the custom time value and unit (if configured).
      */
-    public function __construct($event, $course, $cm, $coursemodule, $aheaddays = 1, $custom_time = null) {
-        parent::__construct($event, $course, $aheaddays, $custom_time);
+    public function __construct($event, $course, $cm, $coursemodule, $aheaddays = 1, $customtime = null) {
+        parent::__construct($event, $course, $aheaddays, $customtime);
         $this->cm = $cm;
         $this->coursemodule = $coursemodule;
     }
@@ -140,11 +140,11 @@ class due_reminder extends course_reminder {
      */
     public function get_message_html($user=null, $changetype=null, $ctxinfo=null) {
         $htmlmail = $this->get_html_header();
-        $htmlmail .= html_writer::start_tag('body', array('id' => 'email'));
+        $htmlmail .= html_writer::start_tag('body', ['id' => 'email']);
         $htmlmail .= $this->get_reminder_header();
         $htmlmail .= html_writer::start_tag('div');
         $htmlmail .= html_writer::start_tag('table',
-                array('cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle));
+                ['cellspacing' => 0, 'cellpadding' => 8, 'style' => $this->tbodycssstyle]);
 
         $contenttitle = $this->get_message_title();
         if (!isemptystring($changetype)) {
@@ -154,17 +154,17 @@ class due_reminder extends course_reminder {
             }
         }
         $htmlmail .= html_writer::start_tag('tr');
-        $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
+        $htmlmail .= html_writer::start_tag('td', ['colspan' => 2]);
         $htmlmail .= html_writer::link($this->generate_event_link(),
-                html_writer::tag('h3', $contenttitle, array('style' => $this->titlestyle)),
-                array('style' => 'text-decoration: none'));
+                html_writer::tag('h3', $contenttitle, ['style' => $this->titlestyle]),
+                ['style' => 'text-decoration: none']);
         $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
 
         if (!isemptystring($changetype) && $changetype == REMINDERS_CALL_TYPE_OVERDUE
             && !is_null($ctxinfo) && !isemptystring($ctxinfo->overduemessage)) {
             $htmlmail .= html_writer::start_tag('tr');
-            $htmlmail .= html_writer::start_tag('td', array('colspan' => 2));
-            $htmlmail .= html_writer::tag('h4', $ctxinfo->overduemessage, array('style' => $this->overduestyle));
+            $htmlmail .= html_writer::start_tag('td', ['colspan' => 2]);
+            $htmlmail .= html_writer::tag('h4', $ctxinfo->overduemessage, ['style' => $this->overduestyle]);
             $htmlmail .= html_writer::end_tag('td').html_writer::end_tag('tr');
         }
 
@@ -174,7 +174,7 @@ class due_reminder extends course_reminder {
 
         $htmlmail .= $this->write_table_row(get_string('contenttypecourse', 'local_reminders'), $this->course->fullname);
 
-        $activitylink = html_writer::link($this->cm->get_url(), $this->cm->get_context_name(), array('target' => '_blank'));
+        $activitylink = html_writer::link($this->cm->get_url(), $this->cm->get_context_name(), ['target' => '_blank']);
         $htmlmail .= $this->write_table_row(get_string('contenttypeactivity', 'local_reminders'), $activitylink);
 
         $formattercls = null;
@@ -205,11 +205,7 @@ class due_reminder extends course_reminder {
      * @return string Message content as plain-text.
      */
     public function get_message_plaintext($user=null, $changetype=null) {
-        if ($this->aheaddays != 0) {
-            $text  = $this->get_message_title().' ['.$this->pluralize($this->aheaddays, ' day').' to go]'."\n";
-        } else {
-            $text  = $this->get_message_title().' ['.$this->pluralize($this->custom_time->value, ' ' . $this->custom_time->unit).' to go]'."\n";
-        }
+        $text = $this->get_message_title().' '.$this->get_aheaddays_plain()."\n";
         $text .= get_string('contentwhen', 'local_reminders').': '.$this->get_tzinfo_plain($user, $this->event)."\n";
         $text .= get_string('contenttypecourse', 'local_reminders').': '.$this->course->fullname."\n";
         $text .= get_string('contenttypeactivity', 'local_reminders').': '.$this->cm->get_context_name()."\n";
