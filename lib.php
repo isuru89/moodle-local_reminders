@@ -50,7 +50,7 @@ require_once($CFG->dirroot . '/local/reminders/locallib.php');
 
 define('REMINDERS_DAYIN_SECONDS', 24 * 3600);
 
-define('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 7);
+define('REMINDERS_FIRST_CRON_CYCLE_CUTOFF_DAYS', 1);
 
 define('REMINDERS_7DAYSBEFORE_INSECONDS', 7 * 24 * 3600);
 define('REMINDERS_3DAYSBEFORE_INSECONDS', 3 * 24 * 3600);
@@ -121,7 +121,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
     global $CFG, $DB;
 
     $aheaddaysindex = [7 => 0, 3 => 1, 1 => 2];
-    $eventtypearray = ['site', 'user', 'course', 'due', 'group', 'zoom'];
+    $eventtypearray = ['site', 'user', 'course', 'due', 'group'];
 
     // Loading roles allowed to receive reminder messages from configuration.
     $tmprolesreminders = get_roles_for_reminders();
@@ -197,6 +197,7 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
         'minutes' => CUSTOM_MINUTE_SECS,
         'seconds' => 1,
     ];
+    $fallbacktocustomactivity = isset($CFG->local_reminders_fallback_customsched) && $CFG->local_reminders_fallback_customsched;
 
     foreach ($upcomingevents as $event) {
         if (in_array($event->modulename, $excludedmodules)) {
@@ -211,7 +212,6 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
         $aheadday = 0;
         $diffinseconds = $event->timestart - $timewindowend;
         $fromcustom = false;
-
         $customtime = null;
 
         if ($event->timestart - REMINDERS_1DAYBEFORE_INSECONDS >= $timewindowstart &&
@@ -225,10 +225,12 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
             $aheadday = 7;
         } else {
             // Find if custom schedule has been defined by user.
+            // For unknown event types, we will try with the schedule defined for activities, only if configured so.
             $tempconfigstr = 'local_reminders_'.$event->eventtype.'custom';
-            if (strcasecmp($event->eventtype, 'zoom') == 0) {
+            if (!isset($CFG->$tempconfigstr) && $fallbacktocustomactivity) {
                 $tempconfigstr = 'local_reminders_duecustom';
             }
+
             if (isset($CFG->$tempconfigstr) && !empty($CFG->$tempconfigstr) && $CFG->$tempconfigstr > 0) {
                 $customsecs = $CFG->$tempconfigstr;
                 if ($event->timestart - $customsecs >= $timewindowstart &&
@@ -241,28 +243,32 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
                             $customtime = new stdClass();
                             $customtime->unit = $unitkey;
                             $customtime->value = $value;
+                            $fromcustom = true;
                             break;
                         }
                     }
-                    $fromcustom = true;
                 }
             }
         }
 
+        // Print the derived schedule.
         if (!$fromcustom) {
-            mtrace("   [Local Reminder] Processing event in ahead of $aheadday days.");
-        } else {
+            mtrace("   [Local Reminder] Processing event#$event->id ($event->eventtype) in ahead of $aheadday days.");
+        } else if ($customtime) {
             mtrace("   [Local Reminder] Processing event in ahead of $customtime->value $customtime->unit.");
         }
+
+        // Is there any schedule? If not, skip the event.
+        if ($aheadday <= 0 && !$fromcustom) {
+            mtrace("   [Local Reminder] Skipping event#$event->id because no schedule found!");
+            continue;
+        }
+
         if ($diffinseconds < 0) {
             mtrace('   [Local Reminder] Skipping event because it might have expired.');
             continue;
         }
-        mtrace("   [Local Reminder] Processing event#$event->id [Type: $event->eventtype, inaheadof=$aheadday days]...");
-        if ($customtime) {
-            mtrace("   [Local Reminder] Processing event#$event->id ".
-                "[Custom Schedule Configured: $customtime->value $customtime->unit]...");
-        }
+
         if (!$fromcustom) {
             $optionstr = 'local_reminders_' . $event->eventtype . 'rdays';
             if (!isset($CFG->$optionstr)) {
@@ -292,8 +298,8 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
             }
 
         } else {
-            mtrace("   [Local Reminder] A reminder can be sent for event#$event->id ".
-                    ", detected through custom schedule.");
+            mtrace("   [Local Reminder] A reminder can be sent for event#$event->id ($event->eventtype), ".
+                    "detected through custom schedule.");
         }
 
         $reminderref = null;
@@ -309,11 +315,11 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
                     break;
 
                 case 'category':
-                    $reminderref = process_category_event($event, $aheadday,  $customtime, $categoryroleids);
+                    $reminderref = process_category_event($event, $aheadday, $customtime, $categoryroleids);
                     break;
 
                 case 'course':
-                    $reminderref = process_course_event($event, $aheadday,  $customtime, $courseroleids);
+                    $reminderref = process_course_event($event, $aheadday, $customtime, $courseroleids);
                     break;
 
                 case 'open':
@@ -560,11 +566,11 @@ function when_calendar_event_updated($updateevent, $changetype) {
             break;
 
         case 'category':
-            $reminderref = process_category_event($event, $aheadday, $categoryroleids, false);
+            $reminderref = process_category_event($event, $aheadday, null, $categoryroleids, false);
             break;
 
         case 'course':
-            $reminderref = process_course_event($event, $aheadday, $courseroleids, false);
+            $reminderref = process_course_event($event, $aheadday, null, $courseroleids, false);
             break;
 
         case 'open':
@@ -581,15 +587,15 @@ function when_calendar_event_updated($updateevent, $changetype) {
             if (has_disabled_reminders_for_activity($event->courseid, $event->id)) {
                 break;
             }
-            $reminderref = process_activity_event($event, $aheadday, $activityroleids, false);
+            $reminderref = process_activity_event($event, $aheadday, null, $activityroleids, false);
             break;
 
         case 'group':
-            $reminderref = process_group_event($event, $aheadday, false);
+            $reminderref = process_group_event($event, $aheadday, null, false);
             break;
 
         default:
-            $reminderref = process_unknown_event($event, $aheadday, $activityroleids, false);
+            $reminderref = process_unknown_event($event, $aheadday, null, $activityroleids, false);
     }
 
     if ($reminderref == null) {
