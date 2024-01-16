@@ -100,6 +100,13 @@ if ($hassiteconfig) {
             [],
             $excludedoptions));
 
+    // Adds a checkbox to fallback custom schedule for unknown events.
+    $settings->add(new admin_setting_configcheckbox('local_reminders_fallback_customsched',
+            get_string('customschedulefallback', 'local_reminders'),
+            get_string('customschedulefallbackdesc', 'local_reminders'), 1));
+
+
+
     // REMINDER EMAIL CONFIGURATIONS.
     $settings->add(new admin_setting_heading('local_reminders_heading_emailcutomizations',
             get_string('emailconfigsheading', 'local_reminders'), ''));

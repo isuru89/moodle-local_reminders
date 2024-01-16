@@ -225,7 +225,7 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
             continue;
         }
 
-        $reminderref = process_activity_event($event, -1, $activityroleids, true, REMINDERS_CALL_TYPE_OVERDUE);
+        $reminderref = process_activity_event($event, -1, null, $activityroleids, true, REMINDERS_CALL_TYPE_OVERDUE);
         if (!isset($reminderref)) {
             mtrace('[LOCAL REMINDERS] Skipped post-activity event for '.$event->id);
             continue;
