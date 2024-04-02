@@ -401,11 +401,11 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
                 $mailresult = message_send($eventdata);
 
                 if (!$mailresult) {
-                    mtrace("Could not send out message for event#$event->id to user $eventdata->userto");
+                    mtrace("Could not send out reminder for event#$event->id to user $touser->id");
                 } else {
-                    mtrace('[LOCAL_REMINDERS] Mail Result: '.$mailresult);
+                    mtrace('[LOCAL_REMINDERS] Mail successfully sent to user: '.$touser->id);
                 }
-            } catch (\Exception $mex) {
+            } catch (\Throwable $mex) {
                 $failedcount++;
                 mtrace('Error: local/reminders/lib.php local_reminders_cron(): '.$mex->getMessage());
             }

@@ -252,12 +252,13 @@ function send_overdue_activity_reminders($curtime, $timewindowstart, $activityro
                 $eventdata = $reminderref->get_updating_send_event(REMINDERS_CALL_TYPE_OVERDUE, $fromuser, $touser, $ctxinfo);
 
                 $mailresult = message_send($eventdata);
-                mtrace('[LOCAL_REMINDERS] Post Activity Mail Result: '.$mailresult);
 
                 if (!$mailresult) {
-                    mtrace("[LOCAL REMINDERS] Could not send out message for event#$event->id to user $eventdata->userto");
+                    mtrace("[LOCAL REMINDERS] Could not send out reminder for event#$event->id to user $touser->id");
+                } else {
+                    mtrace('[LOCAL_REMINDERS] Post Activity Mail sent to user: '.$touser->id);
                 }
-            } catch (\Exception $mex) {
+            } catch (\Throwable $mex) {
                 mtrace('[LOCAL REMINDERS] Error: local/reminders/locallib.php send_post_activity_reminders(): '.$mex->getMessage());
             }
         }
