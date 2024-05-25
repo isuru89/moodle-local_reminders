@@ -42,7 +42,15 @@ class local_reminders_coursesettings_edit_form extends moodleform {
      * @return void.
      */
     public function definition() {
-        global $USER;
+        global $USER, $CFG;
+
+        $mform = $this->_form;
+
+        if (!$CFG->local_reminders_enable) {
+            $mform->addElement('static', 'descriptionex2sub', '',
+                get_string('plugindisabled', 'local_reminders'));
+            return;
+        }
 
         $daysarray = [
             'days7' => ' '.get_string('days7', 'local_reminders'),
@@ -51,7 +59,6 @@ class local_reminders_coursesettings_edit_form extends moodleform {
             'custom' => ' '.get_string('custom', 'local_reminders'),
         ];
 
-        $mform = $this->_form;
         list($coursesettings) = $this->_customdata;
         $explicitlyenable = $coursesettings->explicitenable;
 

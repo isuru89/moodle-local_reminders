@@ -114,6 +114,7 @@ $string['messagetitleprefix'] = 'Message Title Prefix:';
 $string['messagetitleprefixdescription'] = 'This text will be inserted as a prefix (within square brackets) to the title of every reminder message is being sent.';
 $string['moodlecalendarname'] = 'Moodle Calendar';
 $string['overduemessage'] = 'This activity is overdue!';
+$string['plugindisabled'] = 'The plugin is disabled by admin.';
 $string['pluginname'] = 'Event Reminders';
 $string['privacy:metadata'] = 'The Event Reminders plugin does not store any personal data.';
 $string['overdueactivityreminders'] = 'Activity Overdue Reminders:';
