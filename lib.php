@@ -529,6 +529,11 @@ function when_calendar_event_updated($updateevent, $changetype) {
         $event = calendar_event::load($updateevent->objectid);
     }
 
+    // if this is a repeating event, we skip all the upcoming events except for the first one.
+    if ($event->repeatid > 0 && $event->repeatid != $event->id) {
+        return;
+    }
+
     $enabledoptionskey = 'local_reminders_enable_'.strtolower($event->eventtype).'forcalevents';
     if (!isset($CFG->$enabledoptionskey) || !$CFG->$enabledoptionskey) {
         return;
