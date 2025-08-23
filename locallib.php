@@ -499,7 +499,7 @@ function process_category_event($event, $aheadday, $customtime=null, $courserole
     $currenttime = time();
     $allcourses = isset($CFG->local_reminders_category_noforcompleted) && !$CFG->local_reminders_category_noforcompleted;
     foreach ($childrencourses as $course) {
-        if ($allcourses || $currenttime < $course->enddate) {
+        if ($allcourses || !$course->enddate || $currenttime < $course->enddate) {
             get_users_of_course($course->id, $courseroleids, $allusers);
         } else {
             $showtrace && mtrace("   [LOCAL REMINDERS]   - Course skipped: $course->id => $course->fullname");
