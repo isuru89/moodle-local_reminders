@@ -25,8 +25,8 @@ jobs:
             database: mariadb
             plugin-ci: ^4
 
-          - php: 8.1
-            moodle-branch: MOODLE_404_STABLE
+          - php: 8.2
+            moodle-branch: MOODLE_500_STABLE
             database: mariadb
             plugin-ci: ^4
 

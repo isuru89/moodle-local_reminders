@@ -826,7 +826,6 @@ function filter_user_group_overrides($event, $sendusers, $showtrace) {
 function get_users_in_group($group, $showtrace = false) {
     global $DB;
 
-
     $sendusers = [];
     $context = context_course::instance($group->courseid);
     $groupmemberroles = groups_get_members_by_role($group->id, $group->courseid, 'u.id');

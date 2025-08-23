@@ -145,4 +145,3 @@
  $string['titlesubjectprefix'] = 'Recordatori';
  $string['userheading'] = 'Recordatoris per a esdeveniments d\'usuari';
  $string['useservertimezone'] = "Utilitzar la zona horària del servidor";
- 
