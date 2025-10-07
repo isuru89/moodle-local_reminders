@@ -187,6 +187,8 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
     $explicitactivityenable = isset($CFG->local_reminders_explicitenable)
         && $CFG->local_reminders_explicitenable;
 
+    $multilangfilter = get_multilangsecond_filter(); // get multilang2 filter instanz
+
     $allemailfailed = true;
     $triedcount = 0;
 
@@ -397,6 +399,15 @@ function local_reminders_cron_pre($currtime, $timewindowstart) {
 
             try {
                 $eventdata = $reminderref->get_event_to_send($fromuser, $touser);
+
+                if($multilangfilter) {
+                    $globaluser = $USER; // Store global user obj.
+                    $USER = $touser; // Replace global user obj. with current touser obj. for correct language info.
+                    $eventdata->fullmessage = $multilangfilter->filter($eventdata->fullmessage);
+                    $eventdata->fullmessagehtml = $multilangfilter->filter($eventdata->fullmessagehtml);
+                    $eventdata->smallmessage = $multilangfilter->filter($eventdata->smallmessage);
+                    $USER = $globaluser; // Bring back global user obj.
+                }
 
                 $mailresult = message_send($eventdata);
 
