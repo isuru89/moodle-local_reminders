@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use local_reminders\local\completion_status;
+
 defined('MOODLE_INTERNAL') || die;
 
 /**
@@ -104,13 +106,8 @@ abstract class local_reminder_activity_handler {
      * @return bool true if completed. false otherwise.
      */
     protected function check_completion_status($course, $coursemodule, $userid) {
-        $completion = new completion_info($course);
-        if ($completion->is_enabled($coursemodule)) {
-            return $completion->get_data($coursemodule, false, $userid)->completionstate;
-        }
-        return false;
+        return completion_status::is_completed($userid, $coursemodule);
     }
-
 }
 
 /**
